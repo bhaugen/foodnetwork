@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Statement Selection
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true"></script>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+    </script>
+
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="statements">
+
+	{% include "distribution/tabnav.html" %}
+
+    <form action="." method="POST" >
+        <table>
+            <tr>
+                <th style="text-align: right; " >From Date:</th>
+                <td>{{ header_form.from_date}}</td>
+				{% if header_form.from_date.errors %}
+					<td style="color: red; " >
+						{{ header_form.from_date.errors }}
+					</td>
+				{% endif %}
+            </tr>
+            <tr>
+                <th style="text-align: right; " >To Date:</th>
+                <td>{{ header_form.to_date}}</td>
+				{% if header_form.to_date.errors %}
+					<td style="color: red; " >
+						{{ header_form.to_date.errors }}
+					</td>
+				{% endif %}
+            </tr>
+
+        </table>
+        <p>
+            <input type="submit" value="Submit" />
+        </p>
+    </form>
+</div>
+{% endblock %}

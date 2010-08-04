@@ -1,0 +1,93 @@
+{% load foodnetwork_tags %}
+
+<!-- 
+	CSS Tabs is licensed under Creative Commons Attribution 2.5 - http://creativecommons.org/licenses/by/2.5/ 
+	Joshua Kaufman, unraveled http://unraveled.com/projects/html/css_tabs/
+	28 January, 2007
+-->
+
+<style type="text/css">
+
+/* begin css tabs */
+
+ul#tabnav 
+{ /* general settings */
+	text-align: left; /* set to left, right or center */
+	margin: 8px 0 16px 0; /* set margins as desired */
+	font: bold 11px verdana, arial, sans-serif; /* set font as desired */
+	border-bottom: 1px solid #006699; /* set border COLOR as desired */
+	list-style-type: none;
+	padding: 1px 10px 2px 10px; /* THIRD number must change with respect to padding-top (X) below */
+}
+
+ul#tabnav li 
+{ /* do not change */
+display: inline;
+}
+
+div.customer-dashboard li.customer-dashboard, 
+div.order li.order,
+div.invoices li.invoices,
+div.history li.history, 
+div.plans li.plans, 
+div.help li.help, 
+div.product-lists li.product-lists
+{ /* settings for selected tab */
+	border-bottom: 1px solid #fff; /* set border color to page background color */
+	background-color: #fff !important; /* set background color to match above border color */
+}
+
+div.customer-dashboard li.customer-dashboard a, 
+div.order li.order a,
+div.invoices li.invoices a,
+div.history li.history a, 
+div.plans li.plans a, 
+div.help li.help a, 
+div.product-lists li.product-lists a
+{ /* settings for selected tab link */
+	background-color: #fff  !important; /* set selected tab background color as desired */
+	color: #000; /* set selected tab link color as desired */
+	position: relative;
+	top: 1px;
+	padding-top: 4px; /* must change with respect to padding (X) above and below */
+}
+
+ul#tabnav li a 
+{ /* settings for all tab links */
+	padding: 3px 4px; /* set padding (tab size) as desired; FIRST number must change with respect to padding-top (X) above */
+	border: 1px solid #006699; /* set border COLOR as desired; usually matches border color specified in #tabnav */
+	background-color: #D0D0D0; /* set unselected tab background color as desired */
+	color: #666; /* set unselected tab link color as desired */
+	margin-right: 0px; /* set additional spacing between tabs as desired */
+	text-decoration: none;
+	border-bottom: none;
+}
+
+ul#tabnav a:hover 
+{ /* settings for hover effect */
+	background: #fff; /* set desired hover color */
+}
+
+/* end css tabs */
+
+</style>
+
+<div style="float: left;">
+	<ul id="tabnav" class="do-not-print" >
+		<li class="customer-dashboard" ><a title="Home page" href="/customer/customerdashboard">Dashboard</a> </li>
+		<li class="order" ><a title="Create or update orders" href="/customer/orderselection">Order</a></li>
+		<li class="product-lists" ><a title="Create or update product lists" href="/customer/listselection">Product Lists</a></li>
+		<li class="invoices" ><a title="View or pay invoices" href="/customer/invoiceselection">Invoices</a></li>
+		<li class="history" ><a title="Update orders for one customer at a time" href="/customer/historyselection">History</a> </li>
+		<li class="plans" ><a title="Show all orders for all customers for this week" href="/customer/planselection">Plans</a> </li>
+		<li class="help" ><a title="Food Distribution System documentation" href="customer/help">Help</a> </li>
+	</ul>
+</div>
+
+<div style="float: right;">
+	{{ user }} <a href="{% url acct_logout %}">Logout</a>
+</div>
+
+<div style="clear: both; margin-bottom: 0; padding-bottom: 0;">
+</div>
+

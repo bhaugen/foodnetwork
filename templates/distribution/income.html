@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+
+{% block title %}
+     Planned Income
+{% endblock %}
+
+{% block header %}
+
+<style>
+table thead
+{
+	position: fixed;
+}
+
+</style>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="plan-update">
+
+
+	{% include "distribution/tabnav.html" %}
+
+	<h2>Weekly Gross Income based on Suppliable Demand from {{ from_date }} to {{ to_date }}</h2>
+
+	<p><i>You may drill down into any column to see all supply and demand for that week</i></p>
+
+	<table class="ga-event-table" style="font-size: 90%;" >
+		<thead>
+		<tr>
+			{% for column in income_table.columns %}
+				{% if forloop.first %}
+					<th style="text-align: right; width: 102px;" >{{ column }}</th>
+				{% else %}
+				
+					{% if forloop.last %}
+						<th style="width: 48px; " >
+						{{ column }}
+					{% else %}
+						<th style="width: 40px; " >
+						<a href="{% url supply_and_demand_week week_date=column|date:'Y_m_d' %}">{{ column|date:"n-j" }}</a>
+					{% endif %}
+				</th>
+				{% endif %}
+			{% endfor %}
+		</tr>
+		</thead>
+	</table>
+	<br />
+	<table class="ga-event-table" style="font-size: 90%;" >
+		<tbody>
+
+		{% for row in income_table.rows %}
+			<tr>
+				{% for cell in row %}
+					{% if forloop.first %}
+						<th style="text-align: left; width: 108px;" >{{ cell }}</th>
+					{% else %}
+						<td style="text-align: right; width:40px; " >{{ cell|intcomma }}</td>
+					{% endif %}
+				{% endfor %}			
+			</tr>
+			{% endfor %}
+		</tbody>
+
+	</table>
+
+</div>
+<div><p>.</p></div>
+
+ 
+{% endblock %} 
+

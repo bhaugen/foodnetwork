@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Orders with Deliveries
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+
+<div class="deliveries">
+
+	{% include "distribution/tabnav.html" %}
+	
+	<p style='margin-left: 2em;' >
+		<i>All Order Items for {{order_date}}</i>
+	</p>
+	
+
+    <table class="ga-event-table" >
+        <tr>
+             <th>Date</th>
+             <th>Order</th>
+             <th>Paid?</th>
+             <th>Customer</th>
+             <th>Product</th>
+             <th>Quantity</th>
+             <th>Deliveries</th>
+        </tr>
+        {% for orderitem in orderitem_list %}
+            <tr>
+                <td>{{ orderitem.order.order_date }}</td>
+                <td>{{ orderitem.order.id }}</td>
+                <td>{{ orderitem.order.paid }}</td>
+                <td>{{ orderitem.order.customer }}</td>
+                <td>{{ orderitem.product }}</td>
+                <td style="text-align: right; ">{{ orderitem.quantity }}</td>
+				<td>
+				    {% for delivery in orderitem.inventorytransaction_set.all %}
+						{{ delivery.inventory_item.producer }}:&#160;
+				        {{ delivery.amount }}&#160;&#160;
+				    {% endfor %}
+				</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %} 

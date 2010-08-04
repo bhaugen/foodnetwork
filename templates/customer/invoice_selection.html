@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}
+      Invoice Selection
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true"></script>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+    </script>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="invoices">
+
+	{% include "customer/customer_tabnav.html" %}
+
+	<h3 style="padding-top: 0; margin-top: 0; " >Invoice Selection</h3>
+	
+	{% if unpaid_invoices %}
+	<div style="border: 2px solid grey; width: 30%; padding-left: 1em;">
+		<h4>Unpaid Invoices:</h4>
+		<ul>
+		{% for order in unpaid_invoices %}
+
+			<li>
+				<a href="{% url unpaid_invoice order_id=order.id %}">
+					#{{ order.id }} {{ order.order_date }} ${{ order.total_price }}
+				</a>&nbsp;&nbsp; 
+				<button>Pay Now</button>
+			</li>
+
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+
+	<div style="border: 2px solid grey; width: 30%; padding-left: 1em;">
+		<h4>Paid Invoices:</h4>
+
+		<form action="." method="POST" >
+        		<table>
+			<tr>
+                		<th style="text-align: right; " >From Date:</th>
+                		<td>
+					{{ date_range_form.from_date }}
+				</td>
+				{% if date_range_form.from_date.errors %}
+					<td style="color: red; " >
+						{{date_range_form.from_date.errors }}
+					</td>
+				{% endif %}
+				</tr>
+				<tr>
+                		<th style="text-align: right; " >To Date:</th>
+                		<td>
+					{{ date_range_form.to_date }}
+				</td>
+				{% if date_range_form.to_date.errors %}
+					<td style="color: red; " >
+						{{date_range_form.to_date.errors }}
+					</td>
+				{% endif %}
+			</tr>
+
+
+			</table>
+			<p>
+            			<input type="submit" value="Submit" />
+			</p>
+		</form>
+
+
+	</div>
+
+
+</div>
+
+{% endblock %}
+
+

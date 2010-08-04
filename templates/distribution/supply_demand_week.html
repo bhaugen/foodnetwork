@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+
+{% block title %}
+     Supply and Demand Week
+{% endblock %}
+
+{% block header %}
+<style>
+table thead
+{
+	position: fixed;
+}
+
+</style>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="plan-update">
+
+
+	{% include "distribution/tabnav.html" %}
+
+	<h2>Supply minus Demand for week of {{ week_date }}</h2>
+
+	<table class="ga-event-table" style="font-size: 90%;" >
+		<thead>
+
+		<tr>
+			{% for column in sdtable.columns %}
+				{% if forloop.first %}
+					<th style="text-align: right; width: 13em; " >{{ column }}</th>
+				{% else %}
+				<th style="width: 4em; " >{{ column }}</th>
+				{% endif %}
+			{% endfor %}
+		</tr>
+	</thead>
+	</table>
+	<br /><br />
+	<table class="ga-event-table" style="font-size: 90%;" >
+		<tbody>
+
+		{% for row in sdtable.rows %}
+			<tr>
+				{% for cell in row %}
+					{% if forloop.first %}
+						<th style="text-align: left; width: 13em; " >{{ cell }}</th>
+					{% else %}
+						<td style="text-align: right; width: 4em; " >{{ cell|intcomma }}</td>
+					{% endif %}
+				{% endfor %}			
+			</tr>
+		{% endfor %}
+		</tbody>
+
+	</table>
+
+</div>
+<div><p>.</p></div>
+
+{% endblock %}
+

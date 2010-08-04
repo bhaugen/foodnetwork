@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+     {{ food_network }} Customer Dashboard
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true"></script>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+    </script>
+
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="customer-dashboard">
+
+	{% include "customer/customer_tabnav.html" %}
+	
+	<h3 style="padding-top: 0; margin-top: 0; " >{{ food_network.long_name }} Customer Dashboard for {{ customer.long_name }}</h3>
+</div>
+{% endblock %}
+

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Plan Selection
+{% endblock %}
+
+
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true"></script>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+    </script>
+
+{% endblock %}
+
+
+{% block header %}
+
+
+    <script type="text/javascript" >
+
+		function producerChanged(evt)
+		{
+			dojo.byId("contact").innerHTML = '---';
+			dojo.byId("phone").innerHTML = '---';
+			var jsonUrl = "/distribution/jsonproducer/" + evt.target.value + "/";
+			dojo.xhrGet( 
+			{
+					url: jsonUrl,
+					handleAs: "json",
+					load: function(responseObject, ioArgs) 
+					{
+						var producer = responseObject[0];
+						dojo.byId("contact").innerHTML = producer.fields.contact;
+						dojo.byId("phone").innerHTML = producer.fields.phone;
+					}
+			});
+		}
+
+
+		dojo.addOnLoad(function()
+		{
+			dojo.connect(dojo.byId("id_member"), "onchange", "producerChanged");
+		});
+
+	</script>
+
+	<style>
+		ul {list-style-type:none;}
+	</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="plan-update">
+
+	{% include "distribution/tabnav.html" %}
+	{% if user.is_authenticated %}
+	<div style="border: 2px solid grey; float: left; width: 30%; padding-left: 1em;">
+
+		<h4>Update Plans</h4>
+
+		<form action="." method="POST" >
+        		<table>
+		            <tr>
+                		<th style="text-align: right; vertical-align: top; " >Member:</th>
+                		<td>
+					{{ plan_form.member }}
+					{% if plan_form.member.errors %}
+					<span style="color: red; " >
+						{{ plan_form.member.errors }}
+					</span>
+					{% endif %}
+				</td>
+		            </tr>
+		            <tr>
+                		<th style="text-align: right; " >Contact:</th>
+               			<td  id="contact" >---</td>
+		            </tr>
+		            <tr>
+                		<th style="text-align: right; " >Phone:</th>
+		                <td id="phone" >---</td>
+			</tr>
+			<tr>
+                		<th style="text-align: right; " >From Date:</th>
+                		<td>
+					{{ plan_form.plan_from_date }}
+					{% if plan_form.plan_from_date.errors %}
+					<span style="color: red; " >
+						{{plan_form.plan_from_date.errors }}
+					</span>
+					{% endif %}
+				</td>
+				</tr>
+				<tr>
+                		<th style="text-align: right; " >To Date:</th>
+                		<td>
+					{{ plan_form.plan_to_date }}
+					{% if plan_form.plan_to_date.errors %}
+					<span style="color: red; " >
+						{{plan_form.plan_to_date.errors }}
+					</span>
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<th style="text-align: right; " >Product List:</th>
+				<td>{{ plan_form.list_type }}</td>
+			</tr>
+
+
+		        </table>
+        		<p>
+	        	    <input name="submit-plan-update" type="submit" value="Submit" />
+        		</p>
+	    </form>
+
+    	</div>
+	{% endif %}
+
+	<div style="float: left; width: 30%; ">
+	<div style="border: 2px solid grey; padding-left: 1em; ">
+		<h4>Supply and Demand Table</h4>
+
+		<form action="." method="POST" >
+
+        		<table>
+		            <tr>
+                		<th style="text-align: right; " >From Date:</th>
+                		<td>
+					{{ sdform.from_date }}
+				</td>
+				{% if sdform.from_date.errors %}
+					<td style="color: red; " >
+						{{sdform.from_date.errors }}
+					</td>
+				{% endif %}
+				</tr>
+				<tr>
+                		<th style="text-align: right; " >To Date:</th>
+                		<td>
+					{{ sdform.to_date }}
+				</td>
+				{% if sdform.to_date.errors %}
+					<td style="color: red; " >
+						{{sdform.to_date.errors }}
+					</td>
+				{% endif %}
+		            </tr>
+
+		        </table>
+
+	        	<p>
+		            <input name="submit-supply-demand" type="submit" value="Submit" />
+        		</p>
+	    </form>
+    	</div>
+
+	
+    	<div style="border: 2px solid grey; padding-left: 1em; ">
+		<h4>Planned Income Table</h4>
+
+		<form action="." method="POST" >
+
+        		<table>
+		            <tr>
+                		<th style="text-align: right; " >From Date:</th>
+                		<td>
+					{{ income_form.from_date }}
+				</td>
+				{% if income_form.from_date.errors %}
+					<td style="color: red; " >
+						{{income_form.from_date.errors }}
+					</td>
+				{% endif %}
+				</tr>
+				<tr>
+                		<th style="text-align: right; " >To Date:</th>
+                		<td>
+					{{ income_form.to_date }}
+				</td>
+				{% if income_form.to_date.errors %}
+					<td style="color: red; " >
+						{{income_form.to_date.errors }}
+					</td>
+				{% endif %}
+		            </tr>
+
+		        </table>
+
+	        	<p>
+		            <input name="submit-income" type="submit" value="Submit" />
+        		</p>
+	    </form>
+	</div>
+
+	</div>
+
+
+	<div style="clear: both;" />
+</div>
+{% endblock %}

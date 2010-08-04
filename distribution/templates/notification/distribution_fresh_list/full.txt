@@ -1,0 +1,6 @@
+The following products are available from the Producers and Buyers Co-op this week:
+{% for item in fresh_list %}
+{{ item.product }}, Quantity available: {{ item.qty }}, Price: ${{ item.price }}
+  Lots: {% for lot in item.lots %}
+    {{ lot.lot_id }} -- Lot qty: {{ lot.avail_qty }} {% endfor %}
+{% endfor %}

@@ -1,0 +1,6 @@
+The following order should be delivered on {{ order_date }} by {{ order.distributor.long_name }}:
+{% for item in order.orderitem_set.all %}
+* {{ item.product.long_name }}, Quantity: {{ item.quantity }}
+		Lot(s): {% for lot in item.inventorytransaction_set.all %}
+		    {{ lot.inventory_item.lot_id }}{% endfor %}
+{% endfor %}

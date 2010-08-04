@@ -1,0 +1,1426 @@
+[
+    {
+        "pk": 1, 
+        "model": "distribution.party", 
+        "fields": {
+            "fax": "", 
+            "short_name": "Demo", 
+            "phone": "", 
+            "address": "", 
+            "cell": "", 
+            "long_name": "Demo Food Network", 
+            "contact": "", 
+            "content_type": 9, 
+            "member_id": "D1", 
+            "email_address": ""
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "distribution.party", 
+        "fields": {
+            "fax": "", 
+            "short_name": "Demo Hospital", 
+            "phone": "", 
+            "address": "", 
+            "cell": "", 
+            "long_name": "Demo Hospital", 
+            "contact": "Dan Nutritionist", 
+            "content_type": 13, 
+            "member_id": "D7", 
+            "email_address": ""
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "distribution.party", 
+        "fields": {
+            "fax": "", 
+            "short_name": "Demo School", 
+            "phone": "", 
+            "address": "", 
+            "cell": "", 
+            "long_name": "Demo School", 
+            "contact": "Jane Cook", 
+            "content_type": 13, 
+            "member_id": "D6", 
+            "email_address": ""
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "distribution.party", 
+        "fields": {
+            "fax": "", 
+            "short_name": "Local Distributor", 
+            "phone": "", 
+            "address": "", 
+            "cell": "", 
+            "long_name": "Local Distributor", 
+            "contact": "", 
+            "content_type": 12, 
+            "member_id": "D5", 
+            "email_address": ""
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.party", 
+        "fields": {
+            "fax": "", 
+            "short_name": "Meat Processor", 
+            "phone": "", 
+            "address": "", 
+            "cell": "", 
+            "long_name": "Meat Processor", 
+            "contact": "", 
+            "content_type": 11, 
+            "member_id": "D4", 
+            "email_address": ""
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.party", 
+        "fields": {
+            "fax": "", 
+            "short_name": "Meat Producer", 
+            "phone": "", 
+            "address": "", 
+            "cell": "", 
+            "long_name": "Meat Producer", 
+            "contact": "Sam  Farmer", 
+            "content_type": 10, 
+            "member_id": "D2", 
+            "email_address": ""
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "distribution.party", 
+        "fields": {
+            "fax": "", 
+            "short_name": "Slicer and Dicer", 
+            "phone": "", 
+            "address": "", 
+            "cell": "", 
+            "long_name": "Slicer and Dicer", 
+            "contact": "", 
+            "content_type": 11, 
+            "member_id": "D8", 
+            "email_address": ""
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.party", 
+        "fields": {
+            "fax": "", 
+            "short_name": "Vegetable Producer", 
+            "phone": "", 
+            "address": "", 
+            "cell": "", 
+            "long_name": "Vegetable Producer", 
+            "contact": "Mary  Farmer", 
+            "content_type": 10, 
+            "member_id": "D3", 
+            "email_address": ""
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.foodnetwork", 
+        "fields": {
+            "charge_name": "Delivery charge", 
+            "billing_address": "", 
+            "current_week": "2010-01-18", 
+            "charge": null, 
+            "customer_fee": "0.05", 
+            "member_terms": 15, 
+            "producer_fee": "0.06", 
+            "billing_contact": "", 
+            "billing_email_address": "", 
+            "customer_terms": 15, 
+            "billing_phone": ""
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.producer", 
+        "fields": {
+            "delivers": false
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.producer", 
+        "fields": {
+            "delivers": false
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.processor", 
+        "fields": {}
+    }, 
+    {
+        "pk": 8, 
+        "model": "distribution.processor", 
+        "fields": {}
+    }, 
+    {
+        "pk": 5, 
+        "model": "distribution.distributor", 
+        "fields": {}
+    }, 
+    {
+        "pk": 7, 
+        "model": "distribution.customer", 
+        "fields": {
+            "charge": null, 
+            "apply_charge": true
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "distribution.customer", 
+        "fields": {
+            "charge": null, 
+            "apply_charge": true
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": null, 
+            "pay_producer": false, 
+            "sellable": false, 
+            "short_name": "Beef Cuts", 
+            "is_parent": true, 
+            "customer_fee_override": null, 
+            "plannable": false, 
+            "price": "0", 
+            "long_name": "Beef Cuts", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": true
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": 3, 
+            "pay_producer": false, 
+            "sellable": true, 
+            "short_name": "Beef Roast", 
+            "is_parent": false, 
+            "customer_fee_override": null, 
+            "plannable": true, 
+            "price": "8", 
+            "long_name": "Beef Roast per lb", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": false
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": null, 
+            "pay_producer": false, 
+            "sellable": false, 
+            "short_name": "Beef Section", 
+            "is_parent": true, 
+            "customer_fee_override": null, 
+            "plannable": false, 
+            "price": "0", 
+            "long_name": "Beef, Large Section", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": true
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": 3, 
+            "pay_producer": false, 
+            "sellable": true, 
+            "short_name": "Beef Steak", 
+            "is_parent": false, 
+            "customer_fee_override": null, 
+            "plannable": true, 
+            "price": "10", 
+            "long_name": "Beef Steak per lb", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": false
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": 2, 
+            "pay_producer": false, 
+            "sellable": true, 
+            "short_name": "Beef, Side", 
+            "is_parent": false, 
+            "customer_fee_override": null, 
+            "plannable": true, 
+            "price": "6", 
+            "long_name": "Beef, Side per lb", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": true
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": 4, 
+            "pay_producer": true, 
+            "sellable": true, 
+            "short_name": "Beets", 
+            "is_parent": false, 
+            "customer_fee_override": null, 
+            "plannable": true, 
+            "price": "15", 
+            "long_name": "Beets 20 lb bag", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": false
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": 4, 
+            "pay_producer": true, 
+            "sellable": true, 
+            "short_name": "Carrots", 
+            "is_parent": false, 
+            "customer_fee_override": null, 
+            "plannable": true, 
+            "price": "10", 
+            "long_name": "Carrots 20 lb bag", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": false
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": null, 
+            "pay_producer": true, 
+            "sellable": false, 
+            "short_name": "Live Animal", 
+            "is_parent": true, 
+            "customer_fee_override": null, 
+            "plannable": false, 
+            "price": "0", 
+            "long_name": "Live Animal", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": true
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": 1, 
+            "pay_producer": true, 
+            "sellable": false, 
+            "short_name": "Steer", 
+            "is_parent": false, 
+            "customer_fee_override": null, 
+            "plannable": true, 
+            "price": "5", 
+            "long_name": "Steer per lb", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": true
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.product", 
+        "fields": {
+            "parent": null, 
+            "pay_producer": true, 
+            "sellable": false, 
+            "short_name": "Vegetables", 
+            "is_parent": true, 
+            "customer_fee_override": null, 
+            "plannable": false, 
+            "price": "0", 
+            "long_name": "Vegetables", 
+            "expiration_days": 6, 
+            "pay_producer_on_terms": true
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.productplan", 
+        "fields": {
+            "product": 7, 
+            "producer": 2, 
+            "from_date": "2010-01-01", 
+            "to_date": "2011-01-11", 
+            "distributor": 5, 
+            "quantity": "10000"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.productplan", 
+        "fields": {
+            "product": 6, 
+            "producer": 2, 
+            "from_date": "2010-01-01", 
+            "to_date": "2011-01-11", 
+            "distributor": 5, 
+            "quantity": "10000"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "distribution.productplan", 
+        "fields": {
+            "product": 10, 
+            "producer": 3, 
+            "from_date": "2010-01-01", 
+            "to_date": "2011-01-12", 
+            "distributor": 5, 
+            "quantity": "2000"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.productplan", 
+        "fields": {
+            "product": 8, 
+            "producer": 3, 
+            "from_date": "2010-01-01", 
+            "to_date": "2011-01-11", 
+            "distributor": 5, 
+            "quantity": "2000"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.productplan", 
+        "fields": {
+            "product": 5, 
+            "producer": 2, 
+            "from_date": "2010-01-01", 
+            "to_date": "2011-01-11", 
+            "distributor": 5, 
+            "quantity": "20000"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 7, 
+            "producer": 2, 
+            "custodian": 4, 
+            "notes": "", 
+            "inventory_date": "2010-01-11", 
+            "planned": "300", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "200"
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 7, 
+            "producer": 2, 
+            "custodian": 8, 
+            "notes": "", 
+            "inventory_date": "2010-01-11", 
+            "planned": "500", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "500"
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 7, 
+            "producer": 2, 
+            "custodian": 8, 
+            "notes": "", 
+            "inventory_date": "2010-01-18", 
+            "planned": "400", 
+            "expiration_date": "2010-01-24", 
+            "onhand": "0", 
+            "remaining": "200"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 6, 
+            "producer": 2, 
+            "custodian": 4, 
+            "notes": "", 
+            "inventory_date": "2010-01-11", 
+            "planned": "200", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "150"
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 6, 
+            "producer": 2, 
+            "custodian": 8, 
+            "notes": "", 
+            "inventory_date": "2010-01-11", 
+            "planned": "200", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "200"
+        }
+    }, 
+    {
+        "pk": 14, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 6, 
+            "producer": 2, 
+            "custodian": 8, 
+            "notes": "", 
+            "inventory_date": "2010-01-18", 
+            "planned": "300", 
+            "expiration_date": "2010-01-24", 
+            "onhand": "0", 
+            "remaining": "150"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 9, 
+            "producer": 2, 
+            "custodian": 4, 
+            "notes": "", 
+            "inventory_date": "2010-01-11", 
+            "planned": "800", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "0"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 10, 
+            "producer": 3, 
+            "custodian": null, 
+            "notes": "Small ones", 
+            "inventory_date": "2010-01-11", 
+            "planned": "50", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "50"
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 10, 
+            "producer": 3, 
+            "custodian": null, 
+            "notes": "", 
+            "inventory_date": "2010-01-18", 
+            "planned": "100", 
+            "expiration_date": "2010-01-24", 
+            "onhand": "0", 
+            "remaining": "50"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 8, 
+            "producer": 3, 
+            "custodian": null, 
+            "notes": "Big ones", 
+            "inventory_date": "2010-01-11", 
+            "planned": "100", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "95"
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 8, 
+            "producer": 3, 
+            "custodian": null, 
+            "notes": "", 
+            "inventory_date": "2010-01-18", 
+            "planned": "200", 
+            "expiration_date": "2010-01-24", 
+            "onhand": "0", 
+            "remaining": "100"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 5, 
+            "producer": 2, 
+            "custodian": null, 
+            "notes": "", 
+            "inventory_date": "2010-01-11", 
+            "planned": "1000", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "0"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 5, 
+            "producer": 2, 
+            "custodian": null, 
+            "notes": "", 
+            "inventory_date": "2010-01-11", 
+            "planned": "1000", 
+            "expiration_date": "2010-01-17", 
+            "onhand": "0", 
+            "remaining": "0"
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "distribution.inventoryitem", 
+        "fields": {
+            "received": "0", 
+            "product": 5, 
+            "producer": 2, 
+            "custodian": null, 
+            "notes": "", 
+            "inventory_date": "2010-01-18", 
+            "planned": "1000", 
+            "expiration_date": "2010-01-24", 
+            "onhand": "0", 
+            "remaining": "0"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "1000", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 4, 
+            "to_whom": 1, 
+            "notes": "", 
+            "amount": "50", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 26
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "800", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "800", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 4, 
+            "to_whom": 1, 
+            "notes": "", 
+            "amount": "100", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 26
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "300", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "200", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 5, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "40", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 27
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "100", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "50", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 3, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "5", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "1000", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 4, 
+            "to_whom": 1, 
+            "notes": "", 
+            "amount": "50", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 26
+        }
+    }, 
+    {
+        "pk": 14, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 8, 
+            "to_whom": 1, 
+            "notes": "", 
+            "amount": "100", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 26
+        }
+    }, 
+    {
+        "pk": 15, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "500", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 16, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "200", 
+            "transaction_date": "2010-01-11", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 18, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "1000", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 19, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 4, 
+            "to_whom": 1, 
+            "notes": "", 
+            "amount": "200", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 26
+        }
+    }, 
+    {
+        "pk": 20, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 8, 
+            "to_whom": 1, 
+            "notes": "", 
+            "amount": "400", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 26
+        }
+    }, 
+    {
+        "pk": 21, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "400", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 22, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 2, 
+            "notes": "", 
+            "amount": "300", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 23, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 5, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "40", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 27
+        }
+    }, 
+    {
+        "pk": 24, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "200", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 25, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 2, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "150", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 26, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 3, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "50", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 27, 
+        "model": "distribution.economicevent", 
+        "fields": {
+            "from_whom": 3, 
+            "to_whom": 7, 
+            "notes": "", 
+            "amount": "100", 
+            "transaction_date": "2010-01-18", 
+            "content_type": 25
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.order", 
+        "fields": {
+            "customer": 7, 
+            "order_date": "2010-01-11", 
+            "distributor": 5, 
+            "paid": true
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.order", 
+        "fields": {
+            "customer": 7, 
+            "order_date": "2010-01-18", 
+            "distributor": 5, 
+            "paid": false
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.orderitem", 
+        "fields": {
+            "product": 7, 
+            "fee": "0", 
+            "notes": "", 
+            "unit_price": "8", 
+            "order": 1, 
+            "quantity": "100"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.orderitem", 
+        "fields": {
+            "product": 6, 
+            "fee": "0", 
+            "notes": "", 
+            "unit_price": "10", 
+            "order": 1, 
+            "quantity": "50"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.orderitem", 
+        "fields": {
+            "product": 8, 
+            "fee": "0", 
+            "notes": "", 
+            "unit_price": "10", 
+            "order": 1, 
+            "quantity": "5"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.orderitem", 
+        "fields": {
+            "product": 7, 
+            "fee": "0", 
+            "notes": "", 
+            "unit_price": "8", 
+            "order": 2, 
+            "quantity": "200"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "distribution.orderitem", 
+        "fields": {
+            "product": 6, 
+            "fee": "0", 
+            "notes": "", 
+            "unit_price": "10", 
+            "order": 2, 
+            "quantity": "150"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "distribution.orderitem", 
+        "fields": {
+            "product": 10, 
+            "fee": "0", 
+            "notes": "", 
+            "unit_price": "15", 
+            "order": 2, 
+            "quantity": "50"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "distribution.orderitem", 
+        "fields": {
+            "product": 8, 
+            "fee": "0", 
+            "notes": "", 
+            "unit_price": "10", 
+            "order": 2, 
+            "quantity": "100"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.servicetype", 
+        "fields": {
+            "pay_provider_on_terms": true, 
+            "name": "Slaughter", 
+            "invoiced_separately": false
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.servicetype", 
+        "fields": {
+            "pay_provider_on_terms": false, 
+            "name": "Cut Beef", 
+            "invoiced_separately": true
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.servicetype", 
+        "fields": {
+            "pay_provider_on_terms": true, 
+            "name": "Transportation", 
+            "invoiced_separately": false
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.processtype", 
+        "fields": {
+            "name": "Slaughter and Cut Beef", 
+            "input_type": 1, 
+            "notes": "", 
+            "output_type": 3, 
+            "number_of_processing_steps": 2, 
+            "use_existing_input_lot": false, 
+            "number_of_output_lots": 2
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.processtype", 
+        "fields": {
+            "name": "Slaughter Beef", 
+            "input_type": 1, 
+            "notes": "", 
+            "output_type": 2, 
+            "number_of_processing_steps": 1, 
+            "use_existing_input_lot": false, 
+            "number_of_output_lots": 1
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.processtype", 
+        "fields": {
+            "name": "Cut Beef", 
+            "input_type": 2, 
+            "notes": "", 
+            "output_type": 3, 
+            "number_of_processing_steps": 1, 
+            "use_existing_input_lot": true, 
+            "number_of_output_lots": 2
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.process", 
+        "fields": {
+            "process_date": "2010-01-11", 
+            "notes": "", 
+            "process_type": 2
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.process", 
+        "fields": {
+            "process_date": "2010-01-11", 
+            "notes": "", 
+            "process_type": 3
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.process", 
+        "fields": {
+            "process_date": "2010-01-11", 
+            "notes": "", 
+            "process_type": 1
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.process", 
+        "fields": {
+            "process_date": "2010-01-18", 
+            "notes": "", 
+            "process_type": 1
+        }
+    }, 
+    {
+        "pk": 18, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 12, 
+            "process": 4, 
+            "unit_price": "5", 
+            "order_item": null, 
+            "transaction_type": "Issue"
+        }
+    }, 
+    {
+        "pk": 21, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 13, 
+            "process": 4, 
+            "unit_price": "8", 
+            "order_item": null, 
+            "transaction_type": "Production"
+        }
+    }, 
+    {
+        "pk": 22, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 14, 
+            "process": 4, 
+            "unit_price": "10", 
+            "order_item": null, 
+            "transaction_type": "Production"
+        }
+    }, 
+    {
+        "pk": 24, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 13, 
+            "process": null, 
+            "unit_price": "8", 
+            "order_item": 4, 
+            "transaction_type": "Delivery"
+        }
+    }, 
+    {
+        "pk": 25, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 14, 
+            "process": null, 
+            "unit_price": "10", 
+            "order_item": 5, 
+            "transaction_type": "Delivery"
+        }
+    }, 
+    {
+        "pk": 26, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 10, 
+            "process": null, 
+            "unit_price": "15", 
+            "order_item": 6, 
+            "transaction_type": "Delivery"
+        }
+    }, 
+    {
+        "pk": 27, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 11, 
+            "process": null, 
+            "unit_price": "10", 
+            "order_item": 7, 
+            "transaction_type": "Delivery"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 2, 
+            "process": 1, 
+            "unit_price": "5", 
+            "order_item": null, 
+            "transaction_type": "Issue"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 3, 
+            "process": 1, 
+            "unit_price": "6", 
+            "order_item": null, 
+            "transaction_type": "Production"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 3, 
+            "process": 2, 
+            "unit_price": "6", 
+            "order_item": null, 
+            "transaction_type": "Issue"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 4, 
+            "process": 2, 
+            "unit_price": "8", 
+            "order_item": null, 
+            "transaction_type": "Production"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 5, 
+            "process": 2, 
+            "unit_price": "10", 
+            "order_item": null, 
+            "transaction_type": "Production"
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 4, 
+            "process": null, 
+            "unit_price": "8", 
+            "order_item": 1, 
+            "transaction_type": "Delivery"
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 5, 
+            "process": null, 
+            "unit_price": "10", 
+            "order_item": 2, 
+            "transaction_type": "Delivery"
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 1, 
+            "process": null, 
+            "unit_price": "10", 
+            "order_item": 3, 
+            "transaction_type": "Delivery"
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 7, 
+            "process": 3, 
+            "unit_price": "5", 
+            "order_item": null, 
+            "transaction_type": "Issue"
+        }
+    }, 
+    {
+        "pk": 15, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 8, 
+            "process": 3, 
+            "unit_price": "8", 
+            "order_item": null, 
+            "transaction_type": "Production"
+        }
+    }, 
+    {
+        "pk": 16, 
+        "model": "distribution.inventorytransaction", 
+        "fields": {
+            "inventory_item": 9, 
+            "process": 3, 
+            "unit_price": "10", 
+            "order_item": null, 
+            "transaction_type": "Production"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "distribution.servicetransaction", 
+        "fields": {
+            "service_type": 1, 
+            "process": 1
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "distribution.servicetransaction", 
+        "fields": {
+            "service_type": 2, 
+            "process": 2
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "distribution.servicetransaction", 
+        "fields": {
+            "service_type": 1, 
+            "process": 3
+        }
+    }, 
+    {
+        "pk": 14, 
+        "model": "distribution.servicetransaction", 
+        "fields": {
+            "service_type": 2, 
+            "process": 3
+        }
+    }, 
+    {
+        "pk": 19, 
+        "model": "distribution.servicetransaction", 
+        "fields": {
+            "service_type": 1, 
+            "process": 4
+        }
+    }, 
+    {
+        "pk": 20, 
+        "model": "distribution.servicetransaction", 
+        "fields": {
+            "service_type": 2, 
+            "process": 4
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "distribution.transportationtransaction", 
+        "fields": {
+            "service_type": 3, 
+            "order": 1
+        }
+    }, 
+    {
+        "pk": 23, 
+        "model": "distribution.transportationtransaction", 
+        "fields": {
+            "service_type": 3, 
+            "order": 2
+        }
+    }
+]

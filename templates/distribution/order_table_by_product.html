@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Order Table
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="order-table">
+
+	{% include "distribution/tabnav.html" %}
+
+    <h4>Orders for {{ date }}</h4>
+
+    <p><a href="{% url order_csv_by_product order_date=datestring %}">Export table as CSV file</a></p>
+    <table class="ga-event-table" >
+        <tr>
+            <th>Category</th>
+            <th>Product</th>
+            <th>Producers</th>
+            <th>Avail</th>
+            <th>Ordered</th>
+            {% for heading in heading_list %}
+                <th style="width: 5em; " >{{ heading|safe }}</th>
+            {% endfor %}
+        </tr>
+        {% for cells in item_list %}
+            <tr>
+                {% for cell in cells %}
+                    <td style="text-align: center; " >{{ cell }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %} 

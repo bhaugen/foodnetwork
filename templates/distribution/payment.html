@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Payment
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="payment-update">
+
+	{% include "distribution/tabnav.html" %}
+
+    <table >
+        <tr>
+            <th style="text-align: right; " >Payment Number: </th>
+            <td>{{payment.id}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Member: </th>
+            <td>{{payment.to_whom.short_name}} {{payment.to_whom.long_name}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Date: </th>
+            <td>{{payment.transaction_date}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Amount:</th>
+            <td>${{payment.amount}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Reference:</th>
+            <td>{{payment.reference}}</td>
+        </tr>
+    </table>
+
+	<h4>Transactions:</h4>
+
+    <table class="ga-event-table" >
+        <tr>
+             <th>Type</th>
+             <th>Order</th>
+             <th>Product</th>
+             <th>Date</th>
+             <th>Quantity</th>
+             <th>Due</th>
+        </tr>
+        {% for tx in payment.paid_inventory_transactions %}
+            <tr>
+                <td>{{ tx.transaction_type }}</td>
+                <td>{{ tx.order_item }}</td>
+                <td>{{ tx.inventory_item.product }}</td>
+                <td>{{ tx.transaction_date }}</td>
+                <td style="text-align: right; ">{{ tx.amount }}</td>
+                <td style="text-align: right; ">{{ tx.due_to_producer }}</td>
+            </tr>
+        {% endfor %}
+		{% for tx in payment.paid_service_transactions %}
+            <tr>
+                <td>{{ tx.service_type }}</td>
+                <td>{{ tx.order_string }}</td>
+                <td>{{ tx.product_string }}</td>
+                <td>{{ tx.transaction_date }}</td>
+                <td style="text-align: right; ">{{ tx.inventory_transaction.quantity }}</td>
+                <td style="text-align: right; ">{{ tx.amount }}</td>
+            </tr>
+        {% endfor %}
+		{% for tx in payment.paid_transportation_transactions %}
+            <tr>
+                <td>{{ tx.service_type }}</td>
+                <td>{{ tx.order }}</td>
+                <td>&nbsp;</td>
+                <td>{{ tx.transaction_date }}</td>
+                <td>&nbsp;</td>
+                <td style="text-align: right; ">{{ tx.amount }}</td>
+            </tr>
+        {% endfor %}
+	</table>
+</div<>
+
+{% endblock %} 

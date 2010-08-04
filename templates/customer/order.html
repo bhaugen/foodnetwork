@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Order
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="order">
+
+	{% include "customer/customer_tabnav.html" %}
+
+
+    <table style="margin-bottom: 1em;" >
+        <tr>
+            <th style="text-align: right; " >Order Number: </th>
+            <td>{{order.id}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Customer: </th>
+            <td>{{order.customer.short_name}} {{order.customer.long_name}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Date: </th>
+            <td>{{order.order_date}}</td>
+        </tr>
+	<tr>
+            <th style="text-align: right; " >Distributor: </th>
+            <td>{{order.distributor}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >State:</th>
+            <td>{{order.state}}</td>
+        </tr>
+    </table>
+    <table class="ga-event-table" >
+        <tr>
+             <th>Product</th>
+             <!--<th>Description</th>-->
+             <th>Quantity</th>
+             <th>Unit Price</th>
+             <th>Extended Price</th>
+	     <!--<th>Producer</th>-->
+             <th>Notes</th>
+        </tr>
+        {% for orderitem in order.orderitem_set.all %}
+            <tr>
+                <!--<td>{{ orderitem.product }}</td>-->
+                <td>{{ orderitem.product.long_name }}</td>
+                <td style="text-align: right; ">{{ orderitem.quantity }}</td>
+                <td style="text-align: right; ">{{ orderitem.formatted_unit_price }}</td>
+                <td style="text-align: right; ">{{ orderitem.extended_price }}</td>
+		<!--<td>{{ orderitem.producers }}</td>-->
+                <td>{{ orderitem.notes }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <table style="margin-top: 1em; margin-left: 9em; " >
+		<tr>
+			<th style="text-align: right;" >Total Price:</th>
+			<td style="text-align: right;" >${{ order.total_price }}</td>
+		</tr>
+
+		{% if order.charge %}
+			<tr>
+				<th style="text-align: right;" >{{ order.charge_name }}:</th>
+				<td style="text-align: right;" >${{ order.charge }}</td>
+			</tr>
+		{% endif %}
+		{% if order.transportation_fee %}
+			<tr>
+				<th style="text-align: right;" >Transportation Fee:</th>
+				<td style="text-align: right;" >${{ order.display_transportation_fee }}</td>
+			</tr>
+		{% endif %}
+		<tr>
+			<th style="text-align: right;" >Co-op Fee:</th>
+			<td style="text-align: right;" >${{ order.coop_fee }}</td>
+		</tr>
+
+		<tr>
+			<th style="text-align: right;" >Grand Total:</th>
+			<td style="text-align: right;" >${{ order.grand_total }}</td>
+		</tr>
+    </table>
+    
+</div>    
+{% endblock %} 
+
+

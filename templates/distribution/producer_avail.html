@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Producer Availability
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="inventory-update">
+
+	{% include "distribution/tabnav.html" %}
+
+    <table style="margin-bottom: 1em; ">
+        <tr>
+            <th style="text-align: right; " >Producer: </th>
+            <td>{{ producer.short_name }} - {{producer.long_name}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Availability for week of: </th>
+            <td>{{avail_date}}</td>
+        </tr>
+    </table>
+    <table class="ga-event-table" >
+        <tr>
+		<th>Product</th>
+		<th>Lot Id</th>
+		<th>Field</th>
+		<th>Custodian</th>
+        	<th>Date</th>
+        	<th>Ready</th>
+		<th>Remaining</th>
+        	<th>Received</th>
+        	<th>Onhand</th>
+        	<th>Notes</th>
+        </tr>
+        {% for item in inventory %}
+            <tr>
+		<td>{{ item.product.long_name }}</td>
+		<td>{{ item.lot_id }}</td>
+		<td>{{ item.field_id }}</td>
+		{% if item.custodian %}
+			<td>{{ item.custodian }}</td>
+		{% else %}
+			<td>&nbsp;</td>
+		{% endif %}
+                <td>{{ item.inventory_date }}</td>
+                <td style="text-align: right; ">{{ item.planned }}</td>
+				<td style="text-align: right; ">{{ item.remaining }}</td>
+                <td style="text-align: right; ">{{ item.received }}</td>
+                <td style="text-align: right; ">{{ item.onhand }}</td>
+                <td>{{ item.notes }}</td>
+            </tr>
+        {% endfor %}
+</table>
+
+</div>
+
+{% endblock %} 

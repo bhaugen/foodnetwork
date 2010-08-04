@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}
+     {{ food_network_name }} Distribution System
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true"></script>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+    </script>
+
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+	{% include "distribution/tabnav.html" %}
+
+	<div  style="margin-left: 1em;" .
+
+	{% if food_network_name %}
+
+		<h2>{{ food_network_name }} Distribution System</h2>
+
+	{% comment %}	
+		{% if user.is_authenticated %}
+			<div style="margin-bottom: 1em; " >
+				<form style="display: inline; " action="{% url send_fresh_list %}" method="POST">
+					<input class="submit-btn" type="submit" value="Send Fresh List Emails" />
+					<input type="hidden" name="next" value="{% url dashboard %}" />
+				</form>
+				<form style="display: inline; " action="{% url send_pickup_list %}" method="POST">
+					<input class="submit-btn" type="submit" value="Send Pickup List Emails" />
+					<input type="hidden" name="next" value="{% url dashboard %}" />
+				</form>
+				<form style="display: inline; " action="{% url send_delivery_list %}" method="POST">
+					<input class="submit-btn" type="submit" value="Send Delivery List Emails" />
+					<input type="hidden" name="next" value="{% url dashboard %}" />
+				</form>
+				<form style="display: inline; " action="{% url send_order_notices %}" method="POST">
+					<input class="submit-btn" type="submit" value="Send Order Emails" />
+					<input type="hidden" name="next" value="{% url dashboard %}" />
+				</form>
+			</div>
+		{% endif %}
+	{% endcomment %}
+
+		<h4 style="margin-bottom: 4px;" >
+			Activity for week of 
+			{% if user.is_authenticated %}
+				<form style="display: inline;" action="{% url reset_week %}" method="POST">
+					{{ week_form.current_week }}
+					<input class="submit-btn" type="submit" value="Reset" />
+				</form>
+			{% else %}
+				{{ order_date }}
+			{% endif %}
+		</h4>
+
+		<table class="ga-event-table" >
+			{% if by_lot %}
+				<tr>
+				        <th>Custodian</th>
+				        <th>Lot</th>		
+			        	<th>Avail</th>
+				        <th>Processed</th>
+			        	<th>Ordered</th>
+					<!--<th>Delivered</th>-->
+					<th>Buyers</th>
+				    </tr>
+				    {% for item in item_list %}
+			        	<tr>
+						{% if item.custodian %}
+							<td>{{ item.custodian }}</td>
+						{% else %}
+							<td>&nbsp;</td>
+						{% endif %}
+						<td>{{ item.lot_id }}</td>
+						<td>{{ item.avail_qty }}</td>
+						<td>{{ item.issued_qty }}</td>
+						<td>{{ item.ordered_qty }}</td>
+						<!--<td>{{ item.delivered_qty }}</td>-->
+						<td>{{ item.customers }}</td>
+				        </tr>
+				{% endfor %}
+			{% else %}
+				<tr>
+					<th>Category</th>
+					<th>Item</th>
+					<th>Producers</th>
+					<th>Avail</th>
+					<th>Ordered</th>
+					<th>Delivered</th>
+				</tr>
+				{% for cells in item_list %}
+					<tr>
+						{% for cell in cells %}
+							<td style="text-align: center; " >{{ cell }}</td>
+						{% endfor %}
+					</tr>
+				{% endfor %}
+			{% endif %}
+
+		</table>
+
+	{% else %}
+
+		<h3>You must create a Food Network in Admin to proceed</h3>
+	
+	{% endif %}
+	</div>
+
+</div>
+{% endblock %} 
+

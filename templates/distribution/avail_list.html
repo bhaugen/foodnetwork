@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Availability
+{% endblock %}
+
+{% block header %}
+    <h1>Availability</h1>
+{% endblock %}
+
+{% block content %}
+    <table class="ga-event-table" >
+        <tr>
+             <th>Date</th>
+             <th>Producer</th>
+             <th>Product</th>
+             <th>Quantity</th>
+        </tr>
+        {% for avail in object_list %}
+            <tr>
+                <td>{{avail.avail_date}}</td>
+                <td>{{ avail.producer }}</td>
+                <td>{{avail.product}}</td>
+                <td style="text-align: right; ">{{avail.quantity}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

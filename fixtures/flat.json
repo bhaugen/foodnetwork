@@ -1,0 +1,32 @@
+[
+    {
+        "pk": 1, 
+        "model": "flatpages.flatpage", 
+        "fields": {
+            "registration_required": false, 
+            "title": "Welcome", 
+            "url": "/", 
+            "template_name": "", 
+            "sites": [
+                1
+            ], 
+            "content": "<a href=\"/dashboard/\">Dashboard</a>", 
+            "enable_comments": false
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "flatpages.flatpage", 
+        "fields": {
+            "registration_required": false, 
+            "title": "Help", 
+            "url": "/help/", 
+            "template_name": "", 
+            "sites": [
+                1
+            ], 
+            "content": "Some help...", 
+            "enable_comments": false
+        }
+    }
+]

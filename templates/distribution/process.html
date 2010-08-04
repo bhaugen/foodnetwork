@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Process
+{% endblock %}
+
+{% block header %}
+<!--
+    <h1>Process</h1>
+-->
+{% endblock %}
+
+{% block content %}
+
+<div class="process">
+
+	{% include "distribution/tabnav.html" %}
+
+    <table style="margin-bottom: 1em;" >
+        <tr>
+            <th style="text-align: right; " >Process Number: </th>
+            <td>{{process.id}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Process Type: </th>
+            <td>{{process.process_type}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Date: </th>
+            <td>{{process.process_date}}</td>
+    </table>
+
+	<h3>Input Lot:</h3>
+    <table class="ga-event-table" >
+        <tr>
+		<th>Lot Id</th>
+		<th>Field</th>
+             	<th>Quantity</th>
+        </tr>
+        {% for tx in process.inputs %}
+            	<tr>
+			<td>{{ tx.inventory_item.lot_id }}</td>
+			<td>{{ tx.inventory_item.field_id }}</td>
+			<td style="text-align: right; ">{{ tx.amount }}</td>
+		</tr>
+        {% endfor %}
+    </table>
+
+	<h3>Processing Service{{process.services.count|pluralize}}:</h3>
+    <table class="ga-event-table" >
+        <tr>
+             <th>Type</th>
+             <th>Processor</th>
+             <th>Cost</th>
+        </tr>
+        {% for tx in process.services %}
+            <tr>
+                <td>{{ tx.service_type }}</td>
+                <td>{{ tx.from_whom }}</td>
+                <td style="text-align: right; ">{{ tx.amount }}</td>
+        {% endfor %}
+    </table>
+
+	<h3>Output Lot{{process.outputs.count|pluralize}}:</h3>
+    <table class="ga-event-table" >
+        <tr>
+		<th>Lot id</th>
+		<th>Field</th>
+        	<th>Custodian</th>
+        	<th>Quantity</th>
+        </tr>
+        {% for tx in process.outputs %}
+            <tr>
+		<td>{{ tx.inventory_item.lot_id }}</td>
+		<td>{{ tx.inventory_item.field_id }}</td>
+		<td>{{ tx.inventory_item.custodian }}</td>
+                <td style="text-align: right; ">{{ tx.amount }}</td>
+        {% endfor %}
+    </table>
+
+</div>
+
+{% endblock %} 

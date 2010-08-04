@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Order Table
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="order-table">
+
+	{% include "distribution/tabnav.html" %}
+
+    <h4>Orders for {{ date }}</h4>
+
+    <p><a href="{% url export_orders_as_csv order_date=datestring %}">Export table as CSV file</a></p>
+    <table class="ga-event-table" >
+        <tr>
+            {% for heading in heading_list %}
+                <th>{{ heading|safe }}</th>
+            {% endfor %}
+        </tr>
+        {% for order in orders %}
+            <tr>
+				<th rowspan="{{ order.rows }}" style="vertical-align: top; " >
+					{{ order.customer }}
+				</th>
+				<th rowspan="{{ order.rows }}" style="vertical-align: top; " >
+					<a href="/orderwithlots/{{ order.id }}">#{{ order.id }} {{ order.order_date }}</a>
+				</th>
+			{% for item in order.orderitem_set.all %}
+				{% if forloop.first %}
+						<td>{{ item.lot }}</td>
+						<td>
+							{% if item.lot.custodian %}
+								{{ item.lot.custodian }}
+							{% else %}
+								&nbsp;
+							{% endif %}
+						</td>
+						<td style="text-align: right; " >{{ item.quantity }}</td>
+					</tr>				
+				{% else %}
+					<tr>
+						<td>{{ item.lot }}</td>
+						<td>
+							{% if item.lot.custodian %}
+								{{ item.lot.custodian }}
+							{% else %}
+								&nbsp;
+							{% endif %}
+						</td>
+						<td style="text-align: right; " >{{ item.quantity }}</td>
+					</tr>
+		        {% endif %}
+			{% endfor %}
+        {% endfor %}
+    </table>
+</div>
+{% endblock %} 

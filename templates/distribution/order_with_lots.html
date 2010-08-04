@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Order
+{% endblock %}
+
+{% block header %}
+<!--
+    <h1>Order</h1>
+-->
+{% endblock %}
+
+{% block content %}
+<!--
+	<p class="do-not-print" >
+		<a href="/orderselection">Update another order</a> <a href="/">Home</a>
+	</p>
+-->
+	{% include "distribution/tabnav.html" %}
+
+    <table style="margin-bottom: 1em;" >
+        <tr>
+            <th style="text-align: right; " >Order Number: </th>
+            <td>{{order.id}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Customer: </th>
+            <td>{{order.customer.short_name}} {{order.customer.long_name}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Date: </th>
+            <td>{{order.order_date}}</td>
+        </tr>
+		<tr>
+            <th style="text-align: right; " >Distributor: </th>
+            <td>{{order.distributor}}</td>
+        </tr>
+		<tr>
+            <th style="text-align: right; " >Transportation Fee: </th>
+            <td>{{order.transportation_fee}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Paid?</th>
+            <td>{{order.paid}}</td>
+        </tr>
+    </table>
+    <table class="ga-event-table" >
+        <tr>
+             <th>Lot</th>
+             <th>Quantity</th>
+             <th>Unit Price</th>
+             <th>Extended Price</th>
+             <th>Notes</th>
+        </tr>
+        {% for orderitem in order.orderitem_set.all %}
+            <tr>
+                <td>{{ orderitem.lot }}</td>
+                <td style="text-align: right; ">{{ orderitem.quantity }}</td>
+                <td style="text-align: right; ">{{ orderitem.unit_price }}</td>
+                <td style="text-align: right; ">{{ orderitem.extended_price }}</td>
+                <td>{{ orderitem.notes }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <table style="margin-top: 1em; margin-left: 3em; " >
+		{% if order.charge %}
+			<tr>
+				<th style="text-align: right;" >{{ order.charge_name }}:</th>
+				<td style="text-align: right;" >${{ order.charge }}</td>
+			</tr>
+		{% endif %}
+		<tr>
+			<th style="text-align: right;" >Total:</th>
+			<td style="text-align: right;" >${{ order.total_price }}</td>
+		</tr>
+    </table>
+{% endblock %} 

@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}
+     New Process
+{% endblock %}
+
+{% block header %}
+
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"></script>
+    <script type="text/javascript" >
+
+		function cleanNumericInput(value)
+		{
+			var cleanNumber = value.replace( /[^\-.0-9]/g, '');
+			var firstPos = cleanNumber.indexOf(".");
+			var lastPos = cleanNumber.lastIndexOf(".");
+			while(firstPos!=lastPos)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				firstPos = cleanNumber.indexOf(".");
+				lastPos = cleanNumber.lastIndexOf(".");
+			}
+			var lastPos = cleanNumber.lastIndexOf("-");
+			while(lastPos>0)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				lastPos = cleanNumber.lastIndexOf("-");
+			}
+			return cleanNumber;
+		}
+
+		function validateNumber(evt, functionToCall)
+		{
+			var isValid = true;
+			var candidate = evt.target.value;
+			var strippedNumber = cleanNumericInput(candidate);
+			strippedNumber = strippedNumber || 0;
+			if(isNaN(candidate))
+			{
+				evt.target.style.color = "red";
+				evt.target.value = "Not number";
+				isValid = false;
+				var anim1 = dojo.animateProperty({
+						node: evt.target, delay: 1000,
+						properties:{
+							opacity: { end: 0 }
+						}
+					}); 
+				var anim2 = dojo.animateProperty
+				({
+						node: evt.target, delay: 1000,
+						properties:
+						{
+							opacity: { end: 1 }, color: { end: 'black'}
+						},
+						onEnd: function()
+						{
+							evt.target.value = strippedNumber;
+							if(functionToCall)
+							{
+								functionToCall(evt);
+							}
+    					}
+				}); 
+				anim1.play();
+				anim2.play();
+			}
+			else
+			{
+				evt.target.value = strippedNumber;
+				if(functionToCall)
+				{
+					functionToCall(evt);
+				}
+			}
+			return isValid;
+		}
+
+
+		function customerChanged(evt)
+		{
+			dojo.byId("contact").innerHTML = '---';
+			dojo.byId("phone").innerHTML = '---';
+			var jsonUrl = "/jsoncustomer/" + evt.target.value + "/";
+			dojo.xhrGet( 
+			{
+					url: jsonUrl,
+					handleAs: "json",
+					load: function(responseObject, ioArgs) 
+					{
+						var customer = responseObject[0];
+						dojo.byId("contact").innerHTML = customer.fields.contact;
+						dojo.byId("phone").innerHTML = customer.fields.phone;
+					}
+			});
+		}
+
+		function extendPriceForEvt(evt)
+		{
+			var row = evt.target.id.split('-')[0];
+			extendPriceForRow(row);
+		}
+
+		function extendPriceForRow(row)
+		{
+			var up = parseFloat(dojo.byId(row + '-unit_price').value);
+			var qty = parseFloat(dojo.byId(row + '-quantity').value);
+			dojo.byId(row + '-ext_price').innerHTML = up * qty;
+		}
+
+		var inputLotQties = {};
+
+		function finishQuantityChange(evt)
+		{
+			if (evt.target.id == 'id_inputselection-quantity')
+			{
+				limitLotQty(evt.target);
+			}
+
+		}
+
+		function limitLotQty(qtyField)
+		{
+			//var row = qtyField.id.split('-');
+			//row = row[0] + '-' + row[1];
+			//var inputs = inputLotQties;
+			//var selectedLotPrefix = qtyField.id.split('-')[0];
+			//var selectedLotId = selectedLotPrefix +  '-lot';
+			var selectedLotField = dojo.byId(qtyField.id.split('-')[0] +  '-lot');
+			var selectedLot = selectedLotField.options[selectedLotField.selectedIndex];
+			//var selectedLotPk = Number(selectedLot.value);
+			var lotQty = inputLotQties[Number(selectedLot.value)];
+			var newQty = parseFloat(qtyField.value);
+			qtyField.style.color = "black";
+			if (newQty > lotQty)
+			{
+				qtyField.value = lotQty;
+				qtyField.style.color = "red";
+			}
+
+		}
+
+
+		var orderedTotals = {};
+		var thisOrderQty = {};
+
+
+		function limitOrderQty(row)
+		{
+			var qtyFieldName = row + '-quantity';
+			var qtyField = dojo.byId(qtyFieldName);
+			qtyField.style.color = "black";
+			var qty = parseFloat(qtyField.value);
+			var avail = parseFloat(dojo.byId(row + '-avail').value);
+			var prevQty = parseFloat(thisOrderQty[qtyFieldName]) || 0;
+			if (qty > prevQty)
+			{
+				if (prevQty == avail)
+				{
+					qtyField.value = prevQty;
+					qtyField.style.color = "red";
+				}
+				else if (qty > avail)
+				{
+					qtyField.value = avail;
+					qtyField.style.color = "red";
+				}
+			}
+			thisOrderQty[qtyFieldName] = qtyField.value;		
+		}
+
+		function quantityChanged(evt)
+		{
+			//alert(evt.target.id + " changed: " + evt.target.value);
+			validateNumber(evt, finishQuantityChange);
+
+		}
+
+		function producerChanged(evt)
+		{
+			var prodId = evt.target.value;
+
+			var queryNodes = dojo.query(".output_producer");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i];
+				var l = node.length;
+  				for (j=0;j<node.length;j++)
+				{
+					if (node.options[j].value == prodId)
+					{
+						node.selectedIndex = j;
+					}
+				}
+			}
+
+
+		}
+
+		dojo.addOnLoad(function()
+		{
+			var queryNodes = dojo.query(".quantity-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i];
+				dojo.connect(node, "onblur", "quantityChanged");
+
+			}
+			var node = dojo.byId("id_inputcreation-producer");
+			dojo.connect(node, "onchange", "producerChanged");
+
+		});
+
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="process">
+
+	{% include "distribution/tabnav.html" %}
+
+    <form action="." method="POST" >
+		<h3>Input Lot:</h3>
+		<table class="ga-event-table" >
+			{% if input_select_form %}
+				<tr>
+					<th>Lot</th>
+					<th>Quantity</th>
+				</tr>
+				<tr>
+					<td>{{ input_select_form.lot }}</td>
+					<td>{{ input_select_form.quantity }}</td>
+				</tr>
+			{% endif %}
+			{% if input_create_form %}
+				<tr>
+					<th>Producer</th>
+					<th>Product</th>
+					<th>Quantity</th>
+					<th>Lot Id</th>
+					<th>Field</th>
+				</tr>
+				<tr>
+					<td>{{ input_create_form.producer }}</td>
+					<td>{{ input_create_form.product }}</td>
+					<td>{{ input_create_form.planned }}</td>
+					<td>{{ input_create_form.freeform_lot_id }}</td>
+					<td>{{ input_create_form.field_id }}</td>
+				</tr>
+			{% endif %}
+		</table>
+
+		<h3>{{ service_label }}:</h3>
+		<table class="ga-event-table" >
+			<tr>
+				<th>Type</th>
+				<th>Processor</th>
+				<th>Cost</th>
+			</tr>
+
+			{% if service_formset %}
+				{{ service_formset.management_form }}
+				{% for service_form in service_formset.forms %}
+					<tr>
+						<td>{{ service_form.service_type }}</td>
+						<td>{{ service_form.from_whom }}</td>
+						<td>{{ service_form.amount }}</td>
+					</tr>
+				{% endfor %}
+			{% endif %}
+		</table>
+
+		<h3>{{ output_label }}:</h3>
+		<table  class="ga-event-table" >
+			<tr>
+				<th>Producer</th>
+				<th>Product</th>
+				<th>Quantity</th>
+				<th>Lot Id</th>
+				<th>Field</th>
+				<th>Custodian</th>
+			</tr>
+
+			{% if output_formset %}
+				{{ output_formset.management_form }}
+				{% for output_create_form in output_formset.forms %}
+					<tr>
+						<td>{{ output_create_form.producer }}</td>
+						<td>{{ output_create_form.product }}</td>
+						<td>{{ output_create_form.planned }}</td>
+						<td>{{ output_create_form.freeform_lot_id }}</td>
+						<td>{{ output_create_form.field_id }}</td>
+						<td>{{ output_create_form.custodian }}</td>
+					</tr>
+				{% endfor %}
+			{% endif %}
+		</table>
+
+        <p>
+            <input type="submit" value="Submit Process" />
+        </p>
+    </form>
+</div>
+
+{% for lot in input_lot_qties %}
+	<script type="text/javascript" >
+		var lotQty = {{lot}};
+		inputLotQties[lotQty[0]] = lotQty[1];
+	</script>
+{% endfor %}
+
+{% endblock %}

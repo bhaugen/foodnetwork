@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Delivery Entry
+{% endblock %}
+
+{% block header %}
+<!--
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"></script>
+    <script type="text/javascript" >
+
+		function producerChanged(evt)
+		{
+			var jsonUrl = "/jsonproducer/" + evt.target.value + "/";
+			dojo.xhrGet( 
+			{
+					url: jsonUrl,
+					handleAs: "json",
+					load: function(responseObject, ioArgs) 
+					{
+						var producer = responseObject[0];
+						dojo.byId("contact").innerHTML = producer.fields.contact;
+						dojo.byId("phone").innerHTML = producer.fields.phone;
+					}
+			});
+		}
+
+
+		dojo.addOnLoad(function()
+		{
+			dojo.connect(dojo.byId("id_producer"), "onchange", "producerChanged");
+		});
+
+    </script>
+-->
+    <h1>Delivery Entry</h1>
+{% endblock %}
+
+{% block content %}
+    <p style='margin-left: 2em;' >
+        <i>Order Items for {{order_date}}</i>
+    </p>
+    <form action="." method="POST" >
+        <table class="ga-event-table" >
+                <th>Order Item</th>
+                <th>Order Qty</th>
+                <th>Producer 1</th>
+                <th>Delivery 1</th>
+                <th>Producer 2</th>
+                <th>Delivery 2</th>
+                <th>Producer 3</th>
+                <th>Delivery 3</th>
+            </tr>
+            {% for item_form in item_forms %}
+                 <tr>
+                    <td class="read-only-td"  > {{ item_form.description }} </td>
+                    <td class="read-only-td"  > {{ item_form.order_qty }} </td>
+					{{item_form.order_item_id}}
+					{{item_form.product_id}}
+<!--
+            		{% for del_form in item_form.delivery_forms %}
+						<td>{{ del_form.producer }}</td>
+						<td>{{ del_form.quantity }}</td>
+           			{% endfor %}
+-->
+                </tr>
+           {% endfor %} 
+        </table>
+        <p>
+            <input type="submit" value="Submit" />
+        </p>
+    </form>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Invoice
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="invoices">
+	
+	{% include "customer/customer_tabnav.html" %}
+
+	<div style="page-break-inside: avoid; width: 7in; " >
+		<table style="width: 100%; margin-bottom: 1em; page-break-after: avoid; " >
+			<tr>
+				<td>
+					<h3>{{ network.long_name }}</h3>
+					Billing Questions: {{ network.billing_phone }} <br />
+					{% for header_line in network.formatted_billing_address %}
+						{{ header_line }}<br />
+					{% endfor %}
+					{{ network.billing_email_address }}
+				</td>
+				<td>
+					<h3 style="text-align: right; " >Invoice</h3>
+					<table class="ga-event-table" style="font-size: 100%; width: 100%; " >
+						<tr>
+							<th>Date</th>
+							<th>Invoice#</th>				
+						</tr>
+						<tr>
+							<td style="text-align: center; " >{{order.order_date}}</td>
+							<td style="text-align: right; ">{{order.id}}</td>
+						</tr>
+						<tr>
+							<th>Terms</th>
+							<th>Due Date</th>				
+						</tr>
+						<tr>
+							<td style="text-align: center; ">Net {{ network.terms }}</td>
+							<td style="text-align: center; ">{{order.payment_due_date}}</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		
+		<table class="ga-event-table" style="font-size: 100%; page-break-before: avoid; page-break-after: avoid; margin-bottom: 3em; " >
+			<tr>
+				<th>Bill To: </th>
+			</tr>
+			<tr>
+				<td>
+					{% if order.customer.long_name %}
+						{{order.customer.long_name}}
+					{% else %}
+						{{order.customer.short_name}}
+					{% endif %}
+					<br />
+					{% for address_line in order.customer.formatted_address %}
+						{{ address_line }}<br />
+					{% endfor %}
+				</td>
+			</tr>
+		</table>
+						
+		<table class="ga-event-table" style="font-size: 100%; page-break-before: avoid; page-break-after: avoid; width: 100%; " >
+			<tr>
+				 <th style="width: 40%; ">Item</th>
+				 <th>Producer</th>
+				 <th>Quantity</th>
+				 <th>Unit Price</th>
+				 <th>Extended Price</th>
+			</tr>
+			{% for orderitem in order.orderitem_set.all %}
+				<tr>
+					<td>{{ orderitem.product.long_name }}</td>
+					<td>{{ orderitem.producers }}</td>
+					<td style="text-align: right; ">{{ orderitem.quantity }}</td>
+					<td style="text-align: right; ">{{ orderitem.unit_price }}</td>
+					<td style="text-align: right; ">{{ orderitem.extended_price }}</td>
+				</tr>
+				{% if orderitem.service_cost %}
+					<tr>
+						<td>Processing</td>
+						<td>{{ orderitem.processors }}</td>
+						<td style="text-align: right; ">&nbsp;</td>
+						<td style="text-align: right; ">{{ orderitem.service_cost }}</td>
+						<td style="text-align: right; ">{{ orderitem.service_cost }}</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+		</table>
+		<table style="page-break-before: avoid; margin-top: 1em; margin-left: 53%; " >
+			{% if order.transportation_fee %}
+				<tr>
+					<th style="text-align: right;" >Transportation fee:</th>
+					<td style="text-align: right; width: 8em;" >${{ order.display_transportation_fee }}</td>
+				</tr>
+			{% endif %}
+			{% if order.coop_fee %}
+				<tr>
+					<th style="text-align: right;" >{{ order.coop_fee_label }}:</th>
+					<td style="text-align: right; width: 8em;" >${{ order.coop_fee }}</td>
+				</tr>
+			{% endif %}
+			<tr>
+				<th style="text-align: right;" >Total:</th>
+				<td style="text-align: right; font-weight: bold; " >${{ order.grand_total }}</td>
+			</tr>
+			<tr>
+				<td colspan="2" style="text-align: right;" >
+					<button>Pay Now</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+{% endblock %} 
+

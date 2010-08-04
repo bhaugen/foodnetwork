@@ -1,0 +1,9 @@
+The following orders should be delivered on {{ order_date }} by {{ distributor }}:
+{% for order in order_list %}
+{{ order.customer }}
+	{{ order.address }}
+	Products: {% for product in order.products %}
+	{{ product.product }}, Quantity: {{ product.qty }}
+		Lots: {% for lot in product.lots %}
+		    {{ lot.pickup_label }}{% endfor %}{% endfor %}
+{% endfor %}

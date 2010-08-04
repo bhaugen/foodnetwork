@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Food Distribution Help
+{% endblock %}
+
+{% block header %}
+		<style type="text/css">	
+		.help-text
+		{
+			font-family: Myriad,Arial,Helvetica,clean,sans-serif; 
+			font-size: 90%;
+			margin: 2em 8em 2em 8em;
+		}
+		</style>
+
+{% endblock %}
+
+{% block content %}
+<div class="help">
+
+	{% include "distribution/tabnav.html" %}
+
+<div class="help-text" >
+	
+<h3>
+	Getting started
+</h3>
+
+<p>
+	The system has two main sections:  Admin and the weekly Operational tabs.  Use Admin for 
+	initial setup of master data, and flexible viewing or correcting of operational details.
+	Use the Operational tabs for the regular weekly operations cycle, and an easier way
+	to enter product plans.
+</p>
+
+<p>
+	Use Admin to create the following master information:
+	
+	<ul>
+		<li>
+			<b>Food Network</b>
+		</li>
+		<li>
+			<b>Producers</b>
+		</li>
+		<li>
+			<b>Products</b>
+		</li>
+		<p>
+			Products may have other products for parents. 
+			Parent products appear in the Category column in product tables. 
+			For example, Hamburger per lb may have a parent Beef, 
+			which may have a parent Meat. So you would see Meat, Beef 
+			in the Category column for Hamburger per lb. 
+		</p>
+		<p>
+			Typically parent products would not be sold. In other words, 
+			you would not sell plain Meat or Beef, but you would sell 
+			Hamburger per lb.  The categories are useful to make the product 
+			tables more readable, and also they may be used for aggregate reports: 
+			for example, how much Meat have we sold so far this year?
+		</p>
+		<li>
+			<b>Customers</b>
+		</li>
+		<li>
+			<b>Processors</b>
+		</li>
+		<li>
+			<b>Distributors</b>
+		</li>
+	</ul>
+
+</p>
+
+<h3>Pre-season (or any time): enter plans for producers</h3>
+<p>
+	Plans are entered by producer, product and date range.  Plans ideally would be entered based on 
+	last year's demand, maybe adjusted by a growth factor.  
+</p>
+</p>
+	The plans determine which producers and products appear in the Availability forms for a given date.
+	If no plans, the producer will not appear in the selection list.  If no product plan, the product will
+	not appear in the form once you have selected a producer.  
+</p>
+	
+<p>
+	You can use the Plan tab to enter plans for one date range per product for a producer (for example,
+	for the whole season).  If you want many date ranges per product for a producer, use Product Plans
+	in Admin.
+</p>
+	
+<h2>Weekly operation cycle</h2>
+<ol>
+<li><h3>Enter what's available this week</h3></li>
+<p>
+	Use the Avail tab to enter what's available from producers.  
+	Each availability row shows two quantities:  Ready and Received.  
+	Ready means ready for pickup.  Received means received into warehouse inventory.  
+	The Custodian field refers to who has the goods other than the Producer.  
+	At this stage, that would be a Processor. Later, that might be the Distributor, 
+	and the goods might in the distributor's warehouse and so do not need to be picked up.
+</p>
+<p>
+	The system keeps track of available quantities by deleting deliveries.
+</p>
+<p> 
+        <b>Expiration:</b> Lots of available product expire (no longer are available) 
+        after their expiration date.  The expiration date is set automatically when the lot 
+        is created, by adding the product's expiration days to the lot's creation date. 
+        The default expiration is 6 days.  In other words, lots will become unavailable 
+        next week.
+        If you want all lots of a product to be available for longer, change the expiration days 
+        for that product, and new lots will be available longer (but existing lots will not be changed). 
+        If you want a particular lot or lots to be available longer, go into Admin and change the 
+        expiration date on the lot (Inventory Item).
+</p>
+	
+<li><h3>Send Fresh List emails to customers</h3></li>
+	
+<li><h3>Enter orders</h3></li>
+<p>
+	Use the Order tab.  The form shows all available lots from all producers, and allows you 
+	to enter the quantities of each lot that the current customer wants to order.  You can also enter notes 
+	about customer special requests.
+</p>
+	
+<li><h3>Send pickup list emails to producers and distributors</h3></li>
+
+<li><h3>Send order emails to distributors and customers</h3></li>
+
+<li><h3>Enter meat processing weight and cost</h3></li>
+
+<p>
+	Use the Avail tab and check the meat checkbox to enter the processing information 
+	for a producer.  Or use the Admin Inventory items section, select the meat item 
+	to change, and enter the processing information at the bottom of the page.
+</p>
+	
+<li><h3>Print invoices</h3></li>
+	
+<p>
+	Use the Invoice tab to print invoices for each customer order.
+</p>
+
+<li><h3>Enter payments from customers</h3></li>
+	
+<p>
+	You can enter customer payments through the Order tab, or Orders in Admin.
+</p>
+	
+<li><h3>Compute payments to producers, processors and distributors</h3></li>
+	
+<p>
+	The coop pays producers etc. after the customer pays the order.  The Producer Payments tab 
+        tells how much money is due to which producers, and Payment Update computes and enters the 
+	payments that will be paid out this week.
+</p>
+</ol>		
+</div>
+</div>
+{% endblock %}

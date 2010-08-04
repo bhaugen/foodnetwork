@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Order Delete Confirmation
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="order">
+
+	{% include "customer/customer_tabnav.html" %}
+
+	<h3>Are you sure you want to delete this order?</h3>
+
+	<div style="margin-left: 2em; margin-bottom: 1em; ">
+		<form style="display: inline;" action="{% url delete_order order_id=order.id %}" method="POST">
+    			<input type="submit" value="Delete" />
+		</form>
+		<form style="display: inline;" action="{% url customer_order_selection %}" method="GET">
+    			<input type="submit" value="Cancel" />
+		</form>
+	</div>
+
+
+    <table style="margin-bottom: 1em;" >
+        <tr>
+            <th style="text-align: right; " >Order Number: </th>
+            <td>{{order.id}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Customer: </th>
+            <td>{{order.customer.short_name}} {{order.customer.long_name}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Date: </th>
+            <td>{{order.order_date}}</td>
+        </tr>
+		<tr>
+            <th style="text-align: right; " >Distributor: </th>
+            <td>{{order.distributor}}</td>
+        </tr>
+		<tr>
+            <th style="text-align: right; " >Transportation Fee: </th>
+            <td>{{order.transportation_fee}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >Paid?</th>
+            <td>{{order.paid}}</td>
+        </tr>
+    </table>
+    <table class="ga-event-table" >
+        <tr>
+             <th>Product</th>
+             <!--<th>Description</th>-->
+             <th>Quantity</th>
+             <th>Unit Price</th>
+             <th>Extended Price</th>
+	     <!--<th>Producer</th>-->
+             <th>Notes</th>
+        </tr>
+        {% for orderitem in order.orderitem_set.all %}
+            <tr>
+                <!--<td>{{ orderitem.product }}</td>-->
+                <td>{{ orderitem.product.long_name }}</td>
+                <td style="text-align: right; ">{{ orderitem.quantity }}</td>
+                <td style="text-align: right; ">{{ orderitem.formatted_unit_price }}</td>
+                <td style="text-align: right; ">{{ orderitem.extended_price }}</td>
+		<!--<td>{{ orderitem.producers }}</td>-->
+                <td>{{ orderitem.notes }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <table style="margin-top: 1em; margin-left: 3em; " >
+		{% if order.charge %}
+			<tr>
+				<th style="text-align: right;" >{{ order.charge_name }}:</th>
+				<td style="text-align: right;" >${{ order.charge }}</td>
+			</tr>
+		{% endif %}
+		<tr>
+			<th style="text-align: right;" >Total:</th>
+			<td style="text-align: right;" >${{ order.total_price }}</td>
+		</tr>
+    </table>
+    
+</div>    
+{% endblock %} 
+
+
+

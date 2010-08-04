@@ -1,0 +1,45 @@
+body
+{
+    font-family: Myriad,Arial,Helvetica,clean,sans-serif; 
+}
+
+.ga-event-table
+{
+	font-size: 80%; 
+	border-collapse: collapse; 
+	border-style: solid; 
+	border-width: 1px; 
+	border-color: gray;	
+}
+
+.ga-event-table th
+{
+	border-style: solid; 
+	border-width: 1px; 
+	border-color: gray;
+    background-color: #366dba;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+.ga-event-table td
+{
+	border-style: solid; 
+	border-width: 1px; 
+	border-color: gray;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+.read-only-td
+{
+    background-color: #E8E8E8; !important;
+}
+
+.read-only-input
+{
+    background-color: #E8E8E8; !important;
+    border-style: solid; 
+    border-width: 1px; 
+    border-color: #E8E8E8; 
+}

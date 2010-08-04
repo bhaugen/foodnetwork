@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Order Update
+{% endblock %}
+
+{% block header %}
+
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"></script>
+    <script type="text/javascript" >
+
+		function cleanNumericInput(value)
+		{
+			var cleanNumber = value.replace( /[^\-.0-9]/g, '');
+			var firstPos = cleanNumber.indexOf(".");
+			var lastPos = cleanNumber.lastIndexOf(".");
+			while(firstPos!=lastPos)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				firstPos = cleanNumber.indexOf(".");
+				lastPos = cleanNumber.lastIndexOf(".");
+			}
+			var lastPos = cleanNumber.lastIndexOf("-");
+			while(lastPos>0)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				lastPos = cleanNumber.lastIndexOf("-");
+			}
+			return cleanNumber;
+		}
+
+		function validateNumber(evt, functionToCall)
+		{
+			var isValid = true;
+			var candidate = evt.target.value;
+			var strippedNumber = cleanNumericInput(candidate);
+			strippedNumber = strippedNumber || 0;
+			if(isNaN(candidate))
+			{
+				evt.target.style.color = "red";
+				evt.target.value = "Not number";
+				isValid = false;
+				var anim1 = dojo.animateProperty({
+						node: evt.target, delay: 1000,
+						properties:{
+							opacity: { end: 0 }
+						}
+					}); 
+				var anim2 = dojo.animateProperty
+				({
+						node: evt.target, delay: 1000,
+						properties:
+						{
+							opacity: { end: 1 }, color: { end: 'black'}
+						},
+						onEnd: function()
+						{
+							evt.target.value = strippedNumber;
+							if(functionToCall)
+							{
+								functionToCall(evt);
+							}
+    					}
+				}); 
+				anim1.play();
+				anim2.play();
+			}
+			else
+			{
+				evt.target.value = strippedNumber;
+				if(functionToCall)
+				{
+					functionToCall(evt);
+				}
+			}
+			return isValid;
+		}
+
+
+		function customerChanged(evt)
+		{
+			dojo.byId("contact").innerHTML = '---';
+			dojo.byId("phone").innerHTML = '---';
+			var jsonUrl = "/jsoncustomer/" + evt.target.value + "/";
+			dojo.xhrGet( 
+			{
+					url: jsonUrl,
+					handleAs: "json",
+					load: function(responseObject, ioArgs) 
+					{
+						var customer = responseObject[0];
+						dojo.byId("contact").innerHTML = customer.fields.contact;
+						dojo.byId("phone").innerHTML = customer.fields.phone;
+					}
+			});
+		}
+
+		function extendPriceForEvt(evt)
+		{
+			var row = evt.target.id.split('-')[0];
+			extendPriceForRow(row);
+		}
+
+		function extendPriceForRow(row)
+		{
+			var up = parseFloat(dojo.byId(row + '-unit_price').value);
+			var qty = parseFloat(dojo.byId(row + '-quantity').value);
+			dojo.byId(row + '-ext_price').innerHTML = up * qty;
+		}
+
+		function finishQuantityChange(evt)
+		{
+			var row = evt.target.id.split('-');
+			row = row[0] + '-' + row[1]
+			limitOrderQty(row);
+			extendPriceForRow(row);
+		}
+
+
+		var orderedTotals = {};
+		var thisOrderQty = {};
+
+		function limitOrderQty(row)
+		{
+			var qtyFieldName = row + '-quantity';
+			var qtyField = dojo.byId(qtyFieldName);
+			qtyField.style.color = "black";
+			var qty = parseFloat(qtyField.value);
+			var avail = parseFloat(dojo.byId(row + '-avail').value);
+			var prevQty = parseFloat(thisOrderQty[qtyFieldName]) || 0;
+			if (qty > prevQty)
+			{
+				if (prevQty == avail)
+				{
+					qtyField.value = prevQty;
+					qtyField.style.color = "red";
+				}
+				else if (qty > avail)
+				{
+					qtyField.value = avail;
+					qtyField.style.color = "red";
+				}
+			}
+			thisOrderQty[qtyFieldName] = qtyField.value;		
+		}
+
+		function quantityChanged(evt)
+		{
+			//alert(evt.target.id + " changed: " + evt.target.value);
+			validateNumber(evt, finishQuantityChange);
+
+		}
+
+		function priceChanged(evt)
+		{
+			validateNumber(evt, extendPriceForEvt);
+		}
+
+		function feeChanged(evt)
+		{
+			validateNumber(evt);
+		}
+
+		dojo.addOnLoad(function()
+		{
+			var queryNodes = dojo.query(".quantity-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i]
+				dojo.connect(node, "onblur", "quantityChanged");
+				var row = node.id.split('-');
+				row = row[0] + '-' + row[1]
+				extendPriceForRow(row);
+				thisOrderQty[node.id] = node.value;
+			}
+			var queryNodes = dojo.query(".unit-price-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				dojo.connect(queryNodes[i], "onblur", "priceChanged");
+			}
+			var queryNodes = dojo.query(".fee-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				dojo.connect(queryNodes[i], "onblur", "feeChanged");
+			}
+			var queryNodes = dojo.query(".total-ordered");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var thisNode = queryNodes[i];
+				orderedTotals[thisNode.id] = thisNode.value;
+			}
+		});
+
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="order-update">
+
+	{% include "distribution/tabnav.html" %}
+
+    <form action="." method="POST" >
+        <table >
+            {% if order %}
+		        <tr>
+		            <th style="text-align: right; " >Order Number:</th>
+		            <td>{{ order.id }}</td>
+		        </tr>
+            {% endif %}
+            <tr>
+                <th style="text-align: right; " >Customer:</th>
+                <td>{{ customer }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Date:</th>
+                <td>{{ order_date }}</td>
+            </tr>
+			<tr>
+                <th style="text-align: right; " >Distributor:</th>
+                <td>{{ order_form.distributor }}</td>
+            </tr>
+			<tr>
+                <th style="text-align: right; " >Transportation Fee:</th>
+                <td>{{ order_form.transportation_fee }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Paid?</th>
+                <td>{{ order_form.paid }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Contact:</th>
+               <td  id="contact" >{{ customer.contact }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Phone:</th>
+                <td id="phone" >{{ customer.phone }}</td>
+            </tr>
+        </table>
+
+		{{ formset.management_form }}
+
+        <table class="ga-event-table" style="font-size: 70%;" >
+			<tr>
+				<th>Lot ID</th>
+                <th>Avail</th>
+                <th>Unit Price</th>
+                <th>Order Qty</th>
+                <th>Extended</th>
+                <th>Notes</th>
+            </tr>
+            {% for item_form in formset.forms %}
+                 <tr>
+					 <td class="read-only-td" > {{ item_form.initial.lot_label }} </td>
+					 <td class="read-only-td" > {{ item_form.avail }} </td>
+					 <td> {{ item_form.unit_price }} </td>
+					 <td> {{ item_form.quantity }} </td>
+					 <td id="id_{{ item_form.prefix }}-ext_price" class="read-only-td ext-price" style="text-align: right" ></td>
+					 <td> {{ item_form.notes }} </td>
+					 {{ item_form.order_item_id }}
+					 {{ item_form.lot_id }}
+					 {{ item_form.product_id }}
+                </tr>
+           {% endfor %} 
+        </table>
+        <p>
+            <input type="submit" value="Submit Order" />
+        </p>
+    </form>
+</div>
+{% endblock %}

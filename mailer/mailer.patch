@@ -1,0 +1,73 @@
+diff -rupN mailer/engine.py trunk/apps/mailer/engine.py
+--- mailer/engine.py	2008-12-15 02:41:57.000000000 +0000
++++ trunk/apps/mailer/engine.py	2009-03-06 11:58:01.000000000 +0000
+@@ -8,6 +8,7 @@ from mailer.models import Message, DontS
+ 
+ from django.conf import settings
+ from django.core.mail import send_mail as core_send_mail
++from django.core.mail import EmailMultiAlternatives
+ 
+ # when queue is empty, how long to wait (in seconds) before checking again
+ EMPTY_QUEUE_SLEEP = getattr(settings, "MAILER_EMPTY_QUEUE_SLEEP", 30)
+@@ -69,7 +70,12 @@ def send_all():
+             else:
+                 try:
+                     logging.info("sending message '%s' to %s" % (message.subject.encode("utf-8"), message.to_address.encode("utf-8")))
+-                    core_send_mail(message.subject, message.message_body, message.from_address, [message.to_address])
++                    if not message.message_body_html:
++                        core_send_mail(message.subject, message.message_body, message.from_address, [message.to_address])
++                    else:
++                        email = EmailMultiAlternatives(message.subject, message.message_body, message.from_address, [message.to_address])
++                        email.attach_alternative(message.message_body_html, 'text/html')
++                        email.send()
+                     MessageLog.objects.log(message, 1) # @@@ avoid using literal result code
+                     message.delete()
+                     sent += 1
+diff -rupN mailer/__init__.py trunk/apps/mailer/__init__.py
+--- mailer/__init__.py	2009-02-05 16:34:21.000000000 +0000
++++ trunk/apps/mailer/__init__.py	2009-03-06 11:48:52.000000000 +0000
+@@ -31,6 +31,25 @@ def send_mail(subject, message, from_ema
+                 message_body=message,
+                 priority=priority).save()
+ 
++def send_html_mail(subject, message, message_html, from_email, recipient_list, 
++                    priority="medium", fail_silently=False, auth_user=None,
++                    auth_password=None):
++    """
++    Function to queue html emails
++    """
++    from django.utils.encoding import force_unicode
++    from mailer.models import Message
++    # need to do this in case subject used lazy version of ugettext
++    subject = force_unicode(subject)
++    priority = PRIORITY_MAPPING[priority]
++    for to_address in recipient_list:
++        Message(to_address = to_address,
++            from_address = from_email,
++            subject = subject,
++            message_body = message,
++            message_body_html = message_html,
++            priority=priority).save()
++
+ def mail_admins(subject, message, fail_silently=False, priority="medium"):
+     from django.utils.encoding import force_unicode
+     from django.conf import settings
+diff -rupN mailer/models.py trunk/apps/mailer/models.py
+--- mailer/models.py	2008-07-19 04:19:39.000000000 +0100
++++ trunk/apps/mailer/models.py	2009-03-06 11:57:31.000000000 +0000
+@@ -65,6 +65,7 @@ class Message(models.Model):
+     from_address = models.CharField(max_length=50)
+     subject = models.CharField(max_length=100)
+     message_body = models.TextField()
++    message_body_html = models.TextField(null = True, blank = True)
+     when_added = models.DateTimeField(default=datetime.now)
+     priority = models.CharField(max_length=1, choices=PRIORITIES, default='2')
+     # @@@ campaign?
+@@ -150,6 +151,7 @@ class MessageLog(models.Model):
+     from_address = models.CharField(max_length=50)
+     subject = models.CharField(max_length=100)
+     message_body = models.TextField()
++    message_body_html = models.TextField(null = True, blank = True)
+     when_added = models.DateTimeField()
+     priority = models.CharField(max_length=1, choices=PRIORITIES)
+     # @@@ campaign?

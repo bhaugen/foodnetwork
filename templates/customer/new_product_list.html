@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}
+   New Product List  
+{% endblock %}
+
+{% block header %}
+
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"></script>
+    <script type="text/javascript" >
+
+		function cleanNumericInput(value)
+		{
+			var cleanNumber = value.replace( /[^\-.0-9]/g, '');
+			var firstPos = cleanNumber.indexOf(".");
+			var lastPos = cleanNumber.lastIndexOf(".");
+			while(firstPos!=lastPos)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				firstPos = cleanNumber.indexOf(".");
+				lastPos = cleanNumber.lastIndexOf(".");
+			}
+			var lastPos = cleanNumber.lastIndexOf("-");
+			while(lastPos>0)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				lastPos = cleanNumber.lastIndexOf("-");
+			}
+			return cleanNumber;
+		}
+
+		function validateNumber(evt, functionToCall)
+		{
+			var isValid = true;
+			var candidate = evt.target.value;
+			var strippedNumber = cleanNumericInput(candidate);
+			strippedNumber = strippedNumber || 0;
+			if(isNaN(candidate))
+			{
+				evt.target.style.color = "red";
+				evt.target.value = "Not number";
+				isValid = false;
+				var anim1 = dojo.animateProperty({
+						node: evt.target, delay: 1000,
+						properties:{
+							opacity: { end: 0 }
+						}
+					}); 
+				var anim2 = dojo.animateProperty
+				({
+						node: evt.target, delay: 1000,
+						properties:
+						{
+							opacity: { end: 1 }, color: { end: 'black'}
+						},
+						onEnd: function()
+						{
+							evt.target.value = strippedNumber;
+							if(functionToCall)
+							{
+								functionToCall(evt);
+							}
+    					}
+				}); 
+				anim1.play();
+				anim2.play();
+			}
+			else
+			{
+				evt.target.value = strippedNumber;
+				if(functionToCall)
+				{
+					functionToCall(evt);
+				}
+			}
+			return isValid;
+		}
+
+
+		function quantityChanged(evt)
+		{
+			//alert(evt.target.id + " changed: " + evt.target.value);
+			validateNumber(evt);
+
+		}
+
+
+		dojo.addOnLoad(function()
+		{
+			var queryNodes = dojo.query(".quantity-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i]
+				dojo.connect(node, "onblur", "quantityChanged");
+			}
+		});
+
+    </script>
+
+    <style>
+
+	input {font-size: 85%;}
+
+
+	table thead
+	{
+		position: fixed;
+	}
+
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="product-lists">
+
+	{% include "customer/customer_tabnav.html" %}	
+
+	<form action="." method="POST" >
+	
+	<table >
+
+            <tr>
+                <th style="text-align: right; " >Customer:</th>
+		<td>{{ customer.short_name }} {{ customer.long_name }}</td>
+	    </tr>
+ 	    <tr>
+                <th style="text-align: right; " >List Name:</th>
+		<td>{{ list_form.list_name }} </td>
+	    </tr>
+	    <tr>
+                <th style="text-align: right; " >Description:</th>
+		<td>{{ list_form.description }} </td>
+            </tr>
+        </table>
+        <p>
+            <input type="submit" value="Submit" />
+        </p>
+
+	<table class="ga-event-table" style="font-size: 70%;" >
+		<thead>
+		    <tr>
+			<th style="width: 20em; " >Category</th>
+                	<th style="width: 18em; " >Product</th>
+	                <th style="width: 7em; " >Default Qty</th>
+        	        <th style="width: 30px; " >Plan</th>
+                	<th style="width: 30px; " >Add</th>
+		</tr>
+		</thead>
+	</table>
+	<br />
+	<table class="ga-event-table" style="font-size: 70%;"  >
+
+	<tbody>
+
+
+		{% for form in form_list %}
+			{{ form.prod_id }}
+	                <tr>
+				<td class="read-only-td"  style="width: 20em; "  > {{ form.category }} </td>
+				<td class="read-only-td"  style="width: 18em; "  > {{ form.product_name }} </td>
+				<td style="width: 7em; text-align: center; " > {{ form.default_quantity }} </td>
+				<td style="width: 30px; " > {{ form.planned }} </td>
+				<td style="width: 30px; " > {{ form.added }} </td>
+			</tr>
+		{% endfor %} 
+	</tbody>
+        </table>
+        <p>
+            <input type="submit" value="Submit" />
+        </p>
+    </form>
+</div>
+{% endblock %}
+

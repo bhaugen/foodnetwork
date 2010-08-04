@@ -1,0 +1,8 @@
+The following products are ready to be picked up on {{ pickup_date }}:
+by {{ distributor }}
+{% for custodian in pickup_list %}
+{{ custodian.custodian }}
+	{{ custodian.address }}
+	Products: {% for product in custodian.products %}
+	{{ product.product }}, Quantity: {{ product.qty }}{% endfor %}
+{% endfor %}

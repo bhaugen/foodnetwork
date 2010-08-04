@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}
+   Edit Product List  
+{% endblock %}
+
+{% block header %}
+
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"></script>
+    <script type="text/javascript" >
+
+		function cleanNumericInput(value)
+		{
+			var cleanNumber = value.replace( /[^\-.0-9]/g, '');
+			var firstPos = cleanNumber.indexOf(".");
+			var lastPos = cleanNumber.lastIndexOf(".");
+			while(firstPos!=lastPos)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				firstPos = cleanNumber.indexOf(".");
+				lastPos = cleanNumber.lastIndexOf(".");
+			}
+			var lastPos = cleanNumber.lastIndexOf("-");
+			while(lastPos>0)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				lastPos = cleanNumber.lastIndexOf("-");
+			}
+			return cleanNumber;
+		}
+
+		function validateNumber(evt, functionToCall)
+		{
+			var isValid = true;
+			var candidate = evt.target.value;
+			var strippedNumber = cleanNumericInput(candidate);
+			strippedNumber = strippedNumber || 0;
+			if(isNaN(candidate))
+			{
+				evt.target.style.color = "red";
+				evt.target.value = "Not number";
+				isValid = false;
+				var anim1 = dojo.animateProperty({
+						node: evt.target, delay: 1000,
+						properties:{
+							opacity: { end: 0 }
+						}
+					}); 
+				var anim2 = dojo.animateProperty
+				({
+						node: evt.target, delay: 1000,
+						properties:
+						{
+							opacity: { end: 1 }, color: { end: 'black'}
+						},
+						onEnd: function()
+						{
+							evt.target.value = strippedNumber;
+							if(functionToCall)
+							{
+								functionToCall(evt);
+							}
+    					}
+				}); 
+				anim1.play();
+				anim2.play();
+			}
+			else
+			{
+				evt.target.value = strippedNumber;
+				if(functionToCall)
+				{
+					functionToCall(evt);
+				}
+			}
+			return isValid;
+		}
+
+
+		function quantityChanged(evt)
+		{
+			//alert(evt.target.id + " changed: " + evt.target.value);
+			validateNumber(evt);
+
+		}
+
+
+		dojo.addOnLoad(function()
+		{
+			var queryNodes = dojo.query(".quantity-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i]
+				dojo.connect(node, "onblur", "quantityChanged");
+			}
+		});
+
+    </script>
+
+    <style>
+	    input {font-size: 85%;}
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="product-lists">
+
+	{% include "customer/customer_tabnav.html" %}	
+
+	<form method="post" action="">
+		<table>
+			{{ list_form.as_table }}
+		</table>
+		<p>
+            		<input type="submit" value="Submit" />
+        	</p>
+		<table class="ga-event-table" >
+			<thead>
+				<th>Product</th>
+				<th>Default Qty</th>
+		                <th>Plan</th>
+                		<th>Delete</th>
+			</thead>
+			<tbody>
+		    		{{ formset.management_form }}
+    				{% for form in formset.forms %}
+					{{ form.id }}
+        				<tr>
+						<td>{{ form.product }}</td>
+						<td>{{ form.default_quantity }}</td>
+						<td>{{ form.planned }}</td>
+						<td>{{ form.DELETE }}</td>
+        				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<p>
+	            <input type="submit" value="Submit" />
+        	</p>
+	</form>
+
+</div>
+
+{% endblock %}

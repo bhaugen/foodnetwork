@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Payments Due to Members
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+
+<div class="producer-payments">
+
+	{% include "distribution/tabnav.html" %}
+
+    <h4 style='margin-left: 2em;' >
+        <i>Payments for all members for transactions from {{from_date}} to {{to_date}}</i>
+    </h4>
+
+	<h4>Products</h4>
+    <table class="ga-event-table" >
+        <tr>
+             <th>Producer</th>
+             <th>Type</th>
+             <th>Order</th>
+             <th>Due?</th>
+             <th>Item</th>
+             <th>Date</th>
+             <th>Quantity</th>
+             <th>Unit Price</th>
+             <th>Fee</th>
+             <th>Due</th>
+			{% if show_payments %}
+				<th>Paid</th>
+			{% endif %}
+        </tr>
+		{% for producer in producers %}
+			{% if producer.deliveries %}
+				{% for delivery in producer.deliveries %}
+			    <tr>
+			        <td>{{ producer }}</td>
+			        <td>{{ delivery.transaction_type }}</td>
+			        <td>{{ delivery.order_item.order.customer }}: {{ delivery.order_item.order.id }}</td>
+			        <td>{{ delivery.is_due }}</td>
+			        <td>{{ delivery.inventory_item.product }} </td>
+			        <td>{{ delivery.transaction_date }}</td>
+			        <td style="text-align: right; ">{{ delivery.amount }}</td>
+			        <td style="text-align: right; ">{{ delivery.unit_price }}</td>
+			        <td style="text-align: right; ">{{ delivery.extended_producer_fee }}</td>
+			        <td style="text-align: right; ">{{ delivery.due_to_member }}</td>
+					{% if show_payments %}
+						<td style="text-align: right; "> {{ delivery.paid_amount }} </td>
+					{% endif %}
+			    </tr>
+				{% endfor %}
+				<tr>
+					<td class="read-only-td" colspan="9" style="text-align: right; ">
+						<b>{{ producer }} deliveries total:</b>
+					</td>
+					<td  style="text-align: right; " ><b>{{ producer.delivery_total_due }}</b></td>
+					{% if show_payments %}
+						<td  style="text-align: right; " ><b>{{ producer.delivery_total_paid }}</b></td>
+					{% endif %}
+				</tr>
+			{% endif %}
+		{% endfor %}
+    </table>
+	
+	<h4>Processing</h4>
+    <table class="ga-event-table" >
+        <tr>
+             <th>Processor</th>
+             <th>Type</th>
+             <th>Order</th>
+             <th>Due?</th>
+             <th>Item</th>
+             <th>Date</th>
+             <th>Due</th>
+			{% if show_payments %}
+				<th>Paid</th>
+			{% endif %}
+        </tr>
+		{% for producer in producers %}
+			{% if producer.processes %}
+				{% for process in producer.processes %}
+			    <tr>
+			        <td>{{ producer }}</td>
+			        <td>{{ process.service_type }}</td>
+			        <td>
+						{{ process.order_string }}: 
+					</td>
+			        <td>{{ process.is_due }}</td>
+			        <td>{{ process.product_string }} </td>
+			        <td>{{ process.transaction_date }}</td>
+			        <td style="text-align: right; ">{{ process.due_to_member }}</td>
+					{% if show_payments %}
+						<td style="text-align: right; "> {{ process.paid_amount }} </td>
+					{% endif %}
+			    </tr>
+				{% endfor %}
+				<tr>
+					<td class="read-only-td" colspan="6" style="text-align: right; ">
+						<b>{{ producer }} processing total:</b>
+					</td>
+					<td  style="text-align: right; " ><b>{{ producer.process_total_due }}</b></td>
+					{% if show_payments %}
+					    <td  style="text-align: right; " ><b>{{ producer.process_total_paid }}</b></td>
+					{% endif %}
+				</tr>
+			{% endif %}
+		{% endfor %}
+    </table>
+	
+	<h4>Transportation</h4>
+    <table class="ga-event-table" >
+        <tr>
+             <th>Distributor</th>
+             <th>Order</th>
+             <th>Due?</th>
+             <th>Date</th>
+             <th>Due</th>
+			{% if show_payments %}
+				<th>Paid</th>
+			{% endif %}
+        </tr>
+		{% for producer in producers %}
+			{% if producer.transportations %}
+				{% for tx in producer.transportations %}
+			    <tr>
+			        <td>{{ producer }}</td>
+			        <td>
+						{{ tx.order.customer }}: 
+						{{ tx.order.id }}
+					</td>
+			        <td>{{ tx.is_due }}</td>
+			        <td>{{ tx.order.order_date }}</td>
+			        <td style="text-align: right; ">{{ tx.due_to_member }}</td>
+					{% if show_payments %}
+						<td style="text-align: right; "> {{ tx.paid_amount }} </td>
+					{% endif %}
+			    </tr>
+				{% endfor %}
+				<tr>
+					<td class="read-only-td" colspan="4" style="text-align: right; ">
+						<b>{{ producer }} transportation total:</b>
+					</td> 
+					<td  style="text-align: right; " ><b>{{ producer.transportation_total_due }}</b></td>
+					{% if show_payments %}
+					   <td  style="text-align: right; " ><b>{{ producer.transportation_total_paid }}</b></td>
+					{% endif %}
+				</tr>
+			{% endif %}
+		{% endfor %}
+    </table>
+	
+
+	<h4> Damaged </h4>
+	<table class="ga-event-table" >
+	    <tr>
+	         <th>Item</th>
+             <th>Date</th>
+	         <th>Quantity</th>
+	         <th>Notes</th>
+	         <th>Unit Price</th>
+	         <th>Fee</th>
+	         <th>Due</th>
+			{% if show_payments %}
+				<th>Paid</th>
+			{% endif %}
+	    </tr>
+		{% for producer in producers %}
+			{% if producer.damaged %}
+				{% for damage in producer.damaged %}
+			    <tr>
+			        <td>{{ damage.inventory_item }} </td>
+			    	<td>{{ damage.transaction_date }}</td>
+			        <td style="text-align: right; ">{{ damage.amount }}</td>
+			        <td>{{ damage.notes }} </td>
+			        <td style="text-align: right; ">{{ damage.inventory_item.product.price }}</td>
+			        <td style="text-align: right; ">{{ damage.inventory_item.product.decide_fee }}</td>
+			        <td style="text-align: right; ">{{ damage.due_to_member }}</td>
+					{% if show_payments %}
+						<td style="text-align: right; "> {{ damage.paid_amount }} </td>
+					{% endif %}
+			    </tr>
+				{% endfor %}
+			<tr>
+				<td class="read-only-td" colspan="6" style="text-align: right; ">
+					<b>{{ producer }} damages total:</b>
+				</td>
+				<td  style="text-align: right; " ><b>{{ producer.damage_total_due }}</b></td>
+			</tr>
+			{% endif %}
+		{% endfor %}
+	</table>
+
+
+	<h4> Rejected </h4>
+	<table class="ga-event-table" >
+	    <tr>
+	         <th>Item</th>
+             <th>Date</th>
+	         <th>Quantity</th>
+	         <th>Notes</th>
+	    </tr>
+		{% for producer in producers %}
+			{% if producer.rejected %}
+				{% for reject in producer.rejected %}
+			    <tr>
+			        <td>{{ reject.inventory_item }} </td>
+			    	<td>{{ reject.transaction_date }}</td>
+			        <td style="text-align: right; ">{{ reject.amount }}</td>
+			        <td>{{ reject.notes }} </td>
+			    </tr>
+				{% endfor %}
+			{% endif %}
+		{% endfor %}
+	</table>
+
+	<h4> Grand Totals</h4>
+	<table class="ga-event-table" style="margin-left: 2em; font-weight: bold; "  >
+        <tr>
+            <th>Member</th>
+            <th>Due</th>
+			{% if show_payments %}
+            	<th>Paid</th>
+			{% endif %}
+        </tr>
+	{% for producer in producers %}
+		{% if producer.grand_total_due %}
+		    <tr>
+		        <td>{{ producer.short_name }} </td>
+		        <td style="text-align: right; ">${{ producer.grand_total_due }}</td>
+				{% if show_payments %}
+		        	<td style="text-align: right; ">${{ producer.grand_total_paid }}</td>
+				{% endif %}
+		    </tr>
+		{% endif %}
+	{% endfor %}
+	</table>
+
+</div>
+{% endblock %} 

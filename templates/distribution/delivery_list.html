@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Deliveries
+{% endblock %}
+
+{% block header %}
+    <h1>Deliveries</h1>
+{% endblock %}
+
+{% block content %}
+    <table class="ga-event-table" >
+        <tr>
+             <th>Week</th>
+             <th>Customer</th>
+             <th>Product</th>
+             <th>Producer</th>
+             <th>Quantity</th>
+        </tr>
+        {% for delivery in object_list %}
+            <tr>
+                <td>{{ delivery.orderitem.order.week }}</td>
+                <td>{{ delivery.orderitem.order.customer }}</td>
+                <td>{{ delivery.orderitem.product }}</td>
+                <td>{{ delivery.producer }}</td>
+                <td style="text-align: right; ">{{ delivery.quantity }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %} 

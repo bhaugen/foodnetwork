@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+
+{% block title %}
+     Purchase History
+{% endblock %}
+
+{% block header %}
+
+<style>
+table thead
+{
+	position: fixed;
+}
+
+</style>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="history">
+
+
+	{% include tabnav %}
+
+	<h2>Purchase History from {{ from_date }} to {{ to_date }}</h2>
+
+	<table class="ga-event-table" >
+		<thead>
+		<tr>
+			<th style="text-align: left; width: 13em;" >Product</th>
+			<th style="text-align: right; width: 5em;" >Quantity</th>
+			<th style="text-align: right; width: 5em;" >Ave Price</th>
+			<th style="text-align: right; width: 5em;" >Ext Price</th>
+		</tr>
+		</thead>
+	</table>
+	<br />
+	<table class="ga-event-table" >
+		<tbody>
+
+		{% for row in history_rows %}
+			<tr>
+				<th style="text-align: left; width: 13em;" >{{ row.product }}</th>
+				<td style="text-align: right; width: 5em; " >{{ row.quantity|intcomma }}</td>
+				<td style="text-align: right; width: 5em; " >{{ row.average_price }}</td>
+				<td style="text-align: right; width: 5em; " >{{ row.extended_price|intcomma }}</td>
+		
+			</tr>
+			{% endfor %}
+		</tbody>
+
+	</table>
+
+</div>
+<div><p>.</p></div>
+
+ 
+{% endblock %} 
+
+

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Inventory Update
+{% endblock %}
+
+{% block header %}
+
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"></script>
+    <script type="text/javascript" >
+
+		function cleanNumericInput(value)
+		{
+			var cleanNumber = value.replace( /[^\-.0-9]/g, '');
+			var firstPos = cleanNumber.indexOf(".");
+			var lastPos = cleanNumber.lastIndexOf(".");
+			while(firstPos!=lastPos)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				firstPos = cleanNumber.indexOf(".");
+				lastPos = cleanNumber.lastIndexOf(".");
+			}
+			var lastPos = cleanNumber.lastIndexOf("-");
+			while(lastPos>0)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				lastPos = cleanNumber.lastIndexOf("-");
+			}
+			return cleanNumber;
+		}
+
+		function validateNumber(evt, functionToCall)
+		{
+			var isValid = true;
+			var candidate = evt.target.value;
+			var strippedNumber = cleanNumericInput(candidate);
+			strippedNumber = strippedNumber || 0;
+			if(isNaN(candidate))
+			{
+				evt.target.style.color = "red";
+				evt.target.value = "Not number";
+				isValid = false;
+				var anim1 = dojo.animateProperty({
+						node: evt.target, delay: 1000,
+						properties:{
+							opacity: { end: 0 }
+						}
+					}); 
+				var anim2 = dojo.animateProperty
+				({
+						node: evt.target, delay: 1000,
+						properties:
+						{
+							opacity: { end: 1 }, color: { end: 'black'}
+						},
+						onEnd: function()
+						{
+							evt.target.value = strippedNumber;
+							//functionToCall(evt);
+    					}
+				}); 
+				anim1.play();
+				anim2.play();
+			}
+			else
+			{
+				evt.target.value = strippedNumber;
+				//functionToCall(evt);
+			}
+			return isValid;
+		}
+
+		dojo.addOnLoad(function()
+		{
+			var queryNodes = dojo.query(".quantity-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i]
+				dojo.connect(node, "onblur", "validateNumber");
+			}
+		});
+
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="inventory-update">
+
+	{% include "distribution/tabnav.html" %}
+
+    <form action="." method="POST" >
+		<input name='producer-id' type='hidden' value='{{ producer.id }}' />
+		<input name='avail-date' type='hidden' value='{{ avail_date }}' />
+        <table>
+            <tr>
+                <th style="text-align: right; " >Producer:</th>
+                <td>{{ producer.short_name }} - {{ producer.long_name }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Week of:</th>
+                <td>{{ avail_date}}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Contact:</th>
+               <td  id="contact" >{{producer.contact}}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Phone:</th>
+                <td id="phone" >{{producer.phone}}</td>
+            </tr>
+        </table>
+
+        <table class="ga-event-table" >
+		<th>Product</th>
+		<th>Lot Id</th>
+                <th>Field</th>
+		<th>Custodian</th>
+		<th>Date</th>
+                <th>Ready Qty</th>
+                <th>Received Qty</th>
+				<th>Notes</th>
+            </tr>
+            {% for item_form in item_forms %}
+                 <tr>
+			 <td class="read-only-td" > {{ item_form.description }} </td>
+			 <td> {{ item_form.freeform_lot_id }} </td>
+			 <td> {{ item_form.field_id }} </td>
+			<td> {{ item_form.custodian }} </td>
+			<td> {{ item_form.inventory_date }} </td>
+			<td> {{ item_form.planned }} </td>
+			<td> {{ item_form.received }} </td>
+			<td> {{ item_form.notes }} </td>
+			{{ item_form.item_id }}
+			{{ item_form.prod_id }}
+                </tr>
+           {% endfor %} 
+        </table>
+
+        <p>
+            <input type="submit" value="Submit" />
+        </p>
+    </form>
+</div>
+{% endblock %}

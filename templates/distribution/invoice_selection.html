@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Invoice Selection
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true"></script>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+    </script>
+
+{% endblock %}
+
+{% block header %}
+
+    <script type="text/javascript" >
+
+		function customerChanged(evt)
+		{
+			dojo.byId("contact").innerHTML = '---';
+			dojo.byId("phone").innerHTML = '---';
+			var jsonUrl = "/distribution/jsoncustomer/" + evt.target.value + "/";
+			dojo.xhrGet( 
+			{
+					url: jsonUrl,
+					handleAs: "json",
+					load: function(responseObject, ioArgs) 
+					{
+						var customer = responseObject[0];
+						dojo.byId("contact").innerHTML = customer.fields.contact;
+						dojo.byId("phone").innerHTML = customer.fields.phone;
+					}
+			});
+		}
+
+
+		dojo.addOnLoad(function()
+		{
+			dojo.connect(dojo.byId("id_customer"), "onchange", "customerChanged");
+
+		});
+
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="invoices">
+
+	{% include "distribution/tabnav.html" %}
+
+    <form action="." method="POST" >
+        <table>
+            <tr>
+                <th style="text-align: right; " >Customer:</th>
+                <td>{{ header_form.customer }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Week of:</th>
+                <td>{{ header_form.order_date}}</td>
+				{% if header_form.order_date.errors %}
+					<td style="color: red; " >
+						{{ header_form.order_date.errors }}
+					</td>
+				{% endif %}
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Contact:</th>
+               <td  id="contact" >---</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >Phone:</th>
+                <td id="phone" >---</td>
+            </tr>
+        </table>
+
+        <p>
+            <input type="submit" value="Submit" />
+        </p>
+    </form>
+</div>
+{% endblock %}

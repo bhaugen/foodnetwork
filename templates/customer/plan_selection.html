@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}
+     Plan Selection
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true"></script>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+    </script>
+
+{% endblock %}
+
+
+{% block header %}
+
+
+	<style>
+		ul {list-style-type:none;}
+	</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="plans">
+
+	{% include "customer/customer_tabnav.html" %}
+
+	<h3 style="padding-top: 0; margin-top: 0; " >Plan Selection</h3>
+
+	<form action="." method="POST" >
+        		<table>
+			<tr>
+                		<th style="text-align: right; " >From Date:</th>
+                		<td>
+					{{ plan_form.plan_from_date }}
+				</td>
+				{% if plan_form.plan_from_date.errors %}
+					<td style="color: red; " >
+						{{plan_form.plan_from_date.errors }}
+					</td>
+				{% endif %}
+				</tr>
+				<tr>
+                		<th style="text-align: right; " >To Date:</th>
+                		<td>
+					{{ plan_form.plan_to_date }}
+				</td>
+				{% if plan_form.plan_to_date.errors %}
+					<td style="color: red; " >
+						{{plan_form.plan_to_date.errors }}
+					</td>
+				{% endif %}
+			</tr>
+			<tr>
+				<th style="text-align: right; " >Product List:</th>
+				<td>{{ plan_form.list_type }}</td>
+			</tr>
+
+
+		        </table>
+        		<p>
+	        	    <input name="submit-plan-update" type="submit" value="Submit" />
+        		</p>
+	    </form>
+
+
+</div>
+
+{% endblock %}
+
