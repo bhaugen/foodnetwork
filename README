@@ -1,4 +1,4 @@
-Django-fad is administrative software for food aggregation and distribution networks.
+foodnetwork is administrative software for food aggregation and distribution networks.
 
 These are generally farmer cooperatives that aggregate food from many farmers and distribute it to many customers.
 
@@ -6,5 +6,5 @@ It is being refactored and generalized from two previous systems for two differe
 
 You can read about the previous systems at http://www.group-accounting.com/Home/fooddistribution
 
-This version of the software is not yet ready for use.  When ready, it will be used by a new food network in the Driftless region of western Wisconsin.
+This version of the software is not yet ready for use.  When ready, it will be used by 2 new food networks in the Driftless region of western Wisconsin.
 
