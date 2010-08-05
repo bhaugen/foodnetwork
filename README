@@ -1,8 +1,8 @@
 foodnetwork is administrative software for food aggregation and distribution networks.
 
-These are generally farmer cooperatives that aggregate food from many farmers and distribute it to many customers.
+These are generally groups of farmers who aggregate food from many farmers and distribute it to many customers.
 
-It is being refactored and generalized from two previous systems for two different cooperatives, one in Minnesota and one in Wisconsin.  The one in Wisconsin includes customers, distributors and processors as members as well as farmers.
+It is being refactored and generalized from two previous systems for two different food networks, one in Minnesota and one in Wisconsin.  The one in Wisconsin includes customers, distributors and processors as members as well as farmers.
 
 You can read about the previous systems at http://www.group-accounting.com/Home/fooddistribution
 
