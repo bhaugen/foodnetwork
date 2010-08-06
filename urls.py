@@ -18,5 +18,6 @@ urlpatterns = patterns('',
 
 if settings.DEBUG:
     urlpatterns += patterns('',
-        (r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/home/bob/pbc/media', 'show_indexes': True}),
+        (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
+         {'document_root': '/home/bob/foodnetwork/media', 'show_indexes': True}),
     )
