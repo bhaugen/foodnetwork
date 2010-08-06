@@ -967,7 +967,7 @@ def order_item_rows(thisdate):
     item_list.sort()
     return item_list
 
-
+@login_required
 def order_table_selection(request):
     init = {"selected_date": current_week(),}
     if request.method == "POST":
@@ -998,6 +998,7 @@ def order_table_selection(request):
 
 ORDER_HEADINGS = ["Customer", "Order", "Lot", "Custodian", "Order Qty"]
 
+@login_required
 def order_table(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     date_string = thisdate.strftime('%Y_%m_%d')
@@ -1013,6 +1014,7 @@ def order_table(request, year, month, day):
          'item_list': item_list,
          'orders': orders,})
 
+@login_required
 def order_table_by_product(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     date_string = thisdate.strftime('%Y_%m_%d')
@@ -1086,6 +1088,7 @@ def shorts(request, year, month, day):
         {'date': thisdate, 
          'shorts_table': shorts_table  })
 
+@login_required
 def shorts_changes(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     changed_items = OrderItem.objects.filter(
@@ -1128,6 +1131,7 @@ def send_short_change_notices(request):
                 request.user.message_set.create(message="Short Change emails have been sent")
         return HttpResponseRedirect(request.POST["next"])
 
+@login_required
 def order(request, order_id):
     try:
         order = Order.objects.get(pk=order_id)
@@ -1135,6 +1139,7 @@ def order(request, order_id):
         raise Http404
     return render_to_response('distribution/order.html', {'order': order})
 
+@login_required
 def order_with_lots(request, order_id):
     try:
         order = Order.objects.get(pk=order_id)
@@ -1142,6 +1147,7 @@ def order_with_lots(request, order_id):
         raise Http404
     return render_to_response('distribution/order_with_lots.html', {'order': order})
 
+@login_required
 def producerplan(request, prod_id):
     try:
         member = Party.objects.get(pk=prod_id)
@@ -1154,6 +1160,7 @@ def producerplan(request, prod_id):
         
     return render_to_response('distribution/producer_plan.html', {'member': member, 'plans': plans })
 
+@login_required
 def supply_and_demand(request, from_date, to_date):
     try:
         from_date = datetime.datetime(*time.strptime(from_date, '%Y_%m_%d')[0:5]).date()
@@ -1168,6 +1175,7 @@ def supply_and_demand(request, from_date, to_date):
             'sdtable': sdtable,
         })
 
+@login_required
 def income(request, from_date, to_date):
     try:
         from_date = datetime.datetime(*time.strptime(from_date, '%Y_%m_%d')[0:5]).date()
@@ -1182,7 +1190,7 @@ def income(request, from_date, to_date):
             'income_table': income_table,
         })
 
-
+@login_required
 def member_supply_and_demand(request, from_date, to_date, member_id):
     try:
         member = Party.objects.get(pk=member_id)
@@ -1221,7 +1229,7 @@ def supply_and_demand_week(request, week_date):
         })
 
 
-
+@login_required
 def produceravail(request, prod_id, year, month, day):
     availdate = datetime.date(int(year), int(month), int(day))
     availdate = availdate - datetime.timedelta(days=datetime.date.weekday(availdate)) + datetime.timedelta(days=2)
@@ -1235,6 +1243,7 @@ def produceravail(request, prod_id, year, month, day):
         raise Http404
     return render_to_response('distribution/producer_avail.html', {'producer': producer, 'avail_date': weekstart, 'inventory': inventory })
 
+@login_required
 def meatavail(request, prod_id, year, month, day):
     availdate = datetime.date(int(year), int(month), int(day))
     availdate = availdate - datetime.timedelta(days=datetime.date.weekday(availdate)) + datetime.timedelta(days=5)
@@ -1249,7 +1258,7 @@ def meatavail(request, prod_id, year, month, day):
     return render_to_response('distribution/meat_avail.html', {'producer': producer, 'avail_date': weekstart, 'inventory': inventory })
 
 
-
+@login_required
 def all_avail(request):
 
     return list_detail.object_list(
@@ -1267,6 +1276,7 @@ def welcome(request):
 def help(request):
     return render_to_response('distribution/help.html')
 
+
 class ProductActivity():
     def __init__(self, category, product, avail, ordered, delivered, lots):
         self.category = category
@@ -1276,7 +1286,7 @@ class ProductActivity():
         self.delivered = delivered
         self.lots = lots
 
-
+@login_required
 def dashboard(request):
     try:
         food_network = FoodNetwork.objects.get(pk=1)
@@ -1315,7 +1325,7 @@ def dashboard(request):
          'by_lot': by_lot,
          }, context_instance=RequestContext(request))
 
-
+@login_required
 def reset_week(request):
     if request.method == "POST":
         try:
@@ -1330,6 +1340,7 @@ def reset_week(request):
             pass
     return HttpResponseRedirect("/distribution/dashboard/")   
 
+@login_required
 def all_orders(request):
     return list_detail.object_list(
         request,
@@ -1337,7 +1348,7 @@ def all_orders(request):
         template_name = "distribution/order_list.html",
     )
 
-
+@login_required
 def all_deliveries(request):
     return list_detail.object_list(
         request,
@@ -1345,12 +1356,13 @@ def all_deliveries(request):
         template_name = "distribution/delivery_list.html",
     )
 
-
+@login_required
 def orders_with_deliveries(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     orderitem_list = OrderItem.objects.select_related().filter(order__order_date=thisdate).order_by('order', 'distribution_product.short_name')
     return render_to_response('distribution/order_delivery_list.html', {'order_date': thisdate, 'orderitem_list': orderitem_list})
 
+@login_required
 def payment_selection(request):
     thisdate = current_week()
     init = {
@@ -1388,7 +1400,7 @@ def statement_selection(request):
         hdrform = StatementSelectionForm()
     return render_to_response('distribution/statement_selection.html', {'header_form': hdrform})
 
-
+@login_required
 def statements(request, from_date, to_date):
     try:
         from_date = datetime.datetime(*time.strptime(from_date, '%Y_%m_%d')[0:5]).date()
@@ -1407,6 +1419,7 @@ def statements(request, from_date, to_date):
     return render_to_response('distribution/statements.html', 
               {'payments': payments, 'network': network, })   
 
+@login_required
 def producer_payments(request, prod_id, from_date, to_date, due, paid_member):
     try:
         from_date = datetime.datetime(*time.strptime(from_date, '%Y_%m_%d')[0:5]).date()
@@ -1431,6 +1444,7 @@ def producer_payments(request, prod_id, from_date, to_date, due, paid_member):
         return render_to_response('distribution/producer_payments.html', 
             {'from_date': from_date, 'to_date': to_date, 'producers': producer_list, 'show_payments': show_payments })
 
+@login_required
 def one_producer_payments(producer, from_date, to_date, due, paid_member):  
 
     # Collect the transactions
@@ -1597,6 +1611,7 @@ def one_producer_payments(producer, from_date, to_date, due, paid_member):
     producer.total_due = total_due
     return producer
 
+@login_required
 def all_producer_payments(from_date, to_date, due, paid_member):
     delivery_producers = {}
     processors = {}
@@ -1864,6 +1879,7 @@ def all_producer_payments(from_date, to_date, due, paid_member):
     producer_list.sort(lambda x, y: cmp(x.short_name, y.short_name))
     return producer_list
 
+@login_required
 def payment(request, payment_id):
     payment = get_object_or_404(Payment, pk=payment_id)
     return render_to_response('distribution/payment.html', {'payment': payment})
@@ -2001,6 +2017,7 @@ def invoices(request, cust_id, year, month, day):
         'network': fn,
         'tabnav': "distribution/tabnav.html",
     })
+
 
 def advance_dates():
     orders = list(Order.objects.all())
@@ -2399,11 +2416,12 @@ def edit_process(request, process_id):
     # todo: wip: how to edit a process?
 
 
-
+@login_required
 def process(request, process_id):
     process = get_object_or_404(Process, id=process_id)
     return render_to_response('distribution/process.html', {"process": process,})
 
+@login_required
 def delete_process_confirmation(request, process_id):
     if request.method == "POST":
         process = get_object_or_404(Process, id=process_id)
@@ -2433,6 +2451,7 @@ def delete_process_confirmation(request, process_id):
             "inputs_with_lot": inputs_with_lot,
             })
 
+@login_required
 def delete_process(request, process_id):
     if request.method == "POST":
         process = get_object_or_404(Process, id=process_id)
