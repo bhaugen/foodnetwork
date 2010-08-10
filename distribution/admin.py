@@ -3,7 +3,7 @@ from distribution.models import *
 from distribution.forms import CustomerForm, DistributorForm, ProcessorForm, ProducerForm
 
 class FoodNetworkAdmin(admin.ModelAdmin):
-    list_display = ('short_name', 'long_name', 'contact', 'customer_fee', 'producer_fee', 'charge', 'charge_name')
+    list_display = ('short_name', 'long_name', 'contact', 'customer_fee', 'producer_fee')
 
 admin.site.register(FoodNetwork, FoodNetworkAdmin)
 

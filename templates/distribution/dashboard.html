@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     {{ food_network_name }} Distribution System
+     {{ food_network_name }} {% trans "Distribution System" %}
 {% endblock %}
 
 {% block extra_head %}
@@ -29,25 +30,25 @@
 
 	{% if food_network_name %}
 
-		<h2>{{ food_network_name }} Distribution System</h2>
+		<h2>{{ food_network_name }} {% trans "Distribution System" %}</h2>
 
 	{% comment %}	
 		{% if user.is_authenticated %}
 			<div style="margin-bottom: 1em; " >
 				<form style="display: inline; " action="{% url send_fresh_list %}" method="POST">
-					<input class="submit-btn" type="submit" value="Send Fresh List Emails" />
+					<input class="submit-btn" type="submit" value="{% trans 'Send Fresh List Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
 				<form style="display: inline; " action="{% url send_pickup_list %}" method="POST">
-					<input class="submit-btn" type="submit" value="Send Pickup List Emails" />
+					<input class="submit-btn" type="submit" value="{% trans 'Send Pickup List Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
 				<form style="display: inline; " action="{% url send_delivery_list %}" method="POST">
-					<input class="submit-btn" type="submit" value="Send Delivery List Emails" />
+					<input class="submit-btn" type="submit" value="{% trans 'Send Delivery List Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
 				<form style="display: inline; " action="{% url send_order_notices %}" method="POST">
-					<input class="submit-btn" type="submit" value="Send Order Emails" />
+					<input class="submit-btn" type="submit" value="{% trans 'Send Order Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
 			</div>
@@ -59,7 +60,7 @@
 			{% if user.is_authenticated %}
 				<form style="display: inline;" action="{% url reset_week %}" method="POST">
 					{{ week_form.current_week }}
-					<input class="submit-btn" type="submit" value="Reset" />
+					<input class="submit-btn" type="submit" value="{% trans 'Reset' %}" />
 				</form>
 			{% else %}
 				{{ order_date }}
@@ -69,13 +70,13 @@
 		<table class="ga-event-table" >
 			{% if by_lot %}
 				<tr>
-				        <th>Custodian</th>
-				        <th>Lot</th>		
-			        	<th>Avail</th>
-				        <th>Processed</th>
-			        	<th>Ordered</th>
+				        <th>{% trans "Custodian" %}</th>
+				        <th>{% trans "Lot" %}</th>		
+			        	<th>{% trans "Avail" %}</th>
+				        <th>{% trans "Processed" %}</th>
+			        	<th>{% trans "Ordered" %}</th>
 					<!--<th>Delivered</th>-->
-					<th>Buyers</th>
+						<th>{% trans "Buyers" %}</th>
 				    </tr>
 				    {% for item in item_list %}
 			        	<tr>
@@ -94,12 +95,12 @@
 				{% endfor %}
 			{% else %}
 				<tr>
-					<th>Category</th>
-					<th>Item</th>
-					<th>Producers</th>
-					<th>Avail</th>
-					<th>Ordered</th>
-					<th>Delivered</th>
+					<th>{% trans "Category" %}</th>
+					<th>{% trans "Item" %}</th>
+					<th>{% trans "Producers" %}</th>
+					<th>{% trans "Avail" %}</th>
+					<th>{% trans "Ordered" %}</th>
+					<th>{% trans "Delivered" %}</th>
 				</tr>
 				{% for cells in item_list %}
 					<tr>
@@ -114,7 +115,7 @@
 
 	{% else %}
 
-		<h3>You must create a Food Network in Admin to proceed</h3>
+		<h3>{% trans "You must create a Food Network in Admin to proceed" %}</h3>
 	
 	{% endif %}
 	</div>

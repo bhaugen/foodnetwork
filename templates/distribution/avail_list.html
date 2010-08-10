@@ -1,20 +1,21 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Availability
+     {% trans "Availability" %}
 {% endblock %}
 
 {% block header %}
-    <h1>Availability</h1>
+    <h1>{% trans "Availability" %}</h1>
 {% endblock %}
 
 {% block content %}
     <table class="ga-event-table" >
         <tr>
-             <th>Date</th>
-             <th>Producer</th>
-             <th>Product</th>
-             <th>Quantity</th>
+             <th>{% trans "Date" %}</th>
+             <th>{% trans "Producer" %}</th>
+             <th>{% trans "Product" %}</th>
+             <th>{% trans "Quantity" %}</th>
         </tr>
         {% for avail in object_list %}
             <tr>

@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.contrib.localflavor.us.models import PhoneNumberField
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.query import QuerySet
+from django.utils.translation import ugettext_lazy as _
 
 
 def customer_fee():
@@ -175,15 +176,15 @@ class PartyManager(models.Manager):
         return pcs
     
 class Party(models.Model):
-    member_id = models.CharField(max_length=12, blank=True)
-    short_name = models.CharField(max_length=32, unique=True)
-    long_name = models.CharField(max_length=64, blank=True)
-    contact = models.CharField(max_length=64, blank=True)
-    phone = PhoneNumberField(blank=True)
-    cell = PhoneNumberField(blank=True)
-    fax = PhoneNumberField(blank=True)
-    address = models.CharField(max_length=96, blank=True)
-    email_address = models.EmailField(max_length=96, blank=True, null=True)
+    member_id = models.CharField(_('member_id'), max_length=12, blank=True)
+    short_name = models.CharField(_('short_name'), max_length=32, unique=True)
+    long_name = models.CharField(_('long_name'), max_length=64, blank=True)
+    contact = models.CharField(_('contact'), max_length=64, blank=True)
+    phone = PhoneNumberField(_('phone'), blank=True)
+    cell = PhoneNumberField(_('cell'), blank=True)
+    fax = PhoneNumberField(_('fax'), blank=True)
+    address = models.CharField(_('address'), max_length=96, blank=True)
+    email_address = models.EmailField(_('email_address'), max_length=96, blank=True, null=True)
     content_type = models.ForeignKey(ContentType,editable=False,null=True)
     
     objects = models.Manager()
@@ -233,33 +234,33 @@ class Party(models.Model):
 
 
 class PartyUser(models.Model):
-    party = models.ForeignKey(Party, related_name="users")
-    user = models.ForeignKey(User, related_name="parties")
+    party = models.ForeignKey(Party, related_name="users", verbose_name=_('party'))
+    user = models.ForeignKey(User, related_name="parties", verbose_name=_('user'))
 
          
 
 class FoodNetwork(Party):
-    billing_contact = models.CharField(max_length=64, blank=True)
-    billing_phone = PhoneNumberField(blank=True, null=True)
-    billing_address = models.CharField(max_length=96, blank=True, null=True, 
-            help_text='Enter commas only where you want to split address lines for formatting.')
-    billing_email_address = models.EmailField(max_length=96, blank=True, null=True)
-    customer_terms = models.IntegerField(default=0,
-        help_text='Net number of days for customer to pay invoice')
-    member_terms = models.IntegerField(blank=True, null=True,
-        help_text='Net number of days for network to pay member')
-    customer_fee = models.DecimalField(max_digits=3, decimal_places=2, default=Decimal("0"),
-        help_text='Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%')
-    producer_fee = models.DecimalField(max_digits=3, decimal_places=2, default=Decimal("0"),
-        help_text='Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%') 
+    billing_contact = models.CharField(_('billing_contact'), max_length=64, blank=True)
+    billing_phone = PhoneNumberField(_('billing_phone'), blank=True, null=True)
+    billing_address = models.CharField(_('billing_address'), max_length=96, blank=True, null=True, 
+            help_text=_('Enter commas only where you want to split address lines for formatting.'))
+    billing_email_address = models.EmailField(_('billing_email_address'), max_length=96, blank=True, null=True)
+    customer_terms = models.IntegerField(_('customer_terms'), default=0,
+        help_text=_('Net number of days for customer to pay invoice'))
+    member_terms = models.IntegerField(_('member_terms'), blank=True, null=True,
+        help_text=_('Net number of days for network to pay member'))
+    customer_fee = models.DecimalField(_('customer_fee'), max_digits=3, decimal_places=2, default=Decimal("0"),
+        help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
+    producer_fee = models.DecimalField(_('producer_fee'), max_digits=3, decimal_places=2, default=Decimal("0"),
+        help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%')) 
     # next 2 fields are obsolete   
-    charge = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal("0"),
-        help_text='Charge will be added to all orders unless overridden on the Customer')
-    charge_name = models.CharField(max_length=32, blank=True, default='Delivery charge')
-    current_week = models.DateField(default=datetime.date.today, 
-        help_text='Current week for operations availability and orders')
-    order_by_lot = models.BooleanField(default=False, 
-        help_text='Assign lots when ordering, or assign them later')
+    #charge = models.DecimalField(_('charge'), max_digits=8, decimal_places=2, default=Decimal("0"),
+    #    help_text=_('Charge will be added to all orders unless overridden on the Customer'))
+    #charge_name = models.CharField(_('charge_name'), max_length=32, blank=True, default='Delivery charge')
+    current_week = models.DateField(_('current_week'), default=datetime.date.today, 
+        help_text=_('Current week for distribution availability and orders'))
+    order_by_lot = models.BooleanField(_('order_by_lot'), default=False, 
+        help_text=_('Assign lots when ordering, or assign them later'))
 
 
     class Meta:
@@ -426,8 +427,8 @@ class ProducerManager(models.Manager):
 
 
 class Producer(Party):
-    delivers = models.BooleanField(default=False,
-        help_text='Delivers products directly to customers?')
+    delivers = models.BooleanField(_('delivers'), default=False,
+        help_text=_('Delivers products directly to customers?'))
 
 
 class Processor(Party):
@@ -439,10 +440,11 @@ class Distributor(Party):
 
 
 class Customer(Party):
+    #todo: since FN charge fields are obsolete, these probly are too
     charge = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True,
-        help_text='Any value but 0 in this field will override the default charge from the Food Network')
+        help_text=_('Any value but 0 in this field will override the default charge from the Food Network'))
     apply_charge = models.BooleanField(default=True,
-        help_text='Add the extra charge to all orders for this customer, or not?')
+        help_text=_('Add the extra charge to all orders for this customer, or not?'))
 
     def __unicode__(self):
         return self.short_name
@@ -494,26 +496,26 @@ def flattened_children(node, all_nodes, to_return):
 
 class Product(models.Model):
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children',
-        limit_choices_to = {'is_parent': True})
-    short_name = models.CharField(max_length=32, unique=True)
-    long_name = models.CharField(max_length=64)
-    sellable = models.BooleanField(default=True,
-        help_text='Should this product appear in Order form?')
-    plannable = models.BooleanField(default=True,
-        help_text='Should this product appear in Plan form?')
-    stockable = models.BooleanField(default=True,
-        help_text='Should this product be stored as Inventory Items?')
-    is_parent = models.BooleanField(default=False,
-        help_text='Should this product appear in parent selections?')
-    price = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal(0))
-    customer_fee_override = models.DecimalField(max_digits=3, decimal_places=2, blank=True, null=True, 
-        help_text='Enter override as a decimal fraction, not a percentage - for example, .05 instead of 5%. Note: you cannot override to zero here, only on Order Items.')
-    pay_producer = models.BooleanField(default=True,
-        help_text='If checked, the Food Network pays the producer for issues, deliveries and damages of this product.')
-    pay_producer_on_terms = models.BooleanField(default=False,
-        help_text='If checked, producer paid on member terms. If not, producers paid based on customer order payments. Note: Issues always paid on member terms.')
-    expiration_days = models.IntegerField(default=6,
-        help_text='Inventory Items (Lots) of this product will expire in this many days.')
+        limit_choices_to = {'is_parent': True}, verbose_name=_('parent'))
+    short_name = models.CharField(_('short_name'), max_length=32, unique=True)
+    long_name = models.CharField(_('long_name'), max_length=64)
+    sellable = models.BooleanField(_('sellable'), default=True,
+        help_text=_('Should this product appear in Order form?'))
+    plannable = models.BooleanField(_('plannable'), default=True,
+        help_text=_('Should this product appear in Plan form?'))
+    stockable = models.BooleanField(_('stockable'), default=True,
+        help_text=_('Should this product be stored as Inventory Items?'))
+    is_parent = models.BooleanField(_('is_parent'), default=False,
+        help_text=_('Should this product appear in parent selections?'))
+    price = models.DecimalField(_('price'), max_digits=8, decimal_places=2, default=Decimal(0))
+    customer_fee_override = models.DecimalField(_('customer_fee_override'), max_digits=3, decimal_places=2, blank=True, null=True, 
+        help_text=_('Enter override as a decimal fraction, not a percentage - for example, .05 instead of 5%. Note: you cannot override to zero here, only on Order Items.'))
+    pay_producer = models.BooleanField(_('pay_producer'), default=True,
+        help_text=_('If checked, the Food Network pays the producer for issues, deliveries and damages of this product.'))
+    pay_producer_on_terms = models.BooleanField(_('pay_producer_on_terms'), default=False,
+        help_text=_('If checked, producer paid on member terms. If not, producers paid based on customer order payments. Note: Issues always paid on member terms.'))
+    expiration_days = models.IntegerField(_('expiration_days'), default=6,
+        help_text=_('Inventory Items (Lots) of this product will expire in this many days.'))
 
     def __unicode__(self):
         return self.long_name
@@ -653,23 +655,26 @@ class Product(models.Model):
         ordering = ('short_name',)
 
 PLAN_ROLE_CHOICES = (
-    ('consumer', 'consumer'),
-    ('producer', 'producer'),
+    ('consumer', _('consumer')),
+    ('producer', _('producer')),
 )
 
 
 class ProductPlan(models.Model):
-    member = models.ForeignKey(Party, related_name="product_plans") 
-    product = models.ForeignKey(Product, limit_choices_to = {'plannable': True})
-    from_date = models.DateField()
-    to_date = models.DateField()
-    quantity = models.DecimalField(max_digits=8, decimal_places=2,
-        default=Decimal('0'), verbose_name='Qty per week')
-    role = models.CharField(max_length=12, choices=PLAN_ROLE_CHOICES,
+    member = models.ForeignKey(Party, 
+        related_name="product_plans", verbose_name=_('member')) 
+    product = models.ForeignKey(Product, 
+        limit_choices_to = {'plannable': True}, verbose_name=_('product'))
+    from_date = models.DateField(_('from_date'), )
+    to_date = models.DateField(_('to_date'), )
+    quantity = models.DecimalField(_('Qty per week'), max_digits=8, decimal_places=2,
+        default=Decimal('0'))
+    role = models.CharField(_('role'), max_length=12, choices=PLAN_ROLE_CHOICES,
                             default="producer")
-    inventoried = models.BooleanField(default=True,
-        help_text="If not inventoried, the planned qty per week will be used for ordering")
-    distributor = models.ForeignKey(Party, related_name="plan_distributors", blank=True, null=True)
+    inventoried = models.BooleanField(_('inventoried'), default=True,
+        help_text=_("If not inventoried, the planned qty per week will be used for ordering"))
+    distributor = models.ForeignKey(Party, related_name="plan_distributors", 
+        blank=True, null=True, verbose_name=_('distributor'))
     
     def __unicode__(self):
         return " ".join([
@@ -684,15 +689,17 @@ class ProductPlan(models.Model):
 
 
 class ProducerProduct(models.Model):
-    producer = models.ForeignKey(Party, related_name="producer_products") 
-    product = models.ForeignKey(Product)
+    producer = models.ForeignKey(Party, 
+        related_name="producer_products", verbose_name=_('producer')) 
+    product = models.ForeignKey(Product, verbose_name=_('product'))
     default_quantity = models.DecimalField(max_digits=8, decimal_places=2,
-        default=Decimal('0'), verbose_name='Qty per week')
-    inventoried = models.BooleanField(default=True,
-        help_text="If not inventoried, the default or planned qty per week will be used for ordering")
-    planned = models.BooleanField(default=True,
-        help_text='Should this product appear in Plan forms?')
-    distributor = models.ForeignKey(Party, related_name="producer_distributors", blank=True, null=True)
+        default=Decimal('0'), verbose_name=_('Qty per week'))
+    inventoried = models.BooleanField(_('inventoried'), default=True,
+        help_text=_("If not inventoried, the default or planned qty per week will be used for ordering"))
+    planned = models.BooleanField(_('planned'), default=True,
+        help_text=_('Should this product appear in Plan forms?'))
+    distributor = models.ForeignKey(Party, related_name="producer_distributors", 
+        blank=True, null=True, verbose_name=_('distributor'))
     
     def __unicode__(self):
         return " ".join([
@@ -704,9 +711,10 @@ class ProducerProduct(models.Model):
 
 
 class MemberProductList(models.Model):
-    member = models.ForeignKey(Party, related_name="product_lists")
-    list_name = models.CharField(max_length=64)
-    description = models.CharField(max_length=255)
+    member = models.ForeignKey(Party, 
+        related_name="product_lists", verbose_name=_('member'))
+    list_name = models.CharField(_('list_name'), max_length=64)
+    description = models.CharField(_('description'), max_length=255)
 
     def __unicode__(self):
         return " ".join([
@@ -715,14 +723,17 @@ class MemberProductList(models.Model):
 
 
 class CustomerProduct(models.Model):
-    customer = models.ForeignKey(Party, related_name="customer_products") 
-    product = models.ForeignKey(Product, limit_choices_to = {'plannable': True})
+    customer = models.ForeignKey(Party, 
+        related_name="customer_products", verbose_name=_('customer')) 
+    product = models.ForeignKey(Product, 
+        limit_choices_to = {'plannable': True}, verbose_name=_('product'))
     product_list = models.ForeignKey(MemberProductList, blank=True, null=True,
-        help_text='You may separate products into different lists.')
+        help_text=_('You may separate products into different lists.'),
+        verbose_name=_('product_list'))
     default_quantity = models.DecimalField(max_digits=8, decimal_places=2,
-        default=Decimal('0'), verbose_name='Default quantity per week or order')
-    planned = models.BooleanField(default=True,
-        help_text='Should this product appear in Plan forms?')
+        default=Decimal('0'), verbose_name=_('Default quantity per week or order'))
+    planned = models.BooleanField(_('planned'), default=True,
+        help_text=_('Should this product appear in Plan forms?'))
 
         
     class Meta:
@@ -735,21 +746,24 @@ class CustomerProduct(models.Model):
 
 
 class InventoryItem(models.Model):
-    freeform_lot_id = models.CharField("Lot Id", max_length=64, blank=True,
-        help_text='Optional - if you do not enter a Lot Id, one will be created.')
-    producer = models.ForeignKey(Party, related_name="inventory_items")
-    field_id = models.CharField("Field", max_length=12, blank=True)
-    custodian = models.ForeignKey(Party, blank=True, null=True, related_name="custody_items")
-    product = models.ForeignKey(Product, limit_choices_to = {'stockable': True})
-    inventory_date = models.DateField()
-    expiration_date = models.DateField()
-    planned = models.DecimalField("Ready", max_digits=8, decimal_places=2, default=Decimal('0'))
-    remaining = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('0'),
-        help_text='If you change Ready here, you most likely should also change Remaining. The Avail Update page changes Remaining automatically when you enter Ready, but this Admin form does not.')
-    received = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('0'))
-    onhand = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('0'),
-        help_text='If you change Received here, you most likely should also change Onhand. The Avail Update page changes Onhand automatically when you enter Received, but this Admin form does not.')
-    notes = models.CharField(max_length=64, blank=True)
+    freeform_lot_id = models.CharField(_("Lot Id"), max_length=64, blank=True,
+        help_text=_('Optional - if you do not enter a Lot Id, one will be created.'))
+    producer = models.ForeignKey(Party, 
+        related_name="inventory_items", verbose_name=_('producer'))
+    field_id = models.CharField(_("Field"), max_length=12, blank=True)
+    custodian = models.ForeignKey(Party, blank=True, null=True, 
+        related_name="custody_items", verbose_name=_('custodian'))
+    product = models.ForeignKey(Product, 
+        limit_choices_to = {'stockable': True}, verbose_name=_('product'))
+    inventory_date = models.DateField(_('inventory_date'))
+    expiration_date = models.DateField(_('expiration_date'))
+    planned = models.DecimalField(_("Ready"), max_digits=8, decimal_places=2, default=Decimal('0'))
+    remaining = models.DecimalField(_('remaining'), max_digits=8, decimal_places=2, default=Decimal('0'),
+        help_text=_('If you change Ready here, you most likely should also change Remaining. The Avail Update page changes Remaining automatically when you enter Ready, but this Admin form does not.'))
+    received = models.DecimalField(_('received'), max_digits=8, decimal_places=2, default=Decimal('0'))
+    onhand = models.DecimalField(_('onhand'), max_digits=8, decimal_places=2, default=Decimal('0'),
+        help_text=_('If you change Received here, you most likely should also change Onhand. The Avail Update page changes Onhand automatically when you enter Received, but this Admin form does not.'))
+    notes = models.CharField(_('notes'), max_length=64, blank=True)
     
     class Meta:
         ordering = ('product', 'producer', 'inventory_date')
@@ -877,11 +891,13 @@ class EconomicEventManager(models.Manager):
         return payments
 
 class EconomicEvent(models.Model):
-    transaction_date = models.DateField()
-    from_whom = models.ForeignKey(Party, related_name="given_events")
-    to_whom = models.ForeignKey(Party, related_name="taken_events")
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
-    notes = models.CharField(max_length=64, blank=True)
+    transaction_date = models.DateField(_('transaction_date'))
+    from_whom = models.ForeignKey(Party, 
+        related_name="given_events", verbose_name=_('from_whom'))
+    to_whom = models.ForeignKey(Party, 
+        related_name="taken_events", verbose_name=_('to_whom'))
+    amount = models.DecimalField(_('amount'), max_digits=8, decimal_places=2)
+    notes = models.CharField(_('notes'), max_length=64, blank=True)
     content_type = models.ForeignKey(ContentType,editable=False,null=True)
 
     raw_objects = models.Manager()
@@ -937,7 +953,7 @@ class EconomicEvent(models.Model):
 
         
 class Payment(EconomicEvent):
-    reference = models.CharField(max_length=64, blank=True)
+    reference = models.CharField(_('reference'), max_length=64, blank=True)
 
     def __unicode__(self):
         amount_string = '$' + str(self.amount)
@@ -986,31 +1002,34 @@ class TransactionPayment(models.Model):
         In REA terms, this is a Duality
         but always assuming money in payment.
     """
-    paid_event = models.ForeignKey(EconomicEvent, related_name="transaction_payments")
-    payment = models.ForeignKey(Payment, related_name="paid_events")
-    amount_paid = models.DecimalField(max_digits=8, decimal_places=2)
+    paid_event = models.ForeignKey(EconomicEvent, 
+        related_name="transaction_payments", verbose_name=_('paid_event'))
+    payment = models.ForeignKey(Payment, 
+        related_name="paid_events", verbose_name=_('payment'))
+    amount_paid = models.DecimalField(_('amount_paid'), max_digits=8, decimal_places=2)
 
 
 ORDER_STATES = (
-    ('Unsubmitted', 'Unsubmitted'),
-    ('Submitted', 'Submitted'),
-    ('Delivered', 'Delivered'),
-    ('Paid', 'Paid'),
-    ('Paid-Delivered', 'Paid and Delivered'),
-    ('Delivered-Paid', 'Delivered and Paid'),
+    ('Unsubmitted', _('Unsubmitted')),
+    ('Submitted', _('Submitted')),
+    ('Delivered', _('Delivered')),
+    ('Paid', _('Paid')),
+    ('Paid-Delivered', _('Paid and Delivered')),
+    ('Delivered-Paid', _('Delivered and Paid')),
 )
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(Customer) 
-    order_date = models.DateField()
-    distributor = models.ForeignKey(Party, blank=True, null=True, related_name="orders")
+    customer = models.ForeignKey(Customer, verbose_name=_('customer')) 
+    order_date = models.DateField(_('order_date'))
+    distributor = models.ForeignKey(Party, blank=True, null=True, 
+        related_name="orders", verbose_name=_('distributor'))
     #todo: obsolete, or leave in for no-customer-app situations?
-    paid = models.BooleanField(default=False, verbose_name="Order paid")
-    state = models.CharField(max_length=16, choices=ORDER_STATES, default='Submitted', blank=True)
+    paid = models.BooleanField(default=False, verbose_name=_("Order paid"))
+    state = models.CharField(_('state'), max_length=16, choices=ORDER_STATES, default='Submitted', blank=True)
     product_list = models.ForeignKey(MemberProductList, blank=True, null=True,
-        related_name="orders", 
-        help_text="Optional: The product list this order was created from. Maintained by customer.")
+        related_name="orders", verbose_name=_('product_list'),
+        help_text=_("Optional: The product list this order was created from. Maintained by customer."))
 
     class Meta:
         ordering = ('order_date', 'customer')
@@ -1127,9 +1146,11 @@ class CustomerPayment(models.Model):
         where the Order is a bundle of EconomicEvents
         and assuming money in payment.
     """
-    paid_order = models.ForeignKey(Order, related_name="customer_payments")
-    payment = models.ForeignKey(Payment, related_name="paid_orders")
-    amount_paid = models.DecimalField(max_digits=8, decimal_places=2)
+    paid_order = models.ForeignKey(Order, 
+        related_name="customer_payments", verbose_name=_('paid_order'))
+    payment = models.ForeignKey(Payment, 
+        related_name="paid_orders", verbose_name=_('payment'))
+    amount_paid = models.DecimalField(_('amount_paid'), max_digits=8, decimal_places=2)
         
 
 class ShortOrderItems(object):
@@ -1160,14 +1181,14 @@ def shorts_for_date(order_date):
 
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order)
-    product = models.ForeignKey(Product)
-    quantity = models.DecimalField(max_digits=8, decimal_places=2)
-    orig_qty = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('0'))
-    unit_price = models.DecimalField(max_digits=8, decimal_places=2)
-    fee = models.DecimalField(max_digits=3, decimal_places=2, default=Decimal('0'),
-        help_text='Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%')
-    notes = models.CharField(max_length=64, blank=True)
+    order = models.ForeignKey(Order, verbose_name=_('order'))
+    product = models.ForeignKey(Product, verbose_name=_('product'))
+    quantity = models.DecimalField(_('quantity'), max_digits=8, decimal_places=2)
+    orig_qty = models.DecimalField(_('orig_qty'), max_digits=8, decimal_places=2, default=Decimal('0'))
+    unit_price = models.DecimalField(_('unit_price'), max_digits=8, decimal_places=2)
+    fee = models.DecimalField(_('fee'), max_digits=3, decimal_places=2, default=Decimal('0'),
+        help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
+    notes = models.CharField(_('notes'), max_length=64, blank=True)
 
     def __unicode__(self):
         return ' '.join([
@@ -1286,24 +1307,26 @@ class OrderItem(models.Model):
 
 
 class ServiceType(models.Model):
-    name = models.CharField(max_length=64)
-    invoiced_separately = models.BooleanField(default=False,
-        help_text='If checked, the cost of services appear as separate line items on invoices. If not, they are included in the prices of resulting products.')
-    pay_provider_on_terms = models.BooleanField(default=True,
-        help_text='If checked, the Food Network pays the service provider on member terms. If not, the provider payment is based on customer order payment.')
+    name = models.CharField(_('name'), max_length=64)
+    invoiced_separately = models.BooleanField(_('invoiced_separately'), default=False,
+        help_text=_('If checked, the cost of services appear as separate line items on invoices. If not, they are included in the prices of resulting products.'))
+    pay_provider_on_terms = models.BooleanField(_('pay_provider_on_terms'), default=True,
+        help_text=_('If checked, the Food Network pays the service provider on member terms. If not, the provider payment is based on customer order payment.'))
 
     def __unicode__(self):
         return self.name
 
 
 class ProcessType(models.Model):
-    name = models.CharField(max_length=64)
-    input_type = models.ForeignKey(Product, related_name='input_types')
-    use_existing_input_lot = models.BooleanField(default=True)
-    number_of_processing_steps = models.IntegerField(default=1)
-    output_type = models.ForeignKey(Product, related_name='output_types')
-    number_of_output_lots = models.IntegerField(default=1)
-    notes = models.TextField(blank=True)
+    name = models.CharField(_('name'), max_length=64)
+    input_type = models.ForeignKey(Product, 
+        related_name='input_types', verbose_name=_('input_type'))
+    use_existing_input_lot = models.BooleanField(_('use_existing_input_lot'), default=True)
+    number_of_processing_steps = models.IntegerField(_('number_of_processing_steps'), default=1)
+    output_type = models.ForeignKey(Product, 
+        related_name='output_types', verbose_name=_('output_type'))
+    number_of_output_lots = models.IntegerField(_('number_of_output_lots'), default=1)
+    notes = models.TextField(_('notes'), blank=True)
 
     def __unicode__(self):
         return self.name
@@ -1453,21 +1476,23 @@ class Process(models.Model):
 
 
 TX_TYPES = (
-    ('Receipt', 'Receipt'),         # inventory was received from outside the system
-    ('Delivery', 'Delivery'),       # inventory was delivered to a customer
-    ('Transfer', 'Transfer'),       # combination delivery and receipt inside the system
-    ('Issue', 'Issue'),             # a process consumed inventory
-    ('Production', 'Production'),   # a process created inventory
-    ('Damage', 'Damage'),           # inventory was damaged and must be paid for
-    ('Reject', 'Reject'),           # inventory was rejected by a customer and does not need to be paid for
+    ('Receipt', _('Receipt')),         # inventory was received from outside the system
+    ('Delivery', _('Delivery')),       # inventory was delivered to a customer
+    ('Transfer', _('Transfer')),       # combination delivery and receipt inside the system
+    ('Issue', _('Issue')),             # a process consumed inventory
+    ('Production', _('Production')),   # a process created inventory
+    ('Damage', _('Damage')),           # inventory was damaged and must be paid for
+    ('Reject', _('Reject')),           # inventory was rejected by a customer and does not need to be paid for
 )
 
 class InventoryTransaction(EconomicEvent):
-    transaction_type = models.CharField(max_length=10, choices=TX_TYPES, default='Delivery')
-    inventory_item = models.ForeignKey(InventoryItem)
-    process = models.ForeignKey(Process, blank=True, null=True, related_name='inventory_transactions')
-    order_item = models.ForeignKey(OrderItem, blank=True, null=True)
-    unit_price = models.DecimalField(max_digits=8, decimal_places=2)
+    transaction_type = models.CharField(_('transaction_type'), max_length=10, choices=TX_TYPES, default='Delivery')
+    inventory_item = models.ForeignKey(InventoryItem, verbose_name=_('inventory_item'))
+    process = models.ForeignKey(Process, blank=True, null=True, 
+        related_name='inventory_transactions', verbose_name=_('process'))
+    order_item = models.ForeignKey(OrderItem, 
+        blank=True, null=True, verbose_name=_('order_item'))
+    unit_price = models.DecimalField(_('unit_price'), max_digits=8, decimal_places=2)
 
     def __unicode__(self):
         if self.order_item:
@@ -1585,8 +1610,9 @@ class InventoryTransaction(EconomicEvent):
 
 
 class ServiceTransaction(EconomicEvent):
-    service_type = models.ForeignKey(ServiceType)
-    process = models.ForeignKey(Process, related_name='service_transactions')
+    service_type = models.ForeignKey(ServiceType, verbose_name=_('service_type'))
+    process = models.ForeignKey(Process, 
+        related_name='service_transactions', verbose_name=_('process'))
 
 
     def __unicode__(self):
@@ -1656,8 +1682,8 @@ class ServiceTransaction(EconomicEvent):
 
 
 class TransportationTransaction(EconomicEvent):
-    service_type = models.ForeignKey(ServiceType)
-    order = models.ForeignKey(Order)
+    service_type = models.ForeignKey(ServiceType, verbose_name=_('service_type'))
+    order = models.ForeignKey(Order, verbose_name=_('order'))
 
     def __unicode__(self):
         return " ".join([

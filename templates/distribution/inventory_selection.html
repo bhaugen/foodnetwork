@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Inventory Selection
+     {% trans "Contact" %}Inventory Selection
 {% endblock %}
 
 {% block extra_head %}
@@ -55,7 +56,7 @@
     <form action="." method="POST" >
         <table>
             <tr>
-                <th style="text-align: right; " >Producer:</th>
+                <th style="text-align: right; " >{% trans "Producer" %}:</th>
                 <td>
 					{{ header_form.producer }}
 				</td>
@@ -66,7 +67,7 @@
 				{% endif %}
             </tr>
             <tr>
-                <th style="text-align: right; " >Week of:</th>
+                <th style="text-align: right; " >{% trans "Week of" %}:</th>
                 <td>{{ header_form.avail_date}}</td>
 				{% if header_form.avail_date.errors %}
 					<td style="color: red; " >
@@ -75,16 +76,16 @@
 				{% endif %}
             </tr>
             <tr>
-                <th style="text-align: right; " >Contact:</th>
+                <th style="text-align: right; " >{% trans "Contact" %}:</th>
                <td  id="contact" >---</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Phone:</th>
+                <th style="text-align: right; " >{% trans "Phone" %}:</th>
                 <td id="phone" >---</td>
             </tr>
         </table>
         <p>
-            <input type="submit" value="Submit" />
+            <input type="submit" value="{% trans 'Submit' %}" />
         </p>
     </form>
 </div>

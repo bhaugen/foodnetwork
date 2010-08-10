@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-
+{% load i18n %}
 {% load humanize %}
 
 {% block title %}
-     Member Plans Table
+     {% trans "Member Plans Table" %}
 {% endblock %}
 
 {% block header %}
@@ -26,7 +26,11 @@ table thead
 
 	{% include "distribution/tabnav.html" %}
 
-	<h2>{{ member.long_name }} {{ plan_type }} Plans from {{ from_date }} to {{ to_date }}</h2>
+	<h2>
+		{% blocktrans %}
+		{{ member.long_name }} {{ plan_type }} Plans from {{ from_date }} to {{ to_date }}
+		{% endblocktrans %}
+	</h2>
 
 	<table class="ga-event-table" >
 		<thead>

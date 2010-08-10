@@ -1438,13 +1438,18 @@ def producer_payments(request, prod_id, from_date, to_date, due, paid_member):
             raise Http404
         producer = one_producer_payments(producer, from_date, to_date, due, paid_member)
         return render_to_response('distribution/one_producer_payments.html', 
-              {'from_date': from_date, 'to_date': to_date, 'producer': producer, 'show_payments': show_payments })
+              {'from_date': from_date, 
+               'to_date': to_date, 
+               'producer': producer, 
+               'show_payments': show_payments }, context_instance=RequestContext(request))
     else:
         producer_list = all_producer_payments(from_date, to_date, due, paid_member)
         return render_to_response('distribution/producer_payments.html', 
-            {'from_date': from_date, 'to_date': to_date, 'producers': producer_list, 'show_payments': show_payments })
+            {'from_date': from_date, 
+             'to_date': to_date, 
+             'producers': producer_list, 
+             'show_payments': show_payments }, context_instance=RequestContext(request))
 
-@login_required
 def one_producer_payments(producer, from_date, to_date, due, paid_member):  
 
     # Collect the transactions
@@ -1611,7 +1616,6 @@ def one_producer_payments(producer, from_date, to_date, due, paid_member):
     producer.total_due = total_due
     return producer
 
-@login_required
 def all_producer_payments(from_date, to_date, due, paid_member):
     delivery_producers = {}
     processors = {}

@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Inventory Update
+     {% trans "Phone" %}Inventory Update
 {% endblock %}
 
 {% block header %}
@@ -95,32 +96,32 @@
 		<input name='avail-date' type='hidden' value='{{ avail_date }}' />
         <table>
             <tr>
-                <th style="text-align: right; " >Producer:</th>
+                <th style="text-align: right; " >{% trans "Producer" %}:</th>
                 <td>{{ producer.short_name }} - {{ producer.long_name }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Week of:</th>
+                <th style="text-align: right; " >{% trans "Week of" %}:</th>
                 <td>{{ avail_date}}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Contact:</th>
+                <th style="text-align: right; " >{% trans "Contact" %}:</th>
                <td  id="contact" >{{producer.contact}}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Phone:</th>
+                <th style="text-align: right; " >{% trans "Phone" %}:</th>
                 <td id="phone" >{{producer.phone}}</td>
             </tr>
         </table>
 
         <table class="ga-event-table" >
-		<th>Product</th>
-		<th>Lot Id</th>
-                <th>Field</th>
-		<th>Custodian</th>
-		<th>Date</th>
-                <th>Ready Qty</th>
-                <th>Received Qty</th>
-				<th>Notes</th>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Lot Id" %}</th>
+            <th>{% trans "Field" %}</th>
+			<th>{% trans "Custodian" %}</th>
+			<th>{% trans "Date" %}</th>
+            <th>{% trans "Ready Qty" %}</th>
+            <th>{% trans "Received Qty" %}</th>
+			<th>{% trans "Notes" %}</th>
             </tr>
             {% for item_form in item_forms %}
                  <tr>
@@ -139,7 +140,7 @@
         </table>
 
         <p>
-            <input type="submit" value="Submit" />
+            <input type="submit" value="{% trans 'Submit' %}" />
         </p>
     </form>
 </div>

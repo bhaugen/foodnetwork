@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     New Process
+     {% trans "New Process" %}
 {% endblock %}
 
 {% block header %}
@@ -222,12 +223,12 @@
 	{% include "distribution/tabnav.html" %}
 
     <form action="." method="POST" >
-		<h3>Input Lot:</h3>
+		<h3>{% trans "Input Lot" %}:</h3>
 		<table class="ga-event-table" >
 			{% if input_select_form %}
 				<tr>
-					<th>Lot</th>
-					<th>Quantity</th>
+					<th>{% trans "Lot" %}</th>
+					<th>{% trans "Quantity" %}</th>
 				</tr>
 				<tr>
 					<td>{{ input_select_form.lot }}</td>
@@ -236,11 +237,11 @@
 			{% endif %}
 			{% if input_create_form %}
 				<tr>
-					<th>Producer</th>
-					<th>Product</th>
-					<th>Quantity</th>
-					<th>Lot Id</th>
-					<th>Field</th>
+					<th>{% trans "Producer" %}</th>
+					<th>{% trans "Product" %}</th>
+					<th>{% trans "Quantity" %}</th>
+					<th>{% trans "Lot Id" %}</th>
+					<th>{% trans "Field" %}</th>
 				</tr>
 				<tr>
 					<td>{{ input_create_form.producer }}</td>
@@ -255,9 +256,9 @@
 		<h3>{{ service_label }}:</h3>
 		<table class="ga-event-table" >
 			<tr>
-				<th>Type</th>
-				<th>Processor</th>
-				<th>Cost</th>
+				<th>{% trans "Type" %}</th>
+				<th>{% trans "Processor" %}</th>
+				<th>{% trans "Cost" %}</th>
 			</tr>
 
 			{% if service_formset %}
@@ -275,12 +276,12 @@
 		<h3>{{ output_label }}:</h3>
 		<table  class="ga-event-table" >
 			<tr>
-				<th>Producer</th>
-				<th>Product</th>
-				<th>Quantity</th>
-				<th>Lot Id</th>
-				<th>Field</th>
-				<th>Custodian</th>
+				<th>{% trans "Producer" %}</th>
+				<th>{% trans "Product" %}</th>
+				<th>{% trans "Quantity" %}</th>
+				<th>{% trans "Lot Id" %}</th>
+				<th>{% trans "Field" %}</th>
+				<th>{% trans "Custodian" %}</th>
 			</tr>
 
 			{% if output_formset %}
@@ -299,7 +300,7 @@
 		</table>
 
         <p>
-            <input type="submit" value="Submit Process" />
+            <input type="submit" value="{% trans 'Submit Process' %}" />
         </p>
     </form>
 </div>

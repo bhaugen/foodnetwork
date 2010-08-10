@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Payments Due to Member
+     {% trans "Payments Due to Member" %}
 {% endblock %}
 
 {% block header %}
@@ -14,24 +15,26 @@
 	{% include "distribution/tabnav.html" %}
 
     <h4 style='margin-left: 2em;' >
-        <i>Payments due to {{ producer.long_name }} for transactions from {{from_date}} to {{to_date}}</i>
+        <i>{% blocktrans %}
+			Payments due to {{ producer }} for transactions from {{from_date}} to {{to_date}}
+		{% endblocktrans %}</i>
     </h4>
 	
 	{% if producer.deliveries %}
-	<h4> Products </h4>
+	<h4> {% trans "Products" %} </h4>
     <table class="ga-event-table" >
         <tr>
-             <th>Type</th>
-             <th>Order</th>
-             <th>Due?</th>
-             <th>Item</th>
-             <th>Date</th>
-             <th>Quantity</th>
-             <th>Unit Price</th>
-             <th>Fee</th>
-             <th>Due</th>
+             <th>{% trans "Type" %}</th>
+             <th>{% trans "Order" %}</th>
+             <th>{% trans "Due?" %}</th>
+             <th>{% trans "Item" %}</th>
+             <th>{% trans "Date" %}</th>
+             <th>{% trans "Quantity" %}</th>
+             <th>{% trans "Unit Price" %}</th>
+             <th>{% trans "Fee" %}</th>
+             <th>{% trans "Due" %}</th>
 			{% if show_payments %}
-				<th>Paid</th>
+				<th>{% trans "Paid" %}</th>
 			{% endif %}
         </tr>
         	{% for delivery in producer.deliveries %}
@@ -54,17 +57,17 @@
 	{% endif %}
 	
 	{% if producer.processes %}
-	<h4>Processing</h4>
+	<h4>{% trans "Processing" %}</h4>
     <table class="ga-event-table" >
         <tr>
-             <th>Type</th>
-             <th>Order</th>
-             <th>Due?</th>
-             <th>Item</th>
-             <th>Date</th>
-             <th>Due</th>
+             <th>{% trans "Type" %}</th>
+             <th>{% trans "Order" %}</th>
+             <th>{% trans "Due?" %}</th>
+             <th>{% trans "Item" %}</th>
+             <th>{% trans "Date" %}</th>
+             <th>{% trans "Due" %}</th>
 			{% if show_payments %}
-				<th>Paid</th>
+				<th>{% trans "Paid" %}</th>
 			{% endif %}
         </tr>
 		{% for process in producer.processes %}
@@ -86,15 +89,15 @@
 	{% endif %}
 
 	{% if producer.transportations %}
-	<h4>Transportation</h4>
+	<h4>{% trans "Transportation" %}</h4>
     <table class="ga-event-table" >
         <tr>
-             <th>Order</th>
-             <th>Due?</th>
-             <th>Date</th>
-             <th>Due</th>
+             <th>{% trans "Order" %}</th>
+             <th>{% trans "Due?" %}</th>
+             <th>{% trans "Date" %}</th>
+             <th>{% trans "Due" %}</th>
 			{% if show_payments %}
-				<th>Paid</th>
+				<th>{% trans "Paid" %}</th>
 			{% endif %}
         </tr>
 
@@ -116,18 +119,18 @@
 	{% endif %}
 	
 	{% if producer.damaged %}
-	<h4> Damaged </h4>
+	<h4> {% trans "Damaged" %} </h4>
 		<table class="ga-event-table" >
 		    <tr>
-		         <th>Item</th>
-                 <th>Date</th>
-		         <th>Quantity</th>
-		         <th>Notes</th>
-		         <th>Unit Price</th>
-		         <th>Fee</th>
-		         <th>Due</th>
+		         <th>{% trans "Item" %}</th>
+                 <th>{% trans "Date" %}</th>
+		         <th>{% trans "Quantity" %}</th>
+		         <th>{% trans "Notes" %}</th>
+		         <th>{% trans "Unit Price" %}</th>
+		         <th>{% trans "Fee" %}</th>
+		         <th>{% trans "Due" %}</th>
 				{% if show_payments %}
-					<th>Paid</th>
+					<th>{% trans "Paid" %}</th>
 				{% endif %}
 		    </tr>
 		    	{% for damage in producer.damaged %}
@@ -147,13 +150,13 @@
 		</table>
 	{% endif %}
 	{% if producer.rejected %}
-		<h4> Rejected </h4>
+		<h4> {% trans "Rejected" %} </h4>
 		<table class="ga-event-table" >
 		    <tr>
-		         <th>Item</th>
-                 <th>Date</th>
-		         <th>Quantity</th>
-		         <th>Notes</th>
+		         <th>{% trans "Item" %}</th>
+                 <th>{% trans "Date" %}</th>
+		         <th>{% trans "Quantity" %}</th>
+		         <th>{% trans "Notes" %}</th>
 		    </tr>
 		    	{% for reject in producer.rejected %}
 		        <tr>
@@ -166,7 +169,7 @@
 		</table>
 	{% endif %}
     <h4 style="margin-left: 3em; " >
-        Total Due: ${{ producer.total_due }}
+        {% trans "Total Due" %}: ${{ producer.total_due }}
     </h4>
 </div>
 {% endblock %} 
