@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Order Table
+     {% trans "Order Table" %}
 {% endblock %}
 
 {% block header %}
@@ -14,16 +15,16 @@
 
 	{% include "distribution/tabnav.html" %}
 
-    <h4>Orders for {{ date }}</h4>
+    <h4>{% blocktrans %}Orders for {{ date }}{% endblocktrans %}</h4>
 
-    <p><a href="{% url order_csv_by_product order_date=datestring %}">Export table as CSV file</a></p>
+    <p><a href="{% url order_csv_by_product order_date=datestring %}">{% trans "Export table as CSV file" %}</a></p>
     <table class="ga-event-table" >
         <tr>
-            <th>Category</th>
-            <th>Product</th>
-            <th>Producers</th>
-            <th>Avail</th>
-            <th>Ordered</th>
+            <th>{% trans "Category" %}</th>
+            <th>{% trans "Product" %}</th>
+            <th>{% trans "Producers" %}</th>
+            <th>{% trans "Avail" %}</th>
+            <th>{% trans "Ordered" %}</th>
             {% for heading in heading_list %}
                 <th style="width: 5em; " >{{ heading|safe }}</th>
             {% endfor %}

@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% load humanize %}
 
 {% block title %}
-     Supply and Demand Table
+     {% trans "Supply and Demand Table" %}
 {% endblock %}
 
 {% block header %}
@@ -26,7 +27,7 @@ table thead
 
 	{% include "distribution/tabnav.html" %}
 
-	<h2>Weekly Supply minus Demand from {{ from_date }} to {{ to_date }}</h2>
+	<h2>{% blocktrans %}Weekly Supply minus Demand from {{ from_date }} to {{ to_date }}{% endblocktrans %}</h2>
 
 	<p><i>You may drill down into any column</i></p>
 

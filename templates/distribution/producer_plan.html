@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Member Plan
+     {% trans "Member Plan" %}
 {% endblock %}
 
 {% block header %}
@@ -17,17 +18,17 @@
 
     <table style="margin-bottom: 1em; ">
         <tr>
-            <th style="text-align: right; " >Member: </th>
+            <th style="text-align: right; " >{% trans "Member" %}: </th>
             <td>{{ member.short_name }} - {{member.long_name}}</td>
         </tr>
     </table>
     <table class="ga-event-table" >
         <tr>
-             <th>Category</th>
-             <th>Product</th>
-             <th>From Date</th>
-             <th>To Date</th>
-             <th>Quantity</th>
+             <th>{% trans "Category" %}</th>
+             <th>{% trans "Product" %}</th>
+	 		 <th>{% trans "From Date" %}</th>
+			 <th>{% trans "To Date" %}</th>
+             <th>{% trans "Quantity" %}</th>
         </tr>
         {% for item in plans %}
             <tr>

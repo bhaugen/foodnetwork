@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Plan Selection
+     {% trans "Plan Selection" %}
 {% endblock %}
 
 
@@ -67,7 +68,7 @@
 		<form action="." method="POST" >
         		<table>
 		            <tr>
-                		<th style="text-align: right; vertical-align: top; " >Member:</th>
+                		<th style="text-align: right; vertical-align: top; " >{% trans "Member" %}:</th>
                 		<td>
 					{{ plan_form.member }}
 					{% if plan_form.member.errors %}
@@ -78,15 +79,15 @@
 				</td>
 		            </tr>
 		            <tr>
-                		<th style="text-align: right; " >Contact:</th>
+                		<th style="text-align: right; " >{% trans "Contact" %}:</th>
                			<td  id="contact" >---</td>
 		            </tr>
 		            <tr>
-                		<th style="text-align: right; " >Phone:</th>
+                		<th style="text-align: right; " >{% trans "Phone" %}:</th>
 		                <td id="phone" >---</td>
 			</tr>
 			<tr>
-                		<th style="text-align: right; " >From Date:</th>
+                		<th style="text-align: right; " >{% trans "From Date" %}:</th>
                 		<td>
 					{{ plan_form.plan_from_date }}
 					{% if plan_form.plan_from_date.errors %}
@@ -97,7 +98,7 @@
 				</td>
 				</tr>
 				<tr>
-                		<th style="text-align: right; " >To Date:</th>
+                		<th style="text-align: right; " >{% trans "To Date" %}:</th>
                 		<td>
 					{{ plan_form.plan_to_date }}
 					{% if plan_form.plan_to_date.errors %}
@@ -108,14 +109,14 @@
 				</td>
 			</tr>
 			<tr>
-				<th style="text-align: right; " >Product List:</th>
+				<th style="text-align: right; " >{% trans "Product List" %}:</th>
 				<td>{{ plan_form.list_type }}</td>
 			</tr>
 
 
 		        </table>
         		<p>
-	        	    <input name="submit-plan-update" type="submit" value="Submit" />
+	        	    <input name="submit-plan-update" type="submit" value="{% trans 'Submit' %}" />
         		</p>
 	    </form>
 
@@ -130,7 +131,7 @@
 
         		<table>
 		            <tr>
-                		<th style="text-align: right; " >From Date:</th>
+                		<th style="text-align: right; " >{% trans "From Date" %}:</th>
                 		<td>
 					{{ sdform.from_date }}
 				</td>
@@ -141,7 +142,7 @@
 				{% endif %}
 				</tr>
 				<tr>
-                		<th style="text-align: right; " >To Date:</th>
+                		<th style="text-align: right; " >{% trans "To Date" %}:</th>
                 		<td>
 					{{ sdform.to_date }}
 				</td>
@@ -155,7 +156,7 @@
 		        </table>
 
 	        	<p>
-		            <input name="submit-supply-demand" type="submit" value="Submit" />
+		            <input name="submit-supply-demand" type="submit" value="{% trans 'Submit' %}" />
         		</p>
 	    </form>
     	</div>
@@ -168,7 +169,7 @@
 
         		<table>
 		            <tr>
-                		<th style="text-align: right; " >From Date:</th>
+                		<th style="text-align: right; " >{% trans "From Date" %}:</th>
                 		<td>
 					{{ income_form.from_date }}
 				</td>
@@ -179,7 +180,7 @@
 				{% endif %}
 				</tr>
 				<tr>
-                		<th style="text-align: right; " >To Date:</th>
+                		<th style="text-align: right; " >{% trans "To Date" %}:</th>
                 		<td>
 					{{ income_form.to_date }}
 				</td>
@@ -193,7 +194,7 @@
 		        </table>
 
 	        	<p>
-		            <input name="submit-income" type="submit" value="Submit" />
+		            <input name="submit-income" type="submit" value="{% trans 'Submit' %}" />
         		</p>
 	    </form>
 	</div>

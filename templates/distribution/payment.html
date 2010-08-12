@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Payment
+     {% trans "Payment" %}
 {% endblock %}
 
 {% block header %}
@@ -16,37 +17,37 @@
 
     <table >
         <tr>
-            <th style="text-align: right; " >Payment Number: </th>
+            <th style="text-align: right; " >{% trans "Payment Number" %}: </th>
             <td>{{payment.id}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Member: </th>
+            <th style="text-align: right; " >{% trans "Member" %}: </th>
             <td>{{payment.to_whom.short_name}} {{payment.to_whom.long_name}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Date: </th>
+            <th style="text-align: right; " >{% trans "Date" %}: </th>
             <td>{{payment.transaction_date}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Amount:</th>
+            <th style="text-align: right; " >{% trans "Amount" %}:</th>
             <td>${{payment.amount}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Reference:</th>
+            <th style="text-align: right; " >{% trans "Reference" %}:</th>
             <td>{{payment.reference}}</td>
         </tr>
     </table>
 
-	<h4>Transactions:</h4>
+	<h4>{% trans "Transactions" %}:</h4>
 
     <table class="ga-event-table" >
         <tr>
-             <th>Type</th>
-             <th>Order</th>
-             <th>Product</th>
-             <th>Date</th>
-             <th>Quantity</th>
-             <th>Due</th>
+             <th>{% trans "Type" %}</th>
+             <th>{% trans "Order" %}</th>
+             <th>{% trans "Product" %}</th>
+             <th>{% trans "Date" %}</th>
+             <th>{% trans "Quantity" %}</th>
+             <th>{% trans "Due" %}</th>
         </tr>
         {% for tx in payment.paid_inventory_transactions %}
             <tr>

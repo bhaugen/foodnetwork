@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Order Date Selection
+     {% trans "Order Date Selection" %}
 {% endblock %}
 
 {% block extra_head %}
@@ -25,11 +26,11 @@
 
 	{% include "distribution/tabnav.html" %}
 
-	<h2> Enter Order Date </h2>
+	<h2> {% trans "Enter Order Date" %}</h2>
 
     <form action="." method="POST" >
         <table>
-                <th style="text-align: right; " >Week of:</th>
+                <th style="text-align: right; " >{% trans "Week of" %}:</th>
                 <td>{{ dsform.selected_date}}</td>
 				{% if dsform.selected_date.errors %}
 					<td style="color: red; " >
@@ -39,12 +40,12 @@
             </tr>
 		</table>
         <p style="padding-left: 5em;">
-	<input name="submit-order-table" type="submit" value="Order Table" />
+	<input name="submit-order-table" type="submit" value="{% trans 'Order Table' %}" />
 	{% if show_shorts %}
 	&nbsp;&nbsp;
-	<input name="submit-shorts" type="submit" value="Shorts" />
+	<input name="submit-shorts" type="submit" value="{% trans 'Shorts' %}" />
 	&nbsp;&nbsp;
-	<input name="submit-short-changes" type="submit" value="Short Changes" />
+	<input name="submit-short-changes" type="submit" value="{% trans 'Short Changes' %}" />
 	{% endif %}
 
 

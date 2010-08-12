@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% load humanize %}
 
 {% block title %}
-     Planning Table
+     {% trans "Planning Table" %}
 {% endblock %}
 
 {% block header %}
@@ -112,17 +113,16 @@ table thead
 
 <div class="{{ nav_class }}">
 
-	{% comment %}
-	{% include "distribution/tabnav.html" %}
-	{% endcomment %}
 	{% include tabnav %}
 
-	<h3 style="margin-bottom: 0; padding-top: 0; margin-top: 0; ">{{ plan_type }} Plan from {{ from_date }} to {{ to_date }}</h3>
+	<h3 style="margin-bottom: 0; padding-top: 0; margin-top: 0; ">
+		{% blocktrans %}{{ plan_type }} Plan from {{ from_date }} to {{ to_date }}{% endblocktrans %}
+	</h3>
 	<p style="margin-top: 0; font-style: italic; " >
 	{% ifequal list_type "A" %}
-		Using All Products.  Planned products go onto the {{ member }} Product List.
+		{% blocktrans %}Using All Products.  Planned products go onto the {{ member }} Product List.{% endblocktrans %}
 	{% else %}
-		Using {{ member }} Product List
+		{% blocktrans %}Using {{ member }} Product List{% endblocktrans %}
 	{% endifequal %}
 	</p>
 
@@ -161,7 +161,7 @@ table thead
 		</tbody>
 
 	</table>
-	<input style="margin-top: 4px;" type="submit" value="Submit" />
+	<input style="margin-top: 4px;" type="submit" value="{% trans 'Submit' %}" />
 	</form>
 
 </div>

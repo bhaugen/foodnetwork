@@ -1,4 +1,5 @@
 {% load foodnetwork_tags %}
+{% load i18n %}
 
 <!-- 
 	CSS Tabs is licensed under Creative Commons Attribution 2.5 - http://creativecommons.org/licenses/by/2.5/ 
@@ -85,21 +86,21 @@ ul#tabnav a:hover
 </style>
 
 	<ul id="tabnav" class="do-not-print" >
-		<li class="dashboard" ><a title="Home page" href="/distribution/dashboard">Dashboard</a> </li>
-		<li class="inventory-update" ><a title="Update inventory for one producer at a time" href="/distribution/inventoryselection">Avail</a></li>
-		<li class="process" ><a title="Create or update processes" href="/distribution/processselection">Process</a></li>
-		<li class="order-update" ><a title="Update orders for one customer at a time" href="/distribution/orderselection">Order</a> </li>
-		<li class="order-table" ><a title="Show all orders for all customers for this week" href="/distribution/ordertableselection">Orders</a> </li>
+		<li class="dashboard" ><a title="Home page" href="/distribution/dashboard">{% trans "Dashboard" %}</a> </li>
+		<li class="inventory-update" ><a title="Update inventory for one producer at a time" href="/distribution/inventoryselection">{% trans "Avail" %}</a></li>
+		<li class="process" ><a title="Create or update processes" href="/distribution/processselection">{% trans "Process" %}</a></li>
+		<li class="order-update" ><a title="Update orders for one customer at a time" href="/distribution/orderselection">{% trans "Order" %}</a> </li>
+		<li class="order-table" ><a title="Show all orders for all customers for this week" href="/distribution/ordertableselection">{% trans "Orders" %}</a> </li>
         	{% food_network %}{% if not food_network.order_by_lot %}
 			<li class="delivery-update" >
-				<a title="Update lots for all order items for this week" href="/distribution/deliveryselection">Update Lots</a> 
+				<a title="Update lots for all order items for this week" href="/distribution/deliveryselection">{% trans "Assign Lots" %}</a> 
 			</li>
 		{% endif %}
-		<li class="invoices" ><a title="Print invoices for all orders for this week" href="/distribution/invoiceselection">Invoices</a> </li>
-		<li class="producer-payments" ><a title="Show payments due to producers this week" href="/distribution/producerpaymentselection">Payment Table</a> </li>
-		<li class="payment-update" ><a title="Create or update payments to producers" href="/distribution/paymentupdateselection">Payment Update</a> </li>
-		<li class="statements" ><a title="Print payment statements" href="/distribution/statementselection">Statements</a> </li>
-		<li class="plan-update" ><a title="Create or update plans for producers" href="/distribution/planselection">Plan</a> </li>
-		<li class="admin" ><a title="Maintain Producers, Products and Customers" href="/admin">Admin</a> </li>
-		<li class="help" ><a title="Food Distribution System documentation" href="/help">Help</a> </li>
+		<li class="invoices" ><a title="Print invoices for all orders for this week" href="/distribution/invoiceselection">{% trans "Invoices" %}</a> </li>
+		<li class="producer-payments" ><a title="Show payments due to producers this week" href="/distribution/producerpaymentselection">{% trans "Payment Table" %}</a> </li>
+		<li class="payment-update" ><a title="Create or update payments to producers" href="/distribution/paymentupdateselection">{% trans "Payment Update" %}</a> </li>
+		<li class="statements" ><a title="Print payment statements" href="/distribution/statementselection">{% trans "Statements" %}</a> </li>
+		<li class="plan-update" ><a title="Create or update plans for producers" href="/distribution/planselection">{% trans "Plan" %}</a> </li>
+		<li class="admin" ><a title="Maintain Producers, Products and Customers" href="/admin">{% trans "Admin" %}</a> </li>
+		<li class="help" ><a title="Food Distribution System documentation" href="/help">{% trans "Help" %}</a> </li>
 	</ul>

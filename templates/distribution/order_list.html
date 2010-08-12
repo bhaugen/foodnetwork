@@ -1,23 +1,24 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Order Items
+     {% trans "Order Items" %}
 {% endblock %}
 
 {% block header %}
-    <h1>Order Items</h1>
+    <h1>{% trans "Order Items" %}</h1>
 {% endblock %}
 
 {% block content %}
     <table class="ga-event-table" >
         <tr>
-             <th>Date</th>
-             <th>Customer</th>
-             <th>Product</th>
-             <th>Avail</th>
-             <th>Ordered</th>
-             <th>This Order</th>
-             <th>Notes</th>
+             <th>{% trans "Date" %}</th>
+             <th>{% trans "Customer" %}</th>
+             <th>{% trans "Product" %}</th>
+             <th>{% trans "Avail" %}</th>
+             <th>{% trans "Ordered" %}</th>
+             <th>{% trans "This Order" %}</th>
+             <th>{% trans "Notes" %}</th>
         </tr>
         {% for orderitem in object_list %}
             <tr>

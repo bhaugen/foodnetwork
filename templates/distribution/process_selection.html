@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Process Selection
+     {% trans "Process Selection" %}
 {% endblock %}
 
 {% block extra_head %}
@@ -31,7 +32,7 @@
         <table>
 {% comment %}
             <tr>
-                <th style="text-align: right; " >Week of:</th>
+                <th style="text-align: right; " >{% trans "Process" %}Week of:</th>
                 <td>{{ header_form.process_date}}</td>
 				{% if header_form.process_date.errors %}
 					<td style="color: red; " >
@@ -41,33 +42,33 @@
             </tr>
 {% endcomment %}
 			<tr>
-                <th style="text-align: right; " >Process Type:</th>
+                <th style="text-align: right; " >{% trans "Process Type" %}:</th>
                 <td>{{ header_form.process_type}}</td>
 				{% if header_form.process_type.errors %}
 					<td style="color: red; " >
 						{{ header_form.process_type.errors }}
 					</td>
 				{% endif %}
-				<td><input type="submit" value="Create New Process" /></td>
+				<td><input type="submit" value="{% trans 'Create New Process' %}" /></td>
 				<td>
             </tr>
 		</table>
 {% comment %}
         <p>
-            <input type="submit" value="Create New Process" />
+            <input type="submit" value="{% trans 'Create New Process' %}" />
         </p>
 {% endcomment %}
     </form>
 
 	{% if processes %}
-	<h3>Processes:</h3>
+	<h3>{% trans "Processes" %}:</h3>
 	<table class="ga-event-table" >
 		<tr>
-			<th>Type</th>
-			<th>Input Lot</th>
-			<th>Output Lots</th>
-			<th>View</th>
-			<th>Delete</th>
+			<th>{% trans "Type" %}</th>
+			<th>{% trans "Input Lot" %}</th>
+			<th>{% trans "Output Lots" %}</th>
+			<th>{% trans "View" %}</th>
+			<th>{% trans "Delete" %}</th>
 		</tr>
 		{% for process in processes %}
 			<tr>
@@ -78,10 +79,10 @@
 				<td>
 					{% if process.is_deletable %}
 						<form method="POST" action="{% url delete_process_confirmation process_id=process.id %}">
-							<input class="submit-btn" type="submit" value="Delete" />
+							<input class="submit-btn" type="submit" value="{% trans 'Delete' %}" />
 						</form>
 					{% else %}
-						output used
+						{% trans "output used" %}
 					{% endif %}
 				</td>
 			</tr>

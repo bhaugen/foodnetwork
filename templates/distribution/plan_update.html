@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Plan Update
+     {% trans "Plan Update" %}
 {% endblock %}
 
 {% block header %}
@@ -94,51 +95,50 @@
 	<input name='member-id' type='hidden' value='{{ member.id }}' />
         <table>
             <tr>
-                <th style="text-align: right; " >Member:</th>
+                <th style="text-align: right; " >{% trans "Member" %}:</th>
                 <td>{{ member.short_name }} - {{ member.long_name }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Contact:</th>
+                <th style="text-align: right; " >{% trans "Contact" %}:</th>
                <td  id="contact" >{{member.contact}}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Phone:</th>
+                <th style="text-align: right; " >{% trans "Phone" %}:</th>
                 <td id="phone" >{{member.phone}}</td>
             </tr>
         </table>
 
         <table class="ga-event-table" >
 			<tr>
-                <th>Category</th>
-                <th>Product</th>
-		<th>From Date</th>
-		<th>To Date</th>
-		<th>Qty Per Week</th>
-		{% if member.is_producer %}
-			<th>Inventoried?</th>
-		{% endif %}
-		<th>Distributor</th>
+                <th>{% trans "Category" %}</th>
+                <th>{% trans "Product" %}</th>
+				<th>{% trans "From Date" %}</th>
+				<th>{% trans "To Date" %}</th>
+				<th>{% trans "Qty Per Week" %}</th>
+				{% if member.is_producer %}
+					<th>{% trans "Inventoried?" %}</th>
+				{% endif %}
+				<th>{% trans "Distributor" %}</th>
             </tr>
             {% for item_form in item_forms %}
                  <tr>
                     <td class="read-only-td"  > {{ item_form.parents }} </td>
                     <td class="read-only-td" > {{ item_form.long_name }} </td>
                     <td> {{ item_form.from_date }} </td>
-		    <td> {{ item_form.to_date }} </td>
-		    <td> {{ item_form.quantity }} </td>
-		    {% if member.is_producer %}
-		    	<td> {{ item_form.inventoried }} </td>
-
-		    {% endif %}
-		    <td>{{ item_form.distributor }}</td>
+				    <td> {{ item_form.to_date }} </td>
+				    <td> {{ item_form.quantity }} </td>
+				    {% if member.is_producer %}
+				    	<td> {{ item_form.inventoried }} </td>
+				    {% endif %}
+				    <td>{{ item_form.distributor }}</td>
                     {{ item_form.item_id }}
-		    {{ item_form.prodname }}
+				    {{ item_form.prodname }}
                 </tr>
            {% endfor %} 
         </table>
 
         <p style="margin-bottom: 3em;" >
-            <input type="submit" value="Submit" />
+            <input type="submit" value="{% trans 'Submit' %}" />
         </p>
     </form>
 </div>

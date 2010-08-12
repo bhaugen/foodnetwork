@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-	Shorts for {{ date }}
+	{% blocktrans %}Shorts for {{ date }}{% endblocktrans %}
 {% endblock %}
 
 {% block header %}
@@ -204,7 +205,7 @@
 
 	{% include "distribution/tabnav.html" %}
 
-	<h4>Shorts for {{ date }}</h4>
+	<h4>{% blocktrans %}Shorts for {{ date }}{% endblocktrans %}</h4>
 
 	<form action="." method="POST" >
 
@@ -238,7 +239,7 @@
 	</table>
 	{% if shorts_table.rows %}
 		<p>
-        		<input type="submit" value="Submit Short Changes" />
+        		<input type="submit" value="{% trans 'Submit Short Changes' %}" />
 		</p>
 	{% endif %}
 	</form>

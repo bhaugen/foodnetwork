@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-	Short Changes for {{ date }}
+	{% blocktrans %}Shorts Changes for {{ date }}{% endblocktrans %}
 {% endblock %}
 
 {% block header %}
@@ -14,14 +15,14 @@
 
 	{% include "distribution/tabnav.html" %}
 
-	<h4>Short Changes for {{ date }}</h4>
+	<h4>{% blocktrans %}Shorts Changes for {{ date }}{% endblocktrans %}</h4>
 
 	<table class="ga-event-table" >
 		<tr>
-			<th>Order</th>
-			<th>Product</th>
-			<th>Original Qty</th>
-			<th>Changed Qty</th>
+			<th>{% trans "Order" %}</th>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Original Qty" %}</th>
+			<th>{% trans "Changed Qty" %}</th>
 		</tr>
 		{% for item in changed_items %}
 		<tr>
@@ -36,7 +37,7 @@
 	{% if changed_items %}
 		<div style="margin: 1em; " >
 			<form action="{% url send_short_change_notices %}" method="POST">
-				<input class="submit-btn" type="submit" value="Send Short Change Emails" />
+				<input class="submit-btn" type="submit" value="{% trans 'Send Short Change Emails' %}" />
 				<input type="hidden" name="next" value="{% url dashboard %}" />
 			</form>
 		</div>

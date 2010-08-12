@@ -1,13 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Process
+     {% trans "Process" %}
 {% endblock %}
 
 {% block header %}
-<!--
-    <h1>Process</h1>
--->
+
 {% endblock %}
 
 {% block content %}
@@ -18,40 +17,40 @@
 
     <table style="margin-bottom: 1em;" >
         <tr>
-            <th style="text-align: right; " >Process Number: </th>
+            <th style="text-align: right; " >{% trans "Process Number" %}: </th>
             <td>{{process.id}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Process Type: </th>
+            <th style="text-align: right; " >{% trans "Process Type" %}: </th>
             <td>{{process.process_type}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Date: </th>
+            <th style="text-align: right; " >{% trans "Date" %}: </th>
             <td>{{process.process_date}}</td>
     </table>
 
-	<h3>Input Lot:</h3>
+	<h3>{% trans "Input Lot" %}:</h3>
     <table class="ga-event-table" >
         <tr>
-		<th>Lot Id</th>
-		<th>Field</th>
-             	<th>Quantity</th>
+			<th>{% trans "Lot Id" %}</th>
+			<th>{% trans "Field" %}</th>
+           	<th>{% trans "Quantity" %}</th>
         </tr>
         {% for tx in process.inputs %}
-            	<tr>
-			<td>{{ tx.inventory_item.lot_id }}</td>
-			<td>{{ tx.inventory_item.field_id }}</td>
-			<td style="text-align: right; ">{{ tx.amount }}</td>
-		</tr>
+            <tr>
+				<td>{{ tx.inventory_item.lot_id }}</td>
+				<td>{{ tx.inventory_item.field_id }}</td>
+				<td style="text-align: right; ">{{ tx.amount }}</td>
+			</tr>
         {% endfor %}
     </table>
 
-	<h3>Processing Service{{process.services.count|pluralize}}:</h3>
+	<h3>{% trans "Processing Service" %}{{process.services.count|pluralize}}:</h3>
     <table class="ga-event-table" >
         <tr>
-             <th>Type</th>
-             <th>Processor</th>
-             <th>Cost</th>
+             <th>{% trans "Type" %}</th>
+             <th>{% trans "Processor" %}</th>
+             <th>{% trans "Cost" %}</th>
         </tr>
         {% for tx in process.services %}
             <tr>
@@ -61,20 +60,21 @@
         {% endfor %}
     </table>
 
-	<h3>Output Lot{{process.outputs.count|pluralize}}:</h3>
+	<h3>{% trans "Output Lot" %}{{process.outputs.count|pluralize}}:</h3>
     <table class="ga-event-table" >
         <tr>
-		<th>Lot id</th>
-		<th>Field</th>
-        	<th>Custodian</th>
-        	<th>Quantity</th>
+			<th>{% trans "Lot id" %}</th>
+			<th>{% trans "Field" %}</th>
+        	<th>{% trans "Custodian" %}</th>
+        	<th>{% trans "Quantity" %}</th>
         </tr>
         {% for tx in process.outputs %}
             <tr>
-		<td>{{ tx.inventory_item.lot_id }}</td>
-		<td>{{ tx.inventory_item.field_id }}</td>
-		<td>{{ tx.inventory_item.custodian }}</td>
+				<td>{{ tx.inventory_item.lot_id }}</td>
+				<td>{{ tx.inventory_item.field_id }}</td>
+				<td>{{ tx.inventory_item.custodian }}</td>
                 <td style="text-align: right; ">{{ tx.amount }}</td>
+			</tr>
         {% endfor %}
     </table>
 

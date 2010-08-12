@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Order Update
+     {% trans "Order Update" %}
 {% endblock %}
 
 {% block header %}
@@ -228,61 +229,59 @@
         <table >
             {% if order %}
 		        <tr>
-		            <th style="text-align: right; " >Order Number:</th>
+		            <th style="text-align: right; " >{% trans "Order Number" %}:</th>
 		            <td>{{ order.id }}</td>
 		        </tr>
             {% endif %}
             <tr>
-                <th style="text-align: right; " >Customer:</th>
+                <th style="text-align: right; " >{% trans "Customer" %}:</th>
                 <td>{{ customer }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Date:</th>
+                <th style="text-align: right; " >{% trans "Date" %}:</th>
                 <td>{{ order_date }}</td>
             </tr>
 			<tr>
-                <th style="text-align: right; " >Distributor:</th>
+                <th style="text-align: right; " >{% trans "Distributor" %}:</th>
                 <td>{{ order_form.distributor }}</td>
             </tr>
 			<tr>
-                <th style="text-align: right; " >Transportation Fee:</th>
+                <th style="text-align: right; " >{% trans "Transportation Fee" %}:</th>
                 <td>{{ order_form.transportation_fee }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Paid?</th>
+                <th style="text-align: right; " >{% trans "Paid?" %}</th>
                 <td>{{ order_form.paid }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Contact:</th>
+                <th style="text-align: right; " >{% trans "Contact" %}:</th>
                <td  id="contact" >{{ customer.contact }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Phone:</th>
+                <th style="text-align: right; " >{% trans "Phone" %}:</th>
                 <td id="phone" >{{ customer.phone }}</td>
             </tr>
         </table>
         <p style='margin-left: 2em;' >
-            <i>Availability as of {{avail_date}}</i>
+            <i>{% blocktrans %}Availability as of {{avail_date}}{% endblocktrans %}</i>
         </p>
         <table class="ga-event-table" style="font-size: 70%;" >
 			<tr>
-				<th>Category</th>
-                <th>Product</th>
-                <!--<th>Description</th>-->
-                <th>Producers</th>
-                <th>Avail</th>
-                <th>Ordered</th>
-                <th>Unit Price</th>
-                <!--<th>Fee</th>-->
-                <th>This Order</th>
-                <th>Extended</th>
-                <th>Notes</th>
+				<th>{% trans "Category" %}</th>
+                <th>{% trans "Product" %}</th>
+                <th>{% trans "Producers" %}</th>
+                <th>{% trans "Avail" %}</th>
+                <th>{% trans "Ordered" %}</th>
+                <th>{% trans "Unit Price" %}</th>
+                <!--<th>{% trans "Fee" %}</th>-->
+                <th>{% trans "This Order" %}</th>
+                <th>{% trans "Extended" %}</th>
+                <th>{% trans "Notes" %}</th>
             </tr>
             {% for item_form in item_forms %}
                  <tr>
 					 <td class="read-only-td" > {{ item_form.parents }} </td>
 					<td class="read-only-td"  > {{ item_form.description }} </td>
-					<!--<td class="read-only-td" > {{ item_form.description }} </td>-->
 					<td class="read-only-td" > {{ item_form.producers }} </td>
 					<td class="read-only-td" > {{ item_form.avail }} </td>
 					<td class="read-only-td" > {{ item_form.ordered }} </td>
@@ -296,7 +295,7 @@
            {% endfor %} 
         </table>
         <p>
-            <input type="submit" value="Submit Order" />
+            <input type="submit" value="{% trans 'Submit Order' %}" />
         </p>
     </form>
 </div>

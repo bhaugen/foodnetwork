@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Payment Update
+     {% trans "Payment Update" %}
 {% endblock %}
 
 {% block header %}
@@ -166,52 +167,49 @@
         <table>
             {% if payment %}
 		        <tr>
-		            <th style="text-align: right; " >Payment Number:</th>
+		            <th style="text-align: right; " >{% trans "Payment Number" %}:</th>
 		            <td>{{ payment.id }}</td>
 		        </tr>
             {% endif %}
             <tr>
-                <th style="text-align: right; " >Producer:</th>
+                <th style="text-align: right; " >{% trans "Member" %}:</th>
                 <td>{{ payment_form.to_whom }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Date:</th>
+                <th style="text-align: right; " >{% trans "Date" %}:</th>
                 <td>{{ payment_form.transaction_date }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Amount:</th>
+                <th style="text-align: right; " >{% trans "Amount" %}:</th>
                 <td>{{ payment_form.amount }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Reference:</th>
+                <th style="text-align: right; " >{% trans "Reference" %}:</th>
                <td>{{ payment_form.reference }}</td>
             </tr>
         </table>
 
 		<h4>
-			Transactions: 
+			{% trans "Transactions" %}: 
 			<span style='font-size: 70%; font-weight: normal; ' >
 				{% if payment %}
-					including products, processing and transportation that is due to be paid,  
-					and either the transaction is included in this payment 
-					or the producer, processor or distributor has not been paid for it.
+					{% trans "including products, processing and transportation that is due to be paid, and either the transaction is included in this payment or the producer, processor or distributor has not been paid for it." %}				
 				{% else %}
-					including products, processing and transportation that is due to be paid, 
-					but the producer, processor or distributor has not been paid.
+					{% trans "including products, processing and transportation that is due to be paid, but the producer, processor or distributor has not been paid." %}
 				{% endif %}
 			</span>
 		</h4>
 
         <table class="ga-event-table" >
 			<tr>
-                <th>Type</th>
-                <th>Order</th>
-                <th>Product</th>
-                <th>Date</th>
-                <th>Quantity</th>
-                <th>Due</th>
-                <th>Paid</th>
-				<th>Notes</th>
+				<th>{% trans "Type" %}</th>
+             	<th>{% trans "Order" %}</th>
+	            <th>{% trans "Product" %}</th>
+    	        <th>{% trans "Date" %}</th>
+    	        <th>{% trans "Quantity" %}</th>
+    	        <th>{% trans "Due" %}</th>
+                <th>{% trans "Paid" %}</th>
+				<th>{% trans "Notes" %}</th>
             </tr>
             {% for item_form in item_forms %}
                  <tr>
@@ -229,7 +227,7 @@
             {% endfor %}
         </table>
         <p>
-            <input type="submit" value="Submit Payment" />
+            <input type="submit" value="{% trans 'Submit Payment' %}" />
         </p>
 
     </form>

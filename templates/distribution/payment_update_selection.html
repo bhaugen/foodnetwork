@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Payment Update Selection
+     {% trans "Payment Update Selection" %}
 {% endblock %}
 
 {% block header %}
@@ -108,17 +109,17 @@
     <form action="." method="POST" >
         <table>
             <tr>
-                <th style="text-align: right; " >Member:</th>
+                <th style="text-align: right; " >{% trans "Member" %}:</th>
                 <td>{{ selection_form.producer }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >Payment:</th>
+                <th style="text-align: right; " >{% trans "Payment" %}:</th>
                 <td>{{ selection_form.payment }}</td>
             </tr>
         </table>
 
         <p>
-            <input type="submit" value="Submit" />
+            <input type="submit" value="{% trans 'Submit' %}" />
         </p>
     </form>
 </div>

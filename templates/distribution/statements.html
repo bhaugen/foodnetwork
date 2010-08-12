@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Statements
+     {% trans "Statements" %}
 {% endblock %}
 
 {% block header %}
@@ -36,11 +37,11 @@
 				<td>
 					<table>
 						<tr>
-							<th style="text-align: right; " >Payment Date: </th>
+							<th style="text-align: right; " >{% trans "Payment Date" %}: </th>
 							<td>{{payment.transaction_date}}</td>
 						</tr>
 						<tr>
-							<th style="text-align: right; vertical-align: top; " >Payment to: </th>
+							<th style="text-align: right; vertical-align: top; " >{% trans "Payment to" %}: </th>
 							<td>
 								{{payment.to_whom.long_name}} <br />
 								{% for header_line in payment.paid_to.formatted_address %}
@@ -54,19 +55,19 @@
 			
 		</table>
 	
-		<h4>Transactions:</h4>
+		<h4>{% trans "Transactions" %}:</h4>
 
 		<table class="ga-event-table" style="page-break-before: avoid; width: 100%; " >
 			{% if payment.paid_inventory_transactions %}
 				<tr>
-					<th>Type</th>
-					<th>Order Item</th>
-					<th>Lot</th>
-					<th>Date</th>
-					<th>Quantity</th>
-					<th>Unit Price</th>
-					<th>Fee</th>
-					<th>Due</th>
+					<th>{% trans "Type" %}</th>
+					<th>{% trans "Order Item" %}</th>
+					<th>{% trans "Lot" %}</th>
+					<th>{% trans "Date" %}</th>
+					<th>{% trans "Quantity" %}</th>
+					<th>{% trans "Unit Price" %}</th>
+					<th>{% trans "Fee" %}</th>
+					<th>{% trans "Due" %}</th>
 				</tr>
 				{% for tx in payment.paid_inventory_transactions %}
 					<tr>
@@ -101,18 +102,17 @@
 					</tr>
 				{% endfor %}
 				<tr>
-					<th colspan="7" style="text-align: right; font-weight: bold; " >Total Payment:</th>
+					<th colspan="7" style="text-align: right; font-weight: bold; " >{% trans "Total Payment" %}:</th>
 					<td style="text-align: right; font-weight: bold; " >${{ payment.amount }}</td>
 				</tr>
 			{% else %}
 				{% if payment.paid_service_transactions %}
 					<tr>
-						<th>Type</th>
-						<th>Order</th>
-						<th>Product</th>
-						<th>Date</th>
-						<th>Quantity</th>
-						<th>Due</th>
+						<th>{% trans "Type" %}</th>
+						<th>{% trans "Order" %}</th>
+						<th>{% trans "Product" %}</th>
+						<th>{% trans "Date" %}</th>
+						<th>{% trans "Due" %}</th>
 					</tr>
 					{% for tx in payment.paid_service_transactions %}
 					<tr>
@@ -133,15 +133,15 @@
 					</tr>
 				{% endfor %}
 					<tr>
-						<th colspan="5" style="text-align: right; font-weight: bold; " >Total Payment:</th>
+						<th colspan="4" style="text-align: right; font-weight: bold; " >{% trans "Total Payment" %}:</th>
 						<td style="text-align: right; font-weight: bold; " >${{ payment.amount }}</td>
 					</tr>
 				{% else %}
 					<tr>
-						<th>Type</th>
-						<th>Order</th>
-						<th>Date</th>
-						<th>Due</th>
+						<th>{% trans "Type" %}</th>
+						<th>{% trans "Order" %}</th>
+						<th>{% trans "Date" %}</th>
+						<th>{% trans "Due" %}</th>
 					</tr>
 				{% for tx in payment.paid_transportation_transactions %}
 					<tr>
@@ -152,7 +152,7 @@
 					</tr>
 				{% endfor %}
 					<tr>
-						<th colspan="3" style="text-align: right; font-weight: bold; " >Total Payment:</th>
+						<th colspan="3" style="text-align: right; font-weight: bold; " >{% trans "Total Payment" %}:</th>
 						<td style="text-align: right; font-weight: bold; " >${{ payment.amount }}</td>
 					</tr>
 				{% endif %}

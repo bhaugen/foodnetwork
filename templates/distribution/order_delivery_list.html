@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-     Orders with Deliveries
+     {% trans "Orders with Lots" %}
 {% endblock %}
 
 {% block header %}
@@ -14,19 +15,19 @@
 	{% include "distribution/tabnav.html" %}
 	
 	<p style='margin-left: 2em;' >
-		<i>All Order Items for {{order_date}}</i>
+		<i>{% blocktrans %}All Order Items for {{order_date}}{% endblocktrans %}</i>
 	</p>
 	
 
     <table class="ga-event-table" >
         <tr>
-             <th>Date</th>
-             <th>Order</th>
-             <th>Paid?</th>
-             <th>Customer</th>
-             <th>Product</th>
-             <th>Quantity</th>
-             <th>Deliveries</th>
+             <th>{% trans "Date" %}</th>
+             <th>{% trans "Order" %}</th>
+             <th>{% trans "Paid?" %}</th>
+             <th>{% trans "Customer" %}</th>
+             <th>{% trans "Product" %}</th>
+             <th>{% trans "Quantity" %}</th>
+             <th>{% trans "Lots" %}</th>
         </tr>
         {% for orderitem in orderitem_list %}
             <tr>
