@@ -608,17 +608,24 @@ def create_order_by_lot_forms(order, order_date, data=None):
             product_dict[oi.product] = True
             item = oi.lot()
             avail = oi.quantity
-            if item.remaining:
-                avail = item.remaining + oi.quantity
-            if item.onhand:
-                avail = item.onhand + oi.quantity
+            if item:
+                if item.remaining:
+                    avail = item.remaining + oi.quantity
+                if item.onhand:
+                    avail = item.onhand + oi.quantity
+                lot_label = item.lot_id()
+                lot_id = item.id
+            else:
+                avail = Decimal("0")
+                lot_label = "None"
+                lot_id = 0
             dict ={
                 'order_item_id': oi.id,
-                'lot_id': item.id,
+                'lot_id': lot_id,
                 'product_id': oi.product.id,
                 'avail': avail, 
-                'lot_label': item.lot_id(),
-                'unit_price': item.product.price,
+                'lot_label': lot_label,
+                'unit_price': oi.unit_price,
                 'quantity': oi.quantity,
                 'notes': oi.notes}
             initial_data.append(dict)
@@ -718,19 +725,21 @@ def order_by_lot(request, cust_id, year, month, day):
                 lot = InventoryItem.objects.get(pk=lot_id)
                 if oi_id:
                     oi = OrderItem.objects.get(pk=oi_id)
-                    if oi.quantity != qty:
+                    if oi.quantity != qty or oi.unit_price != unit_price:
                         delivery = oi.inventorytransaction_set.all()[0]
                         if qty > 0:
                             oi.quantity = qty
+                            oi.unit_price = unit_price
                             oi.notes=notes
                             oi.save()
                             delivery.amount=qty
+                            delivery.unit_price = unit_price
                             delivery.save()
                         else:
                             delivery.delete()
                             oi.delete()                      
                     elif oi.notes != notes:
-                        oi.notes=notes
+                        oi.notes = notes
                         oi.save()         
                 else:
                     if qty:
@@ -1035,11 +1044,16 @@ def order_csv(request, order_date):
     writer = csv.writer(response)
     writer.writerow(ORDER_HEADINGS)
     for item in OrderItem.objects.filter(order__order_date=thisdate):
+        lot = item.lot()
+        if lot:
+            custodian = lot.custodian
+        else:
+            custodian = ""            
         writer.writerow(
             [item.order.customer.long_name,
              "".join(["#", str(item.order.id), " ", item.order.order_date.strftime('%Y-%m-%d')]),
-             item.lot(),
-             item.lot().custodian,
+             lot,
+             custodian,
              item.quantity]
              )
     return response
