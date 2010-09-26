@@ -8,6 +8,7 @@ from django.utils.encoding import smart_unicode
 
 #from misc.utils import get_send_mail
 #send_mail = get_send_mail()
+from mailer import send_mail
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -84,8 +85,10 @@ class ResetPasswordForm(forms.Form):
     email = forms.EmailField(label=_("Email"), required=True, widget=forms.TextInput(attrs={'size':'30'}))
 
     def clean_email(self):
-        if EmailAddress.objects.filter(email__iexact=self.cleaned_data["email"], verified=True).count() == 0:
+        if User.objects.filter(email__iexact=self.cleaned_data["email"]).count() == 0:
             raise forms.ValidationError(_("Email address not verified for any user account"))
+        if User.objects.filter(email__iexact=self.cleaned_data["email"]).count() > 1:
+            raise forms.ValidationError(_("More than one user has that email address, cannot reset password"))
         return self.cleaned_data["email"]
 
     def save(self):
@@ -98,6 +101,6 @@ class ResetPasswordForm(forms.Form):
                 "user": user,
                 "new_password": new_password,
             })
-            #send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], priority="high")
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], priority="high")
         return self.cleaned_data["email"]
 
