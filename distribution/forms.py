@@ -234,7 +234,7 @@ class DateSelectionForm(forms.Form):
 
 
 class DeliverySelectionForm(forms.Form):
-    order_date = forms.DateField(
+    delivery_date = forms.DateField(
         widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
     customer = forms.ChoiceField()
     def __init__(self, *args, **kwargs):
@@ -488,8 +488,8 @@ class ShortsTable(object):
          self.rows = rows
 
 
-def create_shorts_table(order_date, data=None):
-    shorts_list = shorts_for_date(order_date)
+def create_shorts_table(delivery_date, data=None):
+    shorts_list = shorts_for_date(delivery_date)
     orders = []
     for short in shorts_list:
         for oi in short.order_items:
@@ -524,8 +524,8 @@ def create_shorts_table(order_date, data=None):
         rows.append(row)
     return ShortsTable(cols, rows)
 
-def create_short_forms(order_date):
-    shorts_list = shorts_for_date(order_date)
+def create_short_forms(delivery_date):
+    shorts_list = shorts_for_date(delivery_date)
     orders = []
     for short in shorts_list:
         for oi in short.order_items:
@@ -590,12 +590,12 @@ def create_delivery_forms(thisdate, customer, data=None):
     form_list = []
     if customer:
         orderitems = OrderItem.objects.filter(
-            order__order_date=thisdate, 
+            order__delivery_date=thisdate, 
             order__customer=customer
         ).exclude(order__state="Unsubmitted")
     else:
         orderitems = OrderItem.objects.filter(
-            order__order_date=thisdate).exclude(order__state="Unsubmitted")
+            order__delivery_date=thisdate).exclude(order__state="Unsubmitted")
     for oi in orderitems:
         dtf = DeliveryItemForm(data, prefix=str(oi.id), initial=
             {'order_qty': oi.quantity, 'order_item_id': oi.id, 'product_id': oi.product.id})
@@ -651,7 +651,7 @@ def create_delivery_forms(thisdate, customer, data=None):
 
 class OrderSelectionForm(forms.Form):
     customer = forms.ChoiceField()
-    order_date = forms.DateField(
+    delivery_date = forms.DateField(
         widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
     def __init__(self, *args, **kwargs):
         super(OrderSelectionForm, self).__init__(*args, **kwargs)

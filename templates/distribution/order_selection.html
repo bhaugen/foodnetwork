@@ -55,6 +55,7 @@
 
 	{% include "distribution/tabnav.html" %}
 
+	<div style="border: 2px solid grey; width: 40%; padding-left: 1em; padding-top: 1em;">
     <form action="." method="POST" >
         <table>
             <tr>
@@ -68,11 +69,11 @@
             </tr>
             </tr>
             <tr>
-                <th style="text-align: right; " >{% trans "Week of" %}:</th>
-                <td>{{ header_form.order_date}}</td>
-				{% if header_form.order_date.errors %}
+                <th style="text-align: right; " >{% trans "Delivery date" %}:</th>
+                <td>{{ header_form.delivery_date}}</td>
+				{% if header_form.delivery_date.errors %}
 					<td style="color: red; " >
-						{{ header_form.order_date.errors }}
+						{{ header_form.delivery_date.errors }}
 					</td>
 				{% endif %}
             </tr>
@@ -89,6 +90,28 @@
         <p>
             <input type="submit" value="{% trans 'Submit' %}" />
         </p>
-    </form>
+	</form>
+	</div>
+	{% if unpaid_orders %}
+		<div style="padding-left: 1em;">
+			<h4>Unpaid orders:</h4>
+			<ul>
+			{% for order in unpaid_orders %}
+	
+				<li>
+					<a href="{% url order_with_lots order_id=order.id %}">
+						#{{ order.id }} {{ order.customer }} 
+						Ordered: {{ order.order_date }} Delivery: {{ order.delivery_date }} 
+						${{ order.total_price }}
+					</a>&nbsp;&nbsp; 
+					{% comment %}
+					<a href="{% url change_order order_id=order.id %}">Change</a>
+					{% endcomment %}
+				</li>
+	
+			{% endfor %}
+			</ul>
+		</div>
+	{% endif %}
 </div>
 {% endblock %}

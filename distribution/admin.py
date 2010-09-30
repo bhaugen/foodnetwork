@@ -85,7 +85,7 @@ admin.site.register(PartyUser, PartyUserAdmin)
 class InventoryItemAdmin(admin.ModelAdmin):
     list_display = ('product', 'producer', 'lot_id', 'field_id', 'custodian', 'inventory_date', 'expiration_date', 'planned', 'remaining', 'received', 'onhand', 'notes')
     list_filter = ['producer', 'product']
-    search_fields = ['producer__short_name, product__short_name']
+    search_fields = ['producer__short_name, product__short_name', 'freeform_lot_id']
     date_hierarchy = 'inventory_date'
     
 admin.site.register(InventoryItem, InventoryItemAdmin)
@@ -95,10 +95,10 @@ class OrderItemInline(admin.TabularInline):
     model = OrderItem
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order_date', 'customer', 'distributor', 'state',
+    list_display = ('id', 'order_date', 'delivery_date', 'customer', 'distributor', 'state',
                     'product_list' )
     ordering = ('order_date',)
-    list_filter = ['customer', 'paid']
+    list_filter = ['customer',]
     date_hierarchy = 'order_date'
     inlines = [ OrderItemInline, ]
   

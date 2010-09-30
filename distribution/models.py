@@ -339,7 +339,7 @@ class FoodNetwork(Party):
             thisdate = current_week()
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
-        ois = OrderItem.objects.filter(order__order_date__range=(weekstart, weekend))
+        ois = OrderItem.objects.filter(order__delivery_date__range=(weekstart, weekend))
         
         #customers = {}
         #product_producers = {}
@@ -578,7 +578,7 @@ class Product(models.Model):
     def total_ordered(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
-        myorders = OrderItem.objects.filter(product=self, order__order_date__range=(weekstart, weekend))
+        myorders = OrderItem.objects.filter(product=self, order__delivery_date__range=(weekstart, weekend))
         return sum(order.quantity for order in myorders)
 
     def avail_for_customer(self, thisdate):
@@ -1020,22 +1020,25 @@ ORDER_STATES = (
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(Customer, verbose_name=_('customer')) 
-    order_date = models.DateField(_('order_date'))
+    customer = models.ForeignKey(Customer, verbose_name=_('customer'))
+    purchase_order = models.CharField(_('purchase order')max_length=64, blank=True)
+    order_date = models.DateField(_('order date'))
+    delivery_date = models.DateField(_('delivery date'))
     distributor = models.ForeignKey(Party, blank=True, null=True, 
         related_name="orders", verbose_name=_('distributor'))
     #todo: obsolete, or leave in for no-customer-app situations?
     paid = models.BooleanField(default=False, verbose_name=_("Order paid"))
     state = models.CharField(_('state'), max_length=16, choices=ORDER_STATES, default='Submitted', blank=True)
     product_list = models.ForeignKey(MemberProductList, blank=True, null=True,
-        related_name="orders", verbose_name=_('product_list'),
+        related_name="orders", verbose_name=_('product list'),
         help_text=_("Optional: The product list this order was created from. Maintained by customer."))
 
     class Meta:
         ordering = ('order_date', 'customer')
 
     def __unicode__(self):
-        return ' '.join([self.order_date.strftime('%Y-%m-%d'), self.customer.short_name])
+        date = self.delivery_date if self.delivery_date else self.order_date
+        return ' '.join([date.strftime('%Y-%m-%d'), self.customer.short_name])
 
     def save(self, force_insert=False, force_update=False):
         if self.paid:
@@ -1122,7 +1125,7 @@ class Order(models.Model):
     
     def payment_due_date(self):
         term_days = customer_terms()
-        return self.order_date + datetime.timedelta(days=term_days)
+        return self.delivery_date + datetime.timedelta(days=term_days)
     
     def display_transportation_fee(self):
         return self.transportation_fee().quantize(Decimal('.01'), rounding=ROUND_UP)
@@ -1162,14 +1165,14 @@ class ShortOrderItems(object):
          self.order_items = order_items
 
 
-def shorts_for_date(order_date):
+def shorts_for_date(delivery_date):
     shorts = []
     maybes = {}
-    ois = OrderItem.objects.filter(order__order_date=order_date).exclude(order__state="Unsubmitted")
+    ois = OrderItem.objects.filter(order__delivery_date=delivery_date).exclude(order__state="Unsubmitted")
     for oi in ois:
         if not oi.product in maybes:
             maybes[oi.product] = ShortOrderItems(oi.product, 
-                oi.product.total_avail(order_date), Decimal("0"), Decimal("0"), [])
+                oi.product.total_avail(delivery_date), Decimal("0"), Decimal("0"), [])
         maybes[oi.product].total_ordered += (oi.quantity -oi.delivered_quantity())    
         maybes[oi.product].order_items.append(oi)
     for maybe in maybes:
@@ -1203,10 +1206,10 @@ class OrderItem(models.Model):
         super(OrderItem, self).delete()
     
     def total_avail(self):
-        return self.product.total_avail(self.order.order_date)
+        return self.product.total_avail(self.order.delivery_date)
     
     def total_ordered(self):
-        return self.product.total_ordered(self.order.order_date)
+        return self.product.total_ordered(self.order.delivery_date)
 
     def qty_short(self):
         avail = self.total_avail()
@@ -1254,12 +1257,12 @@ class OrderItem(models.Model):
         return ", ".join(procs)
     
     def distributor(self):
-        order_date = self.order.order_date
+        delivery_date = self.order.delivery_date
         plans = ProductPlan.objects.filter(
             product = self.product,
             producer = self.producer,
-            from_date__lte=order_date,
-            to_date__gte=order_date)
+            from_date__lte=delivery_date,
+            to_date__gte=delivery_date)
         if plans:
             return plans[0].distributor
         else:

@@ -82,7 +82,7 @@ def send_delivery_list(request):
                 request.user.message_set.create(message="Food Network does not exist")
 
             if food_network:
-                order_date = current_week()
+                delivery_date = current_week()
                 delivery_list = food_network.delivery_list()
                 for distributor in delivery_list:
                     dist = delivery_list[distributor]
@@ -91,7 +91,7 @@ def send_delivery_list(request):
                     users = [dist, food_network]
                     notification.send(users, "distribution_order_list", {
                             "order_list": order_list, 
-                            "order_date": order_date,
+                            "order_date": delivery_date,
                             "distributor": dist.distributor})
                 request.user.message_set.create(message="Order List emails have been sent")
         return HttpResponseRedirect(request.POST["next"])
@@ -110,7 +110,7 @@ def send_order_notices(request):
                 thisdate = current_week()
                 weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
                 weekend = weekstart + datetime.timedelta(days=5)
-                order_list = Order.objects.filter(order_date__range=(weekstart, weekend))
+                order_list = Order.objects.filter(delivery_date__range=(weekstart, weekend))
                 for order in order_list:
                     users = [order.customer, food_network]
                     notification.send(users, "distribution_order_notice", {
@@ -481,13 +481,13 @@ def inventory_update(request, prod_id, year, month, day):
 
 @login_required
 def order_selection(request):
-    init = {"order_date": current_week(),}
+    unpaid_orders = Order.objects.exclude(state__contains="Paid")
     if request.method == "POST":
         ihform = OrderSelectionForm(request.POST)  
         if ihform.is_valid():
             ihdata = ihform.cleaned_data
             customer_id = ihdata['customer']
-            ord_date = ihdata['order_date']
+            ord_date = ihdata['delivery_date']
             if ordering_by_lot():
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                    % ('distribution/orderbylot', customer_id, ord_date.year, ord_date.month, ord_date.day))
@@ -495,12 +495,31 @@ def order_selection(request):
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                    % ('distribution/orderupdate', customer_id, ord_date.year, ord_date.month, ord_date.day))
     else:
-        #ihform = OrderSelectionForm(initial={'order_date': orderdate, })
-    #return render_to_response('distribution/order_selection.html', {'order_date': orderdate, 'header_form': ihform})
-        ihform = OrderSelectionForm(initial=init)
-    return render_to_response('distribution/order_selection.html', {'header_form': ihform})
+        ihform = OrderSelectionForm()
+    return render_to_response(
+        'distribution/order_selection.html', 
+        {'header_form': ihform,
+         'unpaid_orders': unpaid_orders}, context_instance=RequestContext(request))
 
 
+    #init = {"delivery_date": current_week(),}
+    #if request.method == "POST":
+    #    ihform = OrderSelectionForm(request.POST)  
+    #    if ihform.is_valid():
+    #        ihdata = ihform.cleaned_data
+    #        customer_id = ihdata['customer']
+    #        ord_date = ihdata['delivery_date']
+    #        if ordering_by_lot():
+    #            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+    #               % ('distribution/orderbylot', customer_id, ord_date.year, ord_date.month, ord_date.day))
+    #        else:
+    #            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+    #               % ('distribution/orderupdate', customer_id, ord_date.year, ord_date.month, ord_date.day))
+    #else:)
+    #    ihform = OrderSelectionForm(initial=init)
+    #return render_to_response('distribution/order_selection.html', {'header_form': ihform})
+
+#todo: this whole view shd be changed a la PBC
 @login_required
 def order_update(request, cust_id, year, month, day):
     orderdate = datetime.date(int(year), int(month), int(day))
@@ -518,9 +537,9 @@ def order_update(request, cust_id, year, month, day):
         raise Http404
 
     try:
-        order = Order.objects.get(customer=customer, order_date=orderdate)
+        order = Order.objects.get(customer=customer, delivery_date=orderdate)
     except MultipleObjectsReturned:
-        order = Order.objects.filter(customer=customer, order_date=orderdate)[0]
+        order = Order.objects.filter(customer=customer, delivery_date=orderdate)[0]
     except Order.DoesNotExist:
         order = False
 
@@ -537,7 +556,7 @@ def order_update(request, cust_id, year, month, day):
             else:
                 the_order = ordform.save(commit=False)
                 the_order.customer = customer
-                the_order.order_date = orderdate
+                the_order.delivery_date = orderdate
                 the_order.save()
 
             order_data = ordform.cleaned_data
@@ -587,18 +606,18 @@ def order_update(request, cust_id, year, month, day):
         if order:
             ordform = OrderForm(order=order, instance=order)
         else:
-            ordform = OrderForm(initial={'customer': customer, 'order_date': orderdate, })
+            ordform = OrderForm(initial={'customer': customer, 'delivery_date': orderdate, })
         itemforms = create_order_item_forms(order, availdate, orderdate)
     return render_to_response('distribution/order_update.html', 
-        {'customer': customer, 'order': order, 'order_date': orderdate, 'avail_date': availdate, 'order_form': ordform, 'item_forms': itemforms})
+        {'customer': customer, 'order': order, 'delivery_date': orderdate, 'avail_date': availdate, 'order_form': ordform, 'item_forms': itemforms})
 
-def create_order_by_lot_forms(order, order_date, data=None):    
+def create_order_by_lot_forms(order, delivery_date, data=None):    
     try:
         food_network = FoodNetwork.objects.get(pk=1)
     except FoodNetwork.DoesNotExist:
         raise Http404
     
-    items = food_network.all_avail_items(order_date)
+    items = food_network.all_avail_items(delivery_date)
 
     initial_data = []
     
@@ -669,9 +688,9 @@ def order_by_lot(request, cust_id, year, month, day):
         raise Http404
 
     try:
-        order = Order.objects.get(customer=customer, order_date=orderdate)
+        order = Order.objects.get(customer=customer, delivery_date=orderdate)
     except MultipleObjectsReturned:
-        order = Order.objects.filter(customer=customer, order_date=orderdate)[0]
+        order = Order.objects.filter(customer=customer, delivery_date=orderdate)[0]
     except Order.DoesNotExist:
         order = False
 
@@ -688,7 +707,7 @@ def order_by_lot(request, cust_id, year, month, day):
             else:
                 the_order = ordform.save(commit=False)
                 the_order.customer = customer
-                the_order.order_date = orderdate
+                the_order.delivery_date = orderdate
                 the_order.save()
             order_data = ordform.cleaned_data
             transportation_fee = order_data["transportation_fee"]
@@ -771,19 +790,19 @@ def order_by_lot(request, cust_id, year, month, day):
             if order:
                 ordform = OrderForm(order=order, instance=order)
             else:
-                ordform = OrderForm(initial={'customer': customer, 'order_date': orderdate, })
+                ordform = OrderForm(initial={'customer': customer, 'delivery_date': orderdate, })
             formset = create_order_by_lot_forms(order, orderdate)                     
     else:
         if order:
             ordform = OrderForm(order=order, instance=order)
         else:
-            ordform = OrderForm(initial={'customer': customer, 'order_date': orderdate, })
+            ordform = OrderForm(initial={'customer': customer, 'delivery_date': orderdate, })
         formset = create_order_by_lot_forms(order, orderdate) 
         
     return render_to_response('distribution/order_by_lot.html', 
         {'customer': customer, 
          'order': order, 
-         'order_date': orderdate, 
+         'delivery_date': orderdate, 
          'order_form': ordform, 
          'formset': formset})    
 
@@ -825,13 +844,13 @@ def order_entry(request):
 
 @login_required
 def delivery_selection(request):
-    init = {"order_date": current_week(),}
+    init = {"delivery_date": current_week(),}
     if request.method == "POST":
         dsform = DeliverySelectionForm(request.POST)  
         if dsform.is_valid():
             dsdata = dsform.cleaned_data
             cust_id = dsdata['customer']
-            ord_date = dsdata['order_date']
+            ord_date = dsdata['delivery_date']
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                % ('distribution/deliveryupdate', cust_id, ord_date.year, ord_date.month, ord_date.day))
     else:
@@ -889,7 +908,7 @@ def delivery_update(request, cust_id, year, month, day):
                             delivery.to_whom = customer
                             delivery.order_item = order_item
                             delivery.unit_price = order_item.unit_price
-                            delivery.transaction_date = order_item.order.order_date
+                            delivery.transaction_date = order_item.order.delivery_date
                             delivery.transaction_type='Delivery'
                             delivery.save()
         return HttpResponseRedirect('/%s/%s/%s/%s/' 
@@ -897,7 +916,7 @@ def delivery_update(request, cust_id, year, month, day):
     else:
         itemforms = create_delivery_forms(thisdate, customer)
     return render_to_response('distribution/delivery_update.html', {
-        'order_date': thisdate, 
+        'delivery_date': thisdate, 
         'customer': customer, 
         'item_forms': itemforms,
         'lot_list': lot_list,
@@ -905,7 +924,7 @@ def delivery_update(request, cust_id, year, month, day):
 
 
 def order_headings_by_product(thisdate, links=True):
-    orders = Order.objects.filter(order_date=thisdate).exclude(state='Unsubmitted')
+    orders = Order.objects.filter(delivery_date=thisdate).exclude(state='Unsubmitted')
     heading_list = []
     for order in orders:
         lines = []
@@ -921,7 +940,7 @@ def order_headings_by_product(thisdate, links=True):
 
 
 def order_item_rows_by_product(thisdate):
-    orders = Order.objects.filter(order_date=thisdate).exclude(state='Unsubmitted')
+    orders = Order.objects.filter(delivery_date=thisdate).exclude(state='Unsubmitted')
     if not orders:
         return []
     #cust_list = []
@@ -942,7 +961,7 @@ def order_item_rows_by_product(thisdate):
             product_dict[prod.short_name] = [prod.parent_string(), prod.long_name, producers, totavail, totordered]
             for x in range(order_count):
                 product_dict[prod.short_name].append(' ')
-    items = OrderItem.objects.filter(order__order_date=thisdate)
+    items = OrderItem.objects.filter(order__delivery_date=thisdate)
     for item in items:
         prod_cell = order_list.index(item.order.id) + 5
         product_dict[item.product.short_name][prod_cell] = item.quantity
@@ -951,7 +970,7 @@ def order_item_rows_by_product(thisdate):
     return item_list
 
 def order_item_rows(thisdate):
-    orders = Order.objects.filter(order_date=thisdate).exclude(state='Unsubmitted')
+    orders = Order.objects.filter(delivery_date=thisdate).exclude(state='Unsubmitted')
     if not orders:
         return []
     cust_list = []
@@ -968,7 +987,7 @@ def order_item_rows(thisdate):
             product_dict[prod.id] = [prod.parent_string(), prod.long_name, producers, totavail, totordered]
             for x in range(cust_count):
                 product_dict[prod.id].append(' ')
-    items = OrderItem.objects.filter(order__order_date=thisdate)
+    items = OrderItem.objects.filter(order__delivery_date=thisdate)
     for item in items:
         prod_cell = cust_list.index(item.order.customer.id) + 5
         product_dict[item.product.id][prod_cell] = item.quantity
@@ -1012,10 +1031,10 @@ def order_table(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     date_string = thisdate.strftime('%Y_%m_%d')
     heading_list = ORDER_HEADINGS
-    orders = Order.objects.filter(order_date=thisdate)
+    orders = Order.objects.filter(delivery_date=thisdate)
     for order in orders:
         order.rows = order.orderitem_set.all().count()
-    item_list = OrderItem.objects.filter(order__order_date=thisdate)
+    item_list = OrderItem.objects.filter(order__delivery_date=thisdate)
     return render_to_response('distribution/order_table.html', 
         {'date': thisdate, 
          'datestring': date_string,
@@ -1036,14 +1055,14 @@ def order_table_by_product(request, year, month, day):
          'item_list': item_list})
 
 
-def order_csv(request, order_date):
-    thisdate = datetime.datetime(*time.strptime(order_date, '%Y_%m_%d')[0:5]).date()
+def order_csv(request, delivery_date):
+    thisdate = datetime.datetime(*time.strptime(delivery_date, '%Y_%m_%d')[0:5]).date()
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=ordersheet.csv'
     #thisdate = current_week()
     writer = csv.writer(response)
     writer.writerow(ORDER_HEADINGS)
-    for item in OrderItem.objects.filter(order__order_date=thisdate):
+    for item in OrderItem.objects.filter(order__delivery_date=thisdate):
         lot = item.lot()
         if lot:
             custodian = lot.custodian
@@ -1051,7 +1070,7 @@ def order_csv(request, order_date):
             custodian = ""            
         writer.writerow(
             [item.order.customer.long_name,
-             "".join(["#", str(item.order.id), " ", item.order.order_date.strftime('%Y-%m-%d')]),
+             "".join(["#", str(item.order.id), " ", item.order.delivery_date.strftime('%Y-%m-%d')]),
              lot,
              custodian,
              item.quantity]
@@ -1059,8 +1078,8 @@ def order_csv(request, order_date):
     return response
 
 
-def order_csv_by_product(request, order_date):
-    thisdate = datetime.datetime(*time.strptime(order_date, '%Y_%m_%d')[0:5]).date()
+def order_csv_by_product(request, delivery_date):
+    thisdate = datetime.datetime(*time.strptime(delivery_date, '%Y_%m_%d')[0:5]).date()
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=ordersheet.csv'
     product_heads = ['Category', 'Product', 'Producers', 'Avail', 'Ordered']
@@ -1106,7 +1125,7 @@ def shorts(request, year, month, day):
 def shorts_changes(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     changed_items = OrderItem.objects.filter(
-        order__order_date=thisdate,
+        order__delivery_date=thisdate,
         orig_qty__gt=Decimal("0")
     )
     return render_to_response('distribution/shorts_changes.html', 
@@ -1127,7 +1146,7 @@ def send_short_change_notices(request):
             if food_network:
                 thisdate = current_week()
                 changed_items = OrderItem.objects.filter(
-                    order__order_date=thisdate,
+                    order__delivery_date=thisdate,
                     orig_qty__gt=Decimal("0")
                 )
                 orders = {}
@@ -1141,7 +1160,7 @@ def send_short_change_notices(request):
                     notification.send(users, "distribution_short_change_notice", {
                         "order": order, 
                         "items": orders[order],
-                        "order_date": thisdate})
+                        "delivery_date": thisdate})
                 request.user.message_set.create(message="Short Change emails have been sent")
         return HttpResponseRedirect(request.POST["next"])
 
@@ -1333,7 +1352,7 @@ def dashboard(request):
             item_list.sort()
     return render_to_response('distribution/dashboard.html', 
         {'item_list': item_list,
-         'order_date': thisdate,
+         'delivery_date': thisdate,
          'week_form': week_form,
          'food_network_name': food_network_name, 
          'by_lot': by_lot,
@@ -1373,8 +1392,8 @@ def all_deliveries(request):
 @login_required
 def orders_with_deliveries(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
-    orderitem_list = OrderItem.objects.select_related().filter(order__order_date=thisdate).order_by('order', 'distribution_product.short_name')
-    return render_to_response('distribution/order_delivery_list.html', {'order_date': thisdate, 'orderitem_list': orderitem_list})
+    orderitem_list = OrderItem.objects.select_related().filter(order__delivery_date=thisdate).order_by('order', 'distribution_product.short_name')
+    return render_to_response('distribution/order_delivery_list.html', {'delivery_date': thisdate, 'orderitem_list': orderitem_list})
 
 @login_required
 def payment_selection(request):
@@ -1990,13 +2009,13 @@ def json_payments(request, producer_id):
 
 @login_required
 def invoice_selection(request):
-    init = {"order_date": current_week(),}
+    init = {"delivery_date": current_week(),}
     if request.method == "POST":
         dsform = DeliverySelectionForm(request.POST)  
         if dsform.is_valid():
             dsdata = dsform.cleaned_data
             cust_id = dsdata['customer']
-            ord_date = dsdata['order_date']
+            ord_date = dsdata['delivery_date']
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                % ('distribution/invoices', cust_id, ord_date.year, ord_date.month, ord_date.day))
     else:
@@ -2022,12 +2041,12 @@ def invoices(request, cust_id, year, month, day):
     if customer:
         orders = Order.objects.filter(
             customer=customer, 
-            order_date=thisdate,
+            delivery_date=thisdate,
             state__contains="Delivered"
         )
     else:
         orders = Order.objects.filter(
-            order_date=thisdate,
+            delivery_date=thisdate,
             state__contains="Delivered"
         )
     return render_to_response('distribution/invoices.html', {
