@@ -55,43 +55,44 @@
 
 	{% include "distribution/tabnav.html" %}
 
-	<div style="border: 2px solid grey; width: 40%; padding-left: 1em; padding-top: 1em;">
-    <form action="." method="POST" >
-        <table>
-            <tr>
-                <th style="text-align: right; " >{% trans "Customer" %}:</th>
-                <td>{{ header_form.customer }}</td>
+	<div style="border: 2px solid grey; width: 40%; padding-left: 1em;">
+		<h3>New order:</h3>
+	    <form action="." method="POST" >
+        	<table>
+	            <tr>
+        	        <th style="text-align: right; " >{% trans "Customer" %}:</th>
+                	<td>{{ header_form.customer }}</td>
 				{% if header_form.customer.errors %}
 					<td style="color: red; " >
 						{{ header_form.customer.errors }}
 					</td>
 				{% endif %}
-            </tr>
-            </tr>
-            <tr>
-                <th style="text-align: right; " >{% trans "Delivery date" %}:</th>
-                <td>{{ header_form.delivery_date}}</td>
+	            </tr>
+	            <tr>
+        	        <th style="text-align: right; " >{% trans "Delivery date" %}:</th>
+                	<td>{{ header_form.delivery_date}}</td>
 				{% if header_form.delivery_date.errors %}
 					<td style="color: red; " >
 						{{ header_form.delivery_date.errors }}
 					</td>
 				{% endif %}
-            </tr>
-            <tr>
-                <th style="text-align: right; " >{% trans "Contact" %}:</th>
-               <td  id="contact" >---</td>
-            </tr>
-            <tr>
-                <th style="text-align: right; " >{% trans "Phone" %}:</th>
-                <td id="phone" >---</td>
-            </tr>
-        </table>
+	            </tr>
+        	    <tr>
+                	<th style="text-align: right; " >{% trans "Contact" %}:</th>
+	               <td  id="contact" >---</td>
+        	    </tr>
+	            <tr>
+        	        <th style="text-align: right; " >{% trans "Phone" %}:</th>
+                	<td id="phone" >---</td>
+	            </tr>
+        	</table>
 
-        <p>
-            <input type="submit" value="{% trans 'Submit' %}" />
-        </p>
-	</form>
+	        <p>
+        	    <input type="submit" value="{% trans 'Submit' %}" />
+	        </p>
+	    </form>
 	</div>
+
 	{% if unpaid_orders %}
 		<div style="padding-left: 1em;">
 			<h4>Unpaid orders:</h4>
@@ -99,10 +100,10 @@
 			{% for order in unpaid_orders %}
 	
 				<li>
-					<a href="{% url order_with_lots order_id=order.id %}">
+					<a href="{% url distribution_order order_id=order.id %}">
 						#{{ order.id }} {{ order.customer }} 
 						Ordered: {{ order.order_date }} Delivery: {{ order.delivery_date }} 
-						${{ order.total_price }}
+						${{ order.grand_total }}
 					</a>&nbsp;&nbsp; 
 					{% comment %}
 					<a href="{% url change_order order_id=order.id %}">Change</a>

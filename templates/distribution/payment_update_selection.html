@@ -106,21 +106,47 @@
 
 	{% include "distribution/tabnav.html" %}
 
-    <form action="." method="POST" >
-        <table>
-            <tr>
-                <th style="text-align: right; " >{% trans "Member" %}:</th>
-                <td>{{ selection_form.producer }}</td>
-            </tr>
-            <tr>
-                <th style="text-align: right; " >{% trans "Payment" %}:</th>
-                <td>{{ selection_form.payment }}</td>
-            </tr>
-        </table>
+	<div style="border: 2px solid grey; width: 30%; padding-left: 1em;">
+		<h4>Payments to Members:</h4>
 
-        <p>
-            <input type="submit" value="{% trans 'Submit' %}" />
-        </p>
-    </form>
+	    <form action="." method="POST" >
+        	<table>
+	            <tr>
+        	        <th style="text-align: right; " >{% trans "Member" %}:</th>
+                	<td>{{ member_selection_form.producer }}</td>
+	            </tr>
+        	    <tr>
+                	<th style="text-align: right; " >{% trans "Payment" %}:</th>
+	                <td>{{ member_selection_form.payment }}</td>
+        	    </tr>
+	        </table>
+
+        	<p>
+	            <input name="submit-member-payments" type="submit" value="{% trans 'Submit' %}" />
+        	</p>
+	    </form>
+	</div>
+
+	<div style="border: 2px solid grey; width: 30%; padding-left: 1em;">
+		<h4>Payments from Customers:</h4>
+
+	    <form action="." method="POST" >
+        	<table>
+	            <tr>
+        	        <th style="text-align: right; " >{% trans "Customer" %}:</th>
+                	<td>{{ customer_selection_form.customer }}</td>
+	            </tr>
+        	    <tr>
+                	<th style="text-align: right; " >{% trans "Payment" %}:</th>
+	                <td>{{ customer_selection_form.payment }}</td>
+        	    </tr>
+	        </table>
+
+        	<p>
+	            <input name="submit-customer-payments" type="submit" value="{% trans 'Submit' %}" />
+        	</p>
+	    </form>
+	</div>
+
 </div>
 {% endblock %}

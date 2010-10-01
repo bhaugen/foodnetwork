@@ -252,7 +252,9 @@ class FoodNetwork(Party):
     customer_fee = models.DecimalField(_('customer_fee'), max_digits=3, decimal_places=2, default=Decimal("0"),
         help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
     producer_fee = models.DecimalField(_('producer_fee'), max_digits=3, decimal_places=2, default=Decimal("0"),
-        help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%')) 
+        help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
+    transportation_fee = models.DecimalField(_('transportation fee'), max_digits=8, decimal_places=2, default=Decimal("0"),
+        help_text=_('This fee will be added to all orders unless overridden on the Customer'))
     # next 2 fields are obsolete   
     #charge = models.DecimalField(_('charge'), max_digits=8, decimal_places=2, default=Decimal("0"),
     #    help_text=_('Charge will be added to all orders unless overridden on the Customer'))
@@ -275,9 +277,6 @@ class FoodNetwork(Party):
     @property
     def email(self):
         return self.email_address
-
-    def transportation_fee(self):
-        return self.charge
     
     def fresh_list(self, thisdate = None):
         if not thisdate:
@@ -440,11 +439,10 @@ class Distributor(Party):
 
 
 class Customer(Party):
-    #todo: since FN charge fields are obsolete, these probly are too
-    charge = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True,
-        help_text=_('Any value but 0 in this field will override the default charge from the Food Network'))
-    apply_charge = models.BooleanField(default=True,
-        help_text=_('Add the extra charge to all orders for this customer, or not?'))
+    customer_transportation_fee = models.DecimalField(_('customer transportation fee'), max_digits=8, decimal_places=2, default=Decimal("0"),
+        help_text=_('Any value but 0 in this field will override the default fee from the Food Network'))
+    apply_transportation_fee = models.BooleanField(_('apply transportation fee'), default=True,
+        help_text=_('Add transportation fee to all orders for this customer, or not?'))
 
     def __unicode__(self):
         return self.short_name
@@ -467,9 +465,13 @@ class Customer(Party):
         return Distributor.objects.all()[0]
 
     def transportation_fee(self):
-        #todo: revise when 5S fees are clear
-        # maybe add transportation_fee field to Customer or some logic on FoodNetwork
-        return FoodNetwork.objects.get(pk=1).transportation_fee()
+        if self.apply_transportation_fee:
+            if self.customer_transportation_fee:
+                return self.customer_transportation_fee
+            else:
+                return FoodNetwork.objects.get(pk=1).transportation_fee
+        else:
+            return Decimal("0")
 
     @property
     def email(self):
@@ -890,6 +892,11 @@ class EconomicEventManager(models.Manager):
         payments = Payment.objects.all().exclude(to_whom=fn)
         return payments
 
+    def payments_from_members(self):
+        fn = FoodNetwork.objects.get(pk=1)
+        payments = Payment.objects.all().filter(to_whom=fn)
+        return payments
+
 class EconomicEvent(models.Model):
     transaction_date = models.DateField(_('transaction_date'))
     from_whom = models.ForeignKey(Party, 
@@ -995,6 +1002,12 @@ class Payment(EconomicEvent):
                 paid.append(p)
         return paid
 
+    def orders_paid(self):
+        paid = []
+        for cp in self.paid_orders.all():
+            paid.append(cp.paid_order)
+        return paid
+
 
 class TransactionPayment(models.Model):
     """ Payment to Producer or Service provider
@@ -1021,7 +1034,7 @@ ORDER_STATES = (
 
 class Order(models.Model):
     customer = models.ForeignKey(Customer, verbose_name=_('customer'))
-    purchase_order = models.CharField(_('purchase order')max_length=64, blank=True)
+    purchase_order = models.CharField(_('purchase order'), max_length=64, blank=True)
     order_date = models.DateField(_('order date'))
     delivery_date = models.DateField(_('delivery date'))
     distributor = models.ForeignKey(Party, blank=True, null=True, 
@@ -1059,6 +1072,15 @@ class Order(models.Model):
             return True
         return False
     
+    def delete_payments(self):
+        for cp in self.customer_payments.all():
+            cp.delete()
+        if self.state == "Paid-Delivered" or self.state == "Delivered-Paid":
+            self.state = "Delivered"
+        else:
+            self.state = "Submitted"
+        self.save()
+
     def is_delivered(self):
         #todo: what about partials?
         if self.state == "Delivered" or self.state == "Paid-Delivered" or self.state == "Delivered-Paid":
@@ -1104,7 +1126,7 @@ class Order(models.Model):
             transportation_tx = TransportationTransaction.objects.get(order=self)
             return transportation_tx.amount
         except TransportationTransaction.DoesNotExist:
-            return FoodNetwork.objects.get(pk=1).transportation_fee()
+            return self.customer.transportation_fee()
     
     def total_price(self):
         items = self.orderitem_set.all()
@@ -1154,6 +1176,14 @@ class CustomerPayment(models.Model):
     payment = models.ForeignKey(Payment, 
         related_name="paid_orders", verbose_name=_('payment'))
     amount_paid = models.DecimalField(_('amount_paid'), max_digits=8, decimal_places=2)
+
+    def __unicode__(self):
+        amount_string = '$' + str(self.amount_paid)
+        return ' '.join([
+            "From:", self.payment.from_whom.short_name,
+            "Order:", str(self.paid_order.id),
+            "Paid:", self.payment.transaction_date.strftime('%Y-%m-%d'),
+            amount_string])
         
 
 class ShortOrderItems(object):

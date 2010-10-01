@@ -23,7 +23,7 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model = Order
-        exclude = ('customer', 'order_date')
+        exclude = ('customer', 'state', 'paid')
         
     def __init__(self, order=None, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)

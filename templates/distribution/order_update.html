@@ -238,10 +238,18 @@
                 <td>{{ customer }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >{% trans "Date" %}:</th>
-                <td>{{ order_date }}</td>
+		    <th style="text-align: right; " >{% trans "Purchase Order" %}:</th>
+                <td>{{ order_form.purchase_order }}</td>
             </tr>
-			<tr>
+             <tr>
+		     <th style="text-align: right; " >{% trans "Order Date" %}:</th>
+                <td>{{ order_form.order_date }}</td>
+             </tr>
+	     <tr>
+		     <th style="text-align: right; " >{% trans "Delivery Date" %}:</th>
+                <td>{{ order_form.delivery_date }}</td>
+            </tr>
+	    <tr>
                 <th style="text-align: right; " >{% trans "Distributor" %}:</th>
                 <td>{{ order_form.distributor }}</td>
             </tr>
@@ -249,11 +257,13 @@
                 <th style="text-align: right; " >{% trans "Transportation Fee" %}:</th>
                 <td>{{ order_form.transportation_fee }}</td>
             </tr>
-            <tr>
+	    {% comment %}
+	    <tr>
                 <th style="text-align: right; " >{% trans "Paid?" %}</th>
                 <td>{{ order_form.paid }}</td>
             </tr>
-            <tr>
+	    {% endcomment %}
+	    <tr>
                 <th style="text-align: right; " >{% trans "Contact" %}:</th>
                <td  id="contact" >{{ customer.contact }}</td>
             </tr>

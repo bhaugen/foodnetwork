@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
      Order
@@ -17,25 +18,33 @@
 
     <table style="margin-bottom: 1em;" >
         <tr>
-            <th style="text-align: right; " >Order Number: </th>
+            <th style="text-align: right; " >{% trans "Order Number" %}: </th>
             <td>{{order.id}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Customer: </th>
+            <th style="text-align: right; " >{% trans "Customer" %}: </th>
             <td>{{order.customer.short_name}} {{order.customer.long_name}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Date: </th>
-            <td>{{order.order_date}}</td>
+		<th style="text-align: right; " >{% trans "Purchase Order" %}: </th>
+            <td>{{order.purchase_order}}</td>
+        </tr>
+         <tr>
+            <th style="text-align: right; " >{% trans "Order Date" %}: </th>
+             <td>{{order.order_date}}</td>
+         </tr>
+ 		<tr>
+            <th style="text-align: right; " >{% trans "Delivery Date" %}: </th>
+            <td>{{order.delivery_date}}</td>
         </tr>
 	<tr>
-            <th style="text-align: right; " >Distributor: </th>
+            <th style="text-align: right; " >{% trans "Distributor" %}: </th>
             <td>{{order.distributor}}</td>
         </tr>
+
         <tr>
-            <th style="text-align: right; " >State:</th>
-            <td>{{order.state}}</td>
-        </tr>
+            <th style="text-align: right; " >{% trans "State" %}:</th>
+            <td>{{order.get_state_display}}</td>
     </table>
     <table class="ga-event-table" >
         <tr>
@@ -65,12 +74,6 @@
 			<td style="text-align: right;" >${{ order.total_price }}</td>
 		</tr>
 
-		{% if order.charge %}
-			<tr>
-				<th style="text-align: right;" >{{ order.charge_name }}:</th>
-				<td style="text-align: right;" >${{ order.charge }}</td>
-			</tr>
-		{% endif %}
 		{% if order.transportation_fee %}
 			<tr>
 				<th style="text-align: right;" >Transportation Fee:</th>

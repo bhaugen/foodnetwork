@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
      Order
@@ -63,8 +64,16 @@
             <td>{{order.customer.short_name}} {{order.customer.long_name}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >Date: </th>
-            <td>{{order.order_date}}</td>
+	    <th style="text-align: right; " >{% trans "Purchase Order" %}: </th>
+            <td>{{order.purchase_order}}</td>
+        </tr>
+         <tr>
+             <th style="text-align: right; " >{% trans "Order Date" %}: </th>
+             <td>{{order.order_date}}</td>
+         </tr>
+	<tr>
+            <th style="text-align: right; " >{% trans "Delivery Date" %}: </th>
+            <td>{{order.delivery_date}}</td>
         </tr>
 	<tr>
             <th style="text-align: right; " >Distributor: </th>

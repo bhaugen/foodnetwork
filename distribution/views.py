@@ -353,7 +353,7 @@ def planning_table(request, member_id, list_type, from_date, to_date):
             'tabnav': "distribution/tabnav.html",
             'nav_class': 'plan-update',
 
-        })
+        }, context_instance=RequestContext(request))
 
 
 @login_required
@@ -418,7 +418,8 @@ def inventory_selection(request):
         #ihform = InventorySelectionForm(initial={'avail_date': availdate, })
     #return render_to_response('distribution/inventory_selection.html', {'avail_date': availdate, 'header_form': ihform})
         ihform = InventorySelectionForm(initial=init)
-    return render_to_response('distribution/inventory_selection.html', {'header_form': ihform})
+    return render_to_response('distribution/inventory_selection.html', {
+        'header_form': ihform}, context_instance=RequestContext(request))
 
 @login_required
 def inventory_update(request, prod_id, year, month, day):
@@ -477,11 +478,14 @@ def inventory_update(request, prod_id, year, month, day):
                % ('distribution/produceravail', producer_id, year, month, day))
     else:
         itemforms = create_inventory_item_forms(producer, availdate)
-    return render_to_response('distribution/inventory_update.html', {'avail_date': availdate, 'producer': producer, 'item_forms': itemforms})
+    return render_to_response('distribution/inventory_update.html', {
+        'avail_date': availdate, 
+        'producer': producer, 
+        'item_forms': itemforms}, context_instance=RequestContext(request))
 
 @login_required
 def order_selection(request):
-    unpaid_orders = Order.objects.exclude(state__contains="Paid")
+    unpaid_orders = Order.objects.exclude(state__contains="Paid").exclude(state="Unsubmitted")
     if request.method == "POST":
         ihform = OrderSelectionForm(request.POST)  
         if ihform.is_valid():
@@ -522,8 +526,8 @@ def order_selection(request):
 #todo: this whole view shd be changed a la PBC
 @login_required
 def order_update(request, cust_id, year, month, day):
-    orderdate = datetime.date(int(year), int(month), int(day))
-    availdate = orderdate
+    delivery_date = datetime.date(int(year), int(month), int(day))
+    availdate = delivery_date
 
     try:
         fn = FoodNetwork.objects.get(pk=1)
@@ -537,9 +541,9 @@ def order_update(request, cust_id, year, month, day):
         raise Http404
 
     try:
-        order = Order.objects.get(customer=customer, delivery_date=orderdate)
+        order = Order.objects.get(customer=customer, delivery_date=delivery_date)
     except MultipleObjectsReturned:
-        order = Order.objects.filter(customer=customer, delivery_date=orderdate)[0]
+        order = Order.objects.filter(customer=customer, delivery_date=delivery_date)[0]
     except Order.DoesNotExist:
         order = False
 
@@ -547,16 +551,20 @@ def order_update(request, cust_id, year, month, day):
         if order:
             ordform = OrderForm(order=order, data=request.POST, instance=order)
         else:
-            ordform = OrderForm(data=request.POST)
+            ordform = OrderForm(data=request.POST, initial={
+                'customer': customer,
+                'order_date': datetime.date.today(),
+                'delivery_date': delivery_date, 
+                })
         #import pdb; pdb.set_trace()
-        itemforms = create_order_item_forms(order, availdate, orderdate, request.POST)     
+        itemforms = create_order_item_forms(order, availdate, delivery_date, request.POST)     
         if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
             if order:
                 the_order = ordform.save()
             else:
                 the_order = ordform.save(commit=False)
                 the_order.customer = customer
-                the_order.delivery_date = orderdate
+                #the_order.delivery_date = delivery_date
                 the_order.save()
 
             order_data = ordform.cleaned_data
@@ -579,7 +587,7 @@ def order_update(request, cust_id, year, month, day):
                         to_whom=customer,
                         order=the_order, 
                         amount=transportation_fee,
-                        transaction_date=orderdate)
+                        transaction_date=delivery_date)
                     transportation_tx.save()
 
             for itemform in itemforms:
@@ -594,8 +602,8 @@ def order_update(request, cust_id, year, month, day):
                     if qty > 0:
                         # these product gyrations wd not be needed if I cd make the product field readonly
                         # or display the product field value (instead of the input widget) in the template
-                        prodname = data['prodname']
-                        product = Product.objects.get(short_name__exact=prodname)
+                        prod_id = data['prod_id']
+                        product = Product.objects.get(pk=prod_id)
                         oi = itemform.save(commit=False)
                         oi.order = the_order
                         oi.product = product
@@ -606,10 +614,18 @@ def order_update(request, cust_id, year, month, day):
         if order:
             ordform = OrderForm(order=order, instance=order)
         else:
-            ordform = OrderForm(initial={'customer': customer, 'delivery_date': orderdate, })
-        itemforms = create_order_item_forms(order, availdate, orderdate)
+            ordform = OrderForm(initial={
+                'customer': customer,
+                'order_date': datetime.date.today(),
+                'delivery_date': delivery_date, })
+        itemforms = create_order_item_forms(order, availdate, delivery_date)
     return render_to_response('distribution/order_update.html', 
-        {'customer': customer, 'order': order, 'delivery_date': orderdate, 'avail_date': availdate, 'order_form': ordform, 'item_forms': itemforms})
+        {'customer': customer, 
+         'order': order, 
+         'delivery_date': delivery_date, 
+         'avail_date': availdate, 
+         'order_form': ordform, 
+         'item_forms': itemforms}, context_instance=RequestContext(request))
 
 def create_order_by_lot_forms(order, delivery_date, data=None):    
     try:
@@ -804,43 +820,7 @@ def order_by_lot(request, cust_id, year, month, day):
          'order': order, 
          'delivery_date': orderdate, 
          'order_form': ordform, 
-         'formset': formset})    
-
-@login_required
-def order_entry(request):
-    try:
-        fn = FoodNetwork.objects.get(pk=1)
-    except FoodNetwork.DoesNotExist:
-        return render_to_response('distribution/network_error.html')
-    # based on http://collingrady.com/2008/02/18/editing-multiple-objects-in-django-with-newforms/
-    # for now, avail date is Wednesday
-    #thisdate = datetime.date.today() +  datetime.timedelta(days=3)
-    availdate = datetime.date.today()
-    availdate = availdate - datetime.timedelta(days=datetime.date.weekday(availdate)) + datetime.timedelta(days=2)
-    orderdate = availdate + datetime.timedelta(days=1)
-    if request.method == "POST":
-        ordform = OrderForm(request.POST, instance=Order())
-        itemforms = create_order_item_forms(availdate, orderdate, request.POST)     
-        if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
-            new_order = ordform.save()
-            for itemform in itemforms:
-                data = itemform.cleaned_data
-                qty = data['quantity'] 
-                if qty > 0:
-                    # these product gyrations wd not be needed if I cd make the product field readonly
-                    # or display the product field value (instead of the input widget) in the template
-                    prodname = data['prodname']
-                    product = Product.objects.get(short_name__exact=prodname)
-                    oi = itemform.save(commit=False)
-                    oi.order = new_order
-                    oi.product = product
-                    oi.save()
-            return HttpResponseRedirect('/%s/%s/'
-               % ('distribution/order', new_order.id))
-    else:
-        ordform = OrderForm(initial={'order_date': orderdate, })
-        itemforms = create_order_item_forms(availdate, orderdate)
-    return render_to_response('distribution/order_entry.html', {'avail_date': availdate, 'order_form': ordform, 'item_forms': itemforms})
+         'formset': formset}, context_instance=RequestContext(request))    
 
 @login_required
 def delivery_selection(request):
@@ -857,7 +837,8 @@ def delivery_selection(request):
         #dsform = DeliverySelectionForm(initial={'order_date': order_date, })
     #return render_to_response('distribution/delivery_selection.html', {'order_date': order_date, 'header_form': dsform})
         dsform = DeliverySelectionForm(initial=init)
-    return render_to_response('distribution/delivery_selection.html', {'header_form': dsform})
+    return render_to_response('distribution/delivery_selection.html', 
+        {'header_form': dsform}, context_instance=RequestContext(request))
 
 @login_required
 def delivery_update(request, cust_id, year, month, day):
@@ -920,7 +901,7 @@ def delivery_update(request, cust_id, year, month, day):
         'customer': customer, 
         'item_forms': itemforms,
         'lot_list': lot_list,
-        })
+        }, context_instance=RequestContext(request))
 
 
 def order_headings_by_product(thisdate, links=True):
@@ -1022,7 +1003,7 @@ def order_table_selection(request):
             {
                 'dsform': dsform,
                 'show_shorts': not ordering_by_lot(),
-            })
+            }, context_instance=RequestContext(request))
 
 ORDER_HEADINGS = ["Customer", "Order", "Lot", "Custodian", "Order Qty"]
 
@@ -1040,7 +1021,7 @@ def order_table(request, year, month, day):
          'datestring': date_string,
          'heading_list': heading_list, 
          'item_list': item_list,
-         'orders': orders,})
+         'orders': orders,}, context_instance=RequestContext(request))
 
 @login_required
 def order_table_by_product(request, year, month, day):
@@ -1052,7 +1033,7 @@ def order_table_by_product(request, year, month, day):
         {'date': thisdate, 
          'datestring': date_string,
          'heading_list': heading_list, 
-         'item_list': item_list})
+         'item_list': item_list}, context_instance=RequestContext(request))
 
 
 def order_csv(request, delivery_date):
@@ -1119,7 +1100,7 @@ def shorts(request, year, month, day):
             % ('distribution/shortschanges', thisdate.year, thisdate.month, thisdate.day))
     return render_to_response('distribution/shorts.html', 
         {'date': thisdate, 
-         'shorts_table': shorts_table  })
+         'shorts_table': shorts_table }, context_instance=RequestContext(request))
 
 @login_required
 def shorts_changes(request, year, month, day):
@@ -1130,7 +1111,7 @@ def shorts_changes(request, year, month, day):
     )
     return render_to_response('distribution/shorts_changes.html', 
         {'date': thisdate, 
-         'changed_items': changed_items  })
+         'changed_items': changed_items }, context_instance=RequestContext(request))
 
 @login_required
 def send_short_change_notices(request):
@@ -1170,7 +1151,8 @@ def order(request, order_id):
         order = Order.objects.get(pk=order_id)
     except Order.DoesNotExist:
         raise Http404
-    return render_to_response('distribution/order.html', {'order': order})
+    return render_to_response('distribution/order.html', 
+        {'order': order}, context_instance=RequestContext(request))
 
 @login_required
 def order_with_lots(request, order_id):
@@ -1178,7 +1160,8 @@ def order_with_lots(request, order_id):
         order = Order.objects.get(pk=order_id)
     except Order.DoesNotExist:
         raise Http404
-    return render_to_response('distribution/order_with_lots.html', {'order': order})
+    return render_to_response('distribution/order_with_lots.html', 
+        {'order': order}, context_instance=RequestContext(request))
 
 @login_required
 def producerplan(request, prod_id):
@@ -1191,7 +1174,9 @@ def producerplan(request, prod_id):
         plan.parents = plan.product.parent_string()
     plans.sort(lambda x, y: cmp(x.parents, y.parents))
         
-    return render_to_response('distribution/producer_plan.html', {'member': member, 'plans': plans })
+    return render_to_response('distribution/producer_plan.html', 
+        {'member': member, 
+         'plans': plans }, context_instance=RequestContext(request))
 
 @login_required
 def supply_and_demand(request, from_date, to_date):
@@ -1206,7 +1191,7 @@ def supply_and_demand(request, from_date, to_date):
             'from_date': from_date,
             'to_date': to_date,
             'sdtable': sdtable,
-        })
+        }, context_instance=RequestContext(request))
 
 @login_required
 def income(request, from_date, to_date):
@@ -1221,7 +1206,7 @@ def income(request, from_date, to_date):
             'from_date': from_date,
             'to_date': to_date,
             'income_table': income_table,
-        })
+        }, context_instance=RequestContext(request))
 
 @login_required
 def member_supply_and_demand(request, from_date, to_date, member_id):
@@ -1245,7 +1230,7 @@ def member_supply_and_demand(request, from_date, to_date, member_id):
             'sdtable': sdtable,
             'member': member,
             'plan_type': plan_type,
-        })
+        }, context_instance=RequestContext(request))
 
 
 @login_required
@@ -1259,7 +1244,7 @@ def supply_and_demand_week(request, week_date):
         {
             'week_date': week_date,
             'sdtable': sdtable,
-        })
+        }, context_instance=RequestContext(request))
 
 
 @login_required
@@ -1274,7 +1259,10 @@ def produceravail(request, prod_id, year, month, day):
             (Q(onhand__gt=0) | Q(inventory_date__range=(weekstart, availdate))))
     except Party.DoesNotExist:
         raise Http404
-    return render_to_response('distribution/producer_avail.html', {'producer': producer, 'avail_date': weekstart, 'inventory': inventory })
+    return render_to_response('distribution/producer_avail.html', 
+        {'producer': producer, 
+         'avail_date': weekstart, 
+         'inventory': inventory }, context_instance=RequestContext(request))
 
 @login_required
 def meatavail(request, prod_id, year, month, day):
@@ -1288,7 +1276,10 @@ def meatavail(request, prod_id, year, month, day):
             (Q(onhand__gt=0) | Q(inventory_date__range=(weekstart, availdate))))
     except Party.DoesNotExist:
         raise Http404
-    return render_to_response('distribution/meat_avail.html', {'producer': producer, 'avail_date': weekstart, 'inventory': inventory })
+    return render_to_response('distribution/meat_avail.html', 
+        {'producer': producer, 
+         'avail_date': weekstart, 
+         'inventory': inventory }, context_instance=RequestContext(request))
 
 
 @login_required
@@ -1302,12 +1293,12 @@ def all_avail(request):
     )
 
 
-def welcome(request):
-    return render_to_response('welcome.html')
+#def welcome(request):
+#    return render_to_response('welcome.html')
 
 #changed help to flatpage
-def help(request):
-    return render_to_response('distribution/help.html')
+#def help(request):
+#    return render_to_response('distribution/help.html')
 
 
 class ProductActivity():
@@ -1393,7 +1384,9 @@ def all_deliveries(request):
 def orders_with_deliveries(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     orderitem_list = OrderItem.objects.select_related().filter(order__delivery_date=thisdate).order_by('order', 'distribution_product.short_name')
-    return render_to_response('distribution/order_delivery_list.html', {'delivery_date': thisdate, 'orderitem_list': orderitem_list})
+    return render_to_response('distribution/order_delivery_list.html', 
+        {'delivery_date': thisdate, 
+         'orderitem_list': orderitem_list}, context_instance=RequestContext(request))
 
 @login_required
 def payment_selection(request):
@@ -1417,7 +1410,8 @@ def payment_selection(request):
         #ihform = PaymentSelectionForm(initial={'from_date': thisdate, 'to_date': thisdate })
     #return render_to_response('distribution/payment_selection.html', {'avail_date': thisdate, 'header_form': ihform})
         ihform = PaymentSelectionForm(initial=init)
-    return render_to_response('distribution/payment_selection.html', {'header_form': ihform})
+    return render_to_response('distribution/payment_selection.html', 
+        {'header_form': ihform}, context_instance=RequestContext(request))
 
 @login_required
 def statement_selection(request):
@@ -1431,7 +1425,8 @@ def statement_selection(request):
                % ('distribution/statements', from_date, to_date))
     else:
         hdrform = StatementSelectionForm()
-    return render_to_response('distribution/statement_selection.html', {'header_form': hdrform})
+    return render_to_response('distribution/statement_selection.html', 
+        {'header_form': hdrform}, context_instance=RequestContext(request))
 
 @login_required
 def statements(request, from_date, to_date):
@@ -1450,7 +1445,8 @@ def statements(request, from_date, to_date):
         transaction_date__gte=from_date, 
         transaction_date__lte=to_date).exclude(to_whom=network)
     return render_to_response('distribution/statements.html', 
-              {'payments': payments, 'network': network, })   
+        {'payments': payments, 
+         'network': network, }, context_instance=RequestContext(request))   
 
 @login_required
 def producer_payments(request, prod_id, from_date, to_date, due, paid_member):
@@ -1919,21 +1915,39 @@ def all_producer_payments(from_date, to_date, due, paid_member):
 @login_required
 def payment(request, payment_id):
     payment = get_object_or_404(Payment, pk=payment_id)
-    return render_to_response('distribution/payment.html', {'payment': payment})
+    return render_to_response('distribution/payment.html', 
+        {'payment': payment}, context_instance=RequestContext(request))
+
+@login_required
+def customer_payment(request, payment_id):
+    payment = get_object_or_404(Payment, pk=payment_id)
+    return render_to_response('distribution/customer_payment.html', 
+        {'payment': payment}, context_instance=RequestContext(request))
 
 @login_required
 def payment_update_selection(request):
+    msform = PaymentUpdateSelectionForm(data=request.POST or None)
+    csform = CustomerPaymentSelectionForm(data=request.POST or None)
     if request.method == "POST":
-        psform = PaymentUpdateSelectionForm(request.POST)  
-        if psform.is_valid():
-            psdata = psform.cleaned_data
-            producer = psdata['producer'] if psdata['producer'] else 0
-            payment = psdata['payment'] if psdata['payment'] else 0
-            return HttpResponseRedirect('/%s/%s/%s/'
-               % ('distribution/paymentupdate', producer, payment))
-    else:
-        psform = PaymentUpdateSelectionForm()
-    return render_to_response('distribution/payment_update_selection.html', {'selection_form': psform})
+        if request.POST.get('submit-member-payments'):
+            if msform.is_valid():
+                msdata = msform.cleaned_data
+                producer = msdata['producer'] if msdata['producer'] else 0
+                payment = msdata['payment'] if msdata['payment'] else 0
+                return HttpResponseRedirect('/%s/%s/%s/'
+                   % ('distribution/paymentupdate', producer, payment))
+    if request.method == "POST":
+        if request.POST.get('submit-customer-payments'):
+            if csform.is_valid():
+                csdata = csform.cleaned_data
+                customer = csdata['customer'] if csdata['customer'] else 0
+                payment = csdata['payment'] if csdata['payment'] else 0
+                return HttpResponseRedirect('/%s/%s/%s/'
+                   % ('distribution/customerpaymentupdate', customer, payment))
+    return render_to_response('distribution/payment_update_selection.html', {
+        'member_selection_form': msform,
+        'customer_selection_form': csform,
+    }, context_instance=RequestContext(request))
 
 @login_required
 def payment_update(request, producer_id, payment_id):
@@ -2000,7 +2014,75 @@ def payment_update(request, producer_id, payment_id):
         paymentform.fields['to_whom'].choices = [(producer.id, producer.short_name)]
         itemforms = create_payment_transaction_forms(producer, payment)
     return render_to_response('distribution/payment_update.html', 
-        {'payment': payment, 'payment_form': paymentform, 'item_forms': itemforms})
+        {'payment': payment, 
+         'payment_form': paymentform, 
+         'item_forms': itemforms}, context_instance=RequestContext(request))
+
+@login_required
+def customer_payment_update(request, customer_id, payment_id):
+
+    try:
+        food_net = FoodNetwork.objects.get(pk=1)
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
+
+    customer_id = int(customer_id)
+    if customer_id:
+        customer = get_object_or_404(Party, pk=customer_id)
+    else:
+        customer = ''
+
+    payment_id = int(payment_id)
+    if payment_id:
+        payment = get_object_or_404(Payment, pk=payment_id)
+        #import pdb; pdb.set_trace()
+        customer = payment.from_whom
+    else:
+        payment = ''
+
+    if payment:
+        paymentform = CustomerPaymentForm(data=request.POST or None, instance=payment)
+    else:
+        paymentform = CustomerPaymentForm(data=request.POST or None,
+            initial={"transaction_date": datetime.date.today()})
+
+    itemforms = create_customer_payment_transaction_forms(
+        customer=customer, payment=payment, data=request.POST or None)
+
+    if request.method == "POST":
+        if paymentform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
+            the_payment = paymentform.save(commit=False)
+            the_payment.from_whom = customer
+            the_payment.to_whom = food_net
+            the_payment.save()
+            for itemform in itemforms:
+                data = itemform.cleaned_data
+                paid = data['paid']
+                order_id = data['order_id']
+                order = Order.objects.get(pk=order_id)
+                if paid:
+                    # todo: assuming here that payments always pay the full tx.due_to_member
+                    # todo: register_payment shd work like delete_payments
+                    if not order.is_paid():
+                        cp = CustomerPayment(
+                            paid_order = order,
+                            payment = the_payment,
+                            amount_paid = order.grand_total())
+                        cp.save()
+                        order.register_customer_payment()
+                else:
+                    order.delete_payments()
+            return HttpResponseRedirect('/%s/%s/'
+               % ('distribution/customerpayment', the_payment.id))
+        else:
+            import pdb; pdb.set_trace()
+        
+    return render_to_response('distribution/customer_payment_update.html', 
+        {'payment': payment,
+         'customer': customer,
+         'payment_form': paymentform, 
+         'item_forms': itemforms}, context_instance=RequestContext(request))
+
 
 def json_payments(request, producer_id):
     # todo: shd limit to a few most recent payments
@@ -2020,7 +2102,8 @@ def invoice_selection(request):
                % ('distribution/invoices', cust_id, ord_date.year, ord_date.month, ord_date.day))
     else:
         dsform = DeliverySelectionForm(initial=init)
-    return render_to_response('distribution/invoice_selection.html', {'header_form': dsform})
+    return render_to_response('distribution/invoice_selection.html', 
+        {'header_form': dsform}, context_instance=RequestContext(request))
 
 @login_required
 def invoices(request, cust_id, year, month, day):
@@ -2053,7 +2136,7 @@ def invoices(request, cust_id, year, month, day):
         'orders': orders, 
         'network': fn,
         'tabnav': "distribution/tabnav.html",
-    })
+    }, context_instance=RequestContext(request))
 
 
 def advance_dates():
@@ -2279,7 +2362,7 @@ def meat_update(request, prod_id, year, month, day):
     return render_to_response('distribution/meat_update.html', {
         'avail_date': avail_date, 
         'producer': producer,
-        'formset': formset})
+        'formset': formset}, context_instance=RequestContext(request))
 
 @login_required
 def process_selection(request):
@@ -2299,7 +2382,7 @@ def process_selection(request):
     return render_to_response('distribution/process_selection.html', {
         'process_date': process_date,
         'header_form': psform,
-        'processes': processes,})
+        'processes': processes,}, context_instance=RequestContext(request))
 
 @login_required
 def new_process(request, process_type_id):
@@ -2443,7 +2526,7 @@ def new_process(request, process_type_id):
         'service_label': service_label,
         'output_formset': output_formset,
         'output_label': output_label,
-        })  
+        }, context_instance=RequestContext(request))  
 
 @login_required
 def edit_process(request, process_id):
@@ -2456,7 +2539,8 @@ def edit_process(request, process_id):
 @login_required
 def process(request, process_id):
     process = get_object_or_404(Process, id=process_id)
-    return render_to_response('distribution/process.html', {"process": process,})
+    return render_to_response('distribution/process.html', 
+        {"process": process,}, context_instance=RequestContext(request))
 
 @login_required
 def delete_process_confirmation(request, process_id):
@@ -2486,7 +2570,7 @@ def delete_process_confirmation(request, process_id):
             "inputs": inputs,
             "outputs_with_lot": outputs_with_lot,
             "inputs_with_lot": inputs_with_lot,
-            })
+            }, context_instance=RequestContext(request))
 
 @login_required
 def delete_process(request, process_id):

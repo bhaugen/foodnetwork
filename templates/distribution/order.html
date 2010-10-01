@@ -29,11 +29,19 @@
             <th style="text-align: right; " >{% trans "Customer" %}: </th>
             <td>{{order.customer.short_name}} {{order.customer.long_name}}</td>
         </tr>
-        <tr>
-            <th style="text-align: right; " >{% trans "Date" %}: </th>
-            <td>{{order.order_date}}</td>
+	<tr>
+		<th style="text-align: right; " >{% trans "Purchase Order" %}: </th>
+            <td>{{order.purchase_order}}</td>
         </tr>
-		<tr>
+         <tr>
+            <th style="text-align: right; " >{% trans "Order Date" %}: </th>
+             <td>{{order.order_date}}</td>
+         </tr>
+ 		<tr>
+            <th style="text-align: right; " >{% trans "Delivery Date" %}: </th>
+            <td>{{order.delivery_date}}</td>
+        </tr>
+	<tr>
             <th style="text-align: right; " >{% trans "Distributor" %}: </th>
             <td>{{order.distributor}}</td>
         </tr>
@@ -42,8 +50,8 @@
             <td>{{order.transportation_fee}}</td>
         </tr>
         <tr>
-            <th style="text-align: right; " >{% trans "Paid?" %}</th>
-            <td>{{order.paid}}</td>
+            <th style="text-align: right; " >{% trans "State" %}:</th>
+            <td>{{order.get_state_display}}</td>
         </tr>
     </table>
     <table class="ga-event-table" >
@@ -67,15 +75,25 @@
         {% endfor %}
     </table>
     <table style="margin-top: 1em; margin-left: 3em; " >
-		{% if order.charge %}
+		<tr>
+			<th style="text-align: right;" >Total Price:</th>
+			<td style="text-align: right;" >${{ order.total_price }}</td>
+		</tr>
+
+		{% if order.transportation_fee %}
 			<tr>
-				<th style="text-align: right;" >{{ order.charge_name }}:</th>
-				<td style="text-align: right;" >${{ order.charge }}</td>
+				<th style="text-align: right;" >Transportation Fee:</th>
+				<td style="text-align: right;" >${{ order.display_transportation_fee }}</td>
 			</tr>
 		{% endif %}
 		<tr>
-			<th style="text-align: right;" >{% trans "Total" %}:</th>
-			<td style="text-align: right;" >${{ order.total_price }}</td>
+			<th style="text-align: right;" >Co-op Fee:</th>
+			<td style="text-align: right;" >${{ order.coop_fee }}</td>
+		</tr>
+
+		<tr>
+			<th style="text-align: right;" >Grand Total:</th>
+			<td style="text-align: right;" >${{ order.grand_total }}</td>
 		</tr>
     </table>
     

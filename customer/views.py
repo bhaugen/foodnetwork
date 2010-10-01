@@ -363,8 +363,8 @@ def planning_table(request, member_id, list_type, from_date, to_date):
 
 @login_required
 def new_order(request, cust_id, year, month, day, list_id=None):
-    orderdate = datetime.date(int(year), int(month), int(day))
-    availdate = orderdate
+    delivery_date = datetime.date(int(year), int(month), int(day))
+    availdate = delivery_date
 
     order = None
 
@@ -379,12 +379,11 @@ def new_order(request, cust_id, year, month, day, list_id=None):
     if request.method == "POST":
         ordform = OrderForm(data=request.POST)
         #import pdb; pdb.set_trace()
-        itemforms = create_order_item_forms(order, product_list, availdate, orderdate, request.POST)     
+        itemforms = create_order_item_forms(order, product_list, availdate, delivery_date, request.POST)     
         if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
             the_order = ordform.save(commit=False)
             the_order.customer = customer
             the_order.distributor = customer.distributor()
-            the_order.order_date = orderdate
             the_order.state = "Unsubmitted"
             the_order.save()
 
@@ -392,12 +391,16 @@ def new_order(request, cust_id, year, month, day, list_id=None):
             return HttpResponseRedirect('/%s/%s/'
                % ('customer/orderconfirmation', the_order.id))
     else:
-        ordform = OrderForm(initial={'customer': customer, 'order_date': orderdate, })
-        itemforms = create_order_item_forms(order, product_list, availdate, orderdate)
+        ordform = OrderForm(initial={
+            'customer': customer, 
+            'order_date': datetime.date.today(),
+            'delivery_date': delivery_date,
+        })
+        itemforms = create_order_item_forms(order, product_list, availdate, delivery_date)
     return render_to_response('customer/order_update.html', 
         {'customer': customer, 
          'order': order, 
-         'order_date': orderdate, 
+         'delivery_date': delivery_date, 
          'avail_date': availdate, 
          'order_form': ordform, 
          'item_forms': itemforms}, context_instance=RequestContext(request))

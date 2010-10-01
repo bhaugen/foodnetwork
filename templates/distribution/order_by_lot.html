@@ -112,7 +112,7 @@
 		function finishQuantityChange(evt)
 		{
 			var row = evt.target.id.split('-');
-			row = row[0] + '-' + row[1]
+			row = row[0] + '-' + row[1];
 			limitOrderQty(row);
 			extendPriceForRow(row);
 		}
@@ -167,10 +167,10 @@
 			var queryNodes = dojo.query(".quantity-field");
 			for(var i=0;i<queryNodes.length;i++)
 			{
-				var node = queryNodes[i]
+				var node = queryNodes[i];
 				dojo.connect(node, "onblur", "quantityChanged");
 				var row = node.id.split('-');
-				row = row[0] + '-' + row[1]
+				row = row[0] + '-' + row[1];
 				extendPriceForRow(row);
 				thisOrderQty[node.id] = node.value;
 			}

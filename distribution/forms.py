@@ -77,8 +77,10 @@ class ProducerForm(forms.ModelForm):
                 raise forms.ValidationError("Someone already has that member id")
         return member_id
 
+
 class CurrentWeekForm(forms.Form):
     current_week = forms.DateField(widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}" }))
+
 
 class PaymentUpdateSelectionForm(forms.Form):
     producer = forms.ChoiceField(required=False)
@@ -87,6 +89,16 @@ class PaymentUpdateSelectionForm(forms.Form):
         super(PaymentUpdateSelectionForm, self).__init__(*args, **kwargs)
         self.fields['producer'].choices = [('', '----------')] + [(prod.id, prod.short_name) for prod in Party.subclass_objects.payable_members()]
         self.fields['payment'].choices = [('', 'New')] + [(payment.id, payment) for payment in EconomicEvent.objects.payments_to_members()]
+
+
+class CustomerPaymentSelectionForm(forms.Form):
+    customer = forms.ChoiceField(required=False)
+    payment = forms.ChoiceField(required=False)
+    def __init__(self, *args, **kwargs):
+        super(CustomerPaymentSelectionForm, self).__init__(*args, **kwargs)
+        self.fields['customer'].choices = [('', '----------')] + [(cust.id, cust.short_name) for cust in Customer.objects.all()]
+        self.fields['payment'].choices = [('', 'New')] + [(payment.id, payment) for payment in EconomicEvent.objects.payments_from_members()]
+
 
 class PaymentTransactionForm(forms.Form):
     transaction_id = forms.CharField(widget=forms.HiddenInput)
@@ -104,6 +116,54 @@ class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
         exclude = ('from_whom', 'notes')
+
+
+class CustomerPaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        exclude = ('from_whom', 'to_whom', 'notes')
+
+
+class CustomerPaymentTransactionForm(forms.Form):
+    order_id = forms.CharField(widget=forms.HiddenInput)
+    amount_due=forms.DecimalField(widget=forms.TextInput(attrs={'readonly':'true', 'class': 'read-only-input', 'size': '8'}))
+    paid=forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'paid',}))
+
+
+def create_customer_payment_transaction_form(order, pay_all, data=None):
+    if pay_all:
+        paid = True
+    else:
+        paid = not not order.is_paid()
+    the_form = CustomerPaymentTransactionForm(data, prefix=order.id, initial={
+        'order_id': order.id,
+        'amount_due': order.grand_total(),
+        'paid': paid,
+        })
+    the_form.order = order
+    the_form.delivery_date = order.delivery_date
+    return the_form
+
+def create_customer_payment_transaction_forms(customer=None, payment=None, data=None):
+    form_list = []
+    if not customer:
+        if payment:
+            customer = payment.from_whom
+        else:
+            return form_list
+    pay_all = True
+    if payment:
+        pay_all = False
+
+        for order in payment.orders_paid():
+            form_list.append(create_customer_payment_transaction_form(order, pay_all, data))
+
+    for order in Order.objects.filter(customer=customer):
+        if not order.is_paid():
+            form_list.append(create_customer_payment_transaction_form(order, pay_all, data))
+
+    return form_list
+
 
 def create_payment_transaction_form(inventory_transaction, pay_all, data=None):
     order = 'None'
@@ -663,7 +723,7 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model = Order
-        exclude = ('customer', 'order_date')
+        exclude = ('customer', 'state', 'paid')
         
     def __init__(self, order=None, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
@@ -680,8 +740,8 @@ class OrderForm(forms.ModelForm):
 
 
 class OrderItemForm(forms.ModelForm):
-     parents = forms.CharField(required=False, widget=forms.TextInput(attrs={'readonly':'true', 'class': 'read-only-input', 'size': '12'}))
-     prodname = forms.CharField(widget=forms.HiddenInput)
+     #parents = forms.CharField(required=False, widget=forms.TextInput(attrs={'readonly':'true', 'class': 'read-only-input', 'size': '12'}))
+     prod_id = forms.CharField(widget=forms.HiddenInput)
      #description = forms.CharField(widget=forms.TextInput(attrs={'readonly':'true', 'class': 'read-only-input'}))
      #producers = forms.CharField(required=False, widget=forms.TextInput(attrs={'readonly':'true', 'class': 'read-only-input', 'size': '12'}))
      avail = forms.DecimalField(widget=forms.TextInput(attrs={'readonly':'true', 'class': 'read-only-input', 'size': '6', 'style': 'text-align: right;'}))
@@ -720,22 +780,23 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
             # no, it is because those shd not be fields, but just strings
             producers = prod.avail_producers(availdate)
             oiform = OrderItemForm(data, prefix=prod.short_name, instance=item)
-            oiform.fields['parents'].widget.attrs['value'] = prod.parents
-            oiform.fields['prodname'].widget.attrs['value'] = prod.short_name
+            #oiform.fields['parents'].widget.attrs['value'] = prod.parents
+            oiform.fields['prod_id'].widget.attrs['value'] = prod.id
             #oiform.fields['description'].widget.attrs['value'] = prod.long_name
             #oiform.fields['producers'].widget.attrs['value'] = producers
             oiform.fields['avail'].widget.attrs['value'] = totavail
             oiform.fields['ordered'].widget.attrs['value'] = totordered
             oiform.producers = producers
             oiform.description = prod.long_name
+            oiform.parents = prod.parents
             form_list.append(oiform)
         else:
             #fee = prod.decide_fee()
             if totavail > 0:
                 producers = prod.avail_producers(availdate)
                 oiform = OrderItemForm(data, prefix=prod.short_name, initial={
-                    'parents': prod.parents, 
-                    'prodname': prod.short_name, 
+                    #'parents': prod.parents, 
+                    'prod_id': prod.id, 
                     'description': prod.long_name, 
                     #'producers': producers,
                     'avail': totavail, 
@@ -745,6 +806,7 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
                     'quantity': 0})
                 oiform.description = prod.long_name
                 oiform.producers = producers
+                oiform.parents = prod.parents
                 form_list.append(oiform)
     return form_list
 
