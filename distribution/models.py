@@ -27,14 +27,6 @@ def producer_fee():
         answer = 0
     return answer
 
-def default_charge():
-    charge = 0
-    try:
-        charge = FoodNetwork.objects.get(pk=1).charge
-    except FoodNetwork.DoesNotExist:
-        charge = 0
-    return charge
-
 def current_week():
     answer = datetime.date.today()
     try:
@@ -48,13 +40,6 @@ def ordering_by_lot():
         answer = FoodNetwork.objects.get(pk=1).order_by_lot
     except FoodNetwork.DoesNotExist:
         answer = False
-    return answer
-
-def charge_name():
-    try:
-        answer = FoodNetwork.objects.get(pk=1).charge_name
-    except:
-        answer = 'Delivery Charge'
     return answer
 
 def customer_terms():
@@ -255,10 +240,6 @@ class FoodNetwork(Party):
         help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
     transportation_fee = models.DecimalField(_('transportation fee'), max_digits=8, decimal_places=2, default=Decimal("0"),
         help_text=_('This fee will be added to all orders unless overridden on the Customer'))
-    # next 2 fields are obsolete   
-    #charge = models.DecimalField(_('charge'), max_digits=8, decimal_places=2, default=Decimal("0"),
-    #    help_text=_('Charge will be added to all orders unless overridden on the Customer'))
-    #charge_name = models.CharField(_('charge_name'), max_length=32, blank=True, default='Delivery charge')
     current_week = models.DateField(_('current_week'), default=datetime.date.today, 
         help_text=_('Current week for distribution availability and orders'))
     order_by_lot = models.BooleanField(_('order_by_lot'), default=False, 
@@ -449,15 +430,6 @@ class Customer(Party):
 
     def formatted_address(self):
         return self.address.split(',')
-
-    def order_charge(self):
-        answer = Decimal(0)
-        if self.apply_charge:
-            if self.charge:
-                answer = self.charge
-            else:
-                answer = default_charge()
-        return answer
     
     def distributor(self):
         #todo: revise when 5S distributor assignments are clear
@@ -1114,12 +1086,6 @@ class Order(models.Model):
     def register_customer_payment(self):
         if self.set_paid_state():
             self.save()
-
-    def charge_name(self):
-        return charge_name()
-    
-    def charge(self):
-        return self.customer.order_charge()
 
     def transportation_fee(self):
         try:

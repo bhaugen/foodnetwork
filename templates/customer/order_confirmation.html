@@ -121,12 +121,7 @@
 			<td style="text-align: right;" >${{ order.total_price }}</td>
 		</tr>
 
-		{% if order.charge %}
-			<tr>
-				<th style="text-align: right;" >{{ order.charge_name }}:</th>
-				<td style="text-align: right;" >${{ order.charge }}</td>
-			</tr>
-		{% endif %}
+
 		{% if order.transportation_fee %}
 			<tr>
 				<th style="text-align: right;" >Transportation Fee:</th>

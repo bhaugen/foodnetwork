@@ -64,15 +64,25 @@
         {% endfor %}
     </table>
     <table style="margin-top: 1em; margin-left: 3em; " >
-		{% if order.charge %}
+		<tr>
+			<th style="text-align: right;" >Total Price:</th>
+			<td style="text-align: right;" >${{ order.total_price }}</td>
+		</tr>
+
+		{% if order.transportation_fee %}
 			<tr>
-				<th style="text-align: right;" >{{ order.charge_name }}:</th>
-				<td style="text-align: right;" >${{ order.charge }}</td>
+				<th style="text-align: right;" >Transportation Fee:</th>
+				<td style="text-align: right;" >${{ order.display_transportation_fee }}</td>
 			</tr>
 		{% endif %}
 		<tr>
-			<th style="text-align: right;" >{% trans "Total" %}:</th>
-			<td style="text-align: right;" >${{ order.total_price }}</td>
+			<th style="text-align: right;" >Co-op Fee:</th>
+			<td style="text-align: right;" >${{ order.coop_fee }}</td>
+		</tr>
+
+		<tr>
+			<th style="text-align: right;" >Grand Total:</th>
+			<td style="text-align: right;" >${{ order.grand_total }}</td>
 		</tr>
     </table>
 {% endblock %} 
