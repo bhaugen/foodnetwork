@@ -34,9 +34,16 @@ def customer_dashboard(request):
     food_network = FoodNetwork.objects.get(pk=1)
     #todo: all uses of the next statement shd be changed
     customer = request.user.parties.all()[0].party
+    cw = current_week()
+    weekstart = cw - datetime.timedelta(days=datetime.date.weekday(cw))
+    weekend = weekstart + datetime.timedelta(days=5)
+    specials = Special.objects.filter(
+        from_date__lte=weekend,
+        to_date__gte=weekstart)
     return render_to_response('customer/customer_dashboard.html', 
         {'customer': customer,
          'food_network': food_network,
+         'specials': specials,
          }, context_instance=RequestContext(request))
 
 def order_selection(request):
@@ -379,7 +386,7 @@ def new_order(request, cust_id, year, month, day, list_id=None):
     if request.method == "POST":
         ordform = OrderForm(data=request.POST)
         #import pdb; pdb.set_trace()
-        itemforms = create_order_item_forms(order, product_list, availdate, delivery_date, request.POST)     
+        itemforms = create_order_item_forms(order, product_list, availdate, request.POST)     
         if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
             the_order = ordform.save(commit=False)
             the_order.customer = customer
@@ -396,7 +403,7 @@ def new_order(request, cust_id, year, month, day, list_id=None):
             'order_date': datetime.date.today(),
             'delivery_date': delivery_date,
         })
-        itemforms = create_order_item_forms(order, product_list, availdate, delivery_date)
+        itemforms = create_order_item_forms(order, product_list, availdate)
     return render_to_response('customer/order_update.html', 
         {'customer': customer, 
          'order': order, 
@@ -418,14 +425,14 @@ def edit_order(request, order_id):
     if request.method == "POST":
         ordform = OrderForm(data=request.POST)
         #import pdb; pdb.set_trace()
-        itemforms = create_order_item_forms(order, product_list, availdate, orderdate, request.POST)     
+        itemforms = create_order_item_forms(order, product_list, availdate, request.POST)     
         if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
             update_order(order, itemforms)
             return HttpResponseRedirect('/%s/%s/'
                % ('customer/orderconfirmation', order.id))
     else:
         ordform = OrderForm(instance=order)
-        itemforms = create_order_item_forms(order, product_list, availdate, orderdate)
+        itemforms = create_order_item_forms(order, product_list, availdate)
     return render_to_response('customer/order_update.html', 
         {'customer': customer, 
          'order': order, 

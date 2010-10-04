@@ -83,7 +83,7 @@
 					<td>{{ orderitem.product.long_name }}</td>
 					<td>{{ orderitem.producers }}</td>
 					<td style="text-align: right; ">{{ orderitem.quantity }}</td>
-					<td style="text-align: right; ">{{ orderitem.unit_price }}</td>
+					<td style="text-align: right; ">{{ orderitem.formatted_unit_price }}</td>
 					<td style="text-align: right; ">{{ orderitem.extended_price }}</td>
 				</tr>
 				{% if orderitem.service_cost %}

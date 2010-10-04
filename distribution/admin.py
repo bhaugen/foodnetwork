@@ -78,6 +78,13 @@ class MemberProductListAdmin(admin.ModelAdmin):
     
 admin.site.register(MemberProductList, MemberProductListAdmin)
 
+class SpecialAdmin(admin.ModelAdmin):
+    list_display = ('product', 'price', 'headline',
+                     'from_date', 'to_date')
+    list_filter = ['product',]
+    
+admin.site.register(Special, SpecialAdmin)
+
 class PartyUserAdmin(admin.ModelAdmin):
     list_display = ('user', 'party')
     

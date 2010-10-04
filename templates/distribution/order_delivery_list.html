@@ -15,7 +15,7 @@
 	{% include "distribution/tabnav.html" %}
 	
 	<p style='margin-left: 2em;' >
-		<i>{% blocktrans %}All Order Items for {{order_date}}{% endblocktrans %}</i>
+		<i>{% blocktrans %}All Order Items for {{delivery_date}}{% endblocktrans %}</i>
 	</p>
 	
 
@@ -31,7 +31,7 @@
         </tr>
         {% for orderitem in orderitem_list %}
             <tr>
-                <td>{{ orderitem.order.order_date }}</td>
+                <td>{{ orderitem.order.delivery_date }}</td>
                 <td>{{ orderitem.order.id }}</td>
                 <td>{{ orderitem.order.paid }}</td>
                 <td>{{ orderitem.order.customer }}</td>

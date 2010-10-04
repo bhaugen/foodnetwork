@@ -1223,12 +1223,14 @@ def member_supply_and_demand(request, from_date, to_date, member_id):
     plan_type = "Production"
     if member.is_customer():
         plan_type = "Production"
+    #import pdb; pdb.set_trace()
     return render_to_response('distribution/member_plans.html', 
         {
             'from_date': from_date,
             'to_date': to_date,
             'sdtable': sdtable,
             'member': member,
+            #'member_long_name': member.long_name,
             'plan_type': plan_type,
         }, context_instance=RequestContext(request))
 

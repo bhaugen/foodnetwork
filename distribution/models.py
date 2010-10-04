@@ -496,7 +496,21 @@ class Product(models.Model):
 
     def formatted_unit_price(self):
         return self.price.quantize(Decimal('.01'), rounding=ROUND_UP)
+
+    def formatted_unit_price_for_date(self, date):
+        return self.unit_price_for_date(date).quantize(Decimal('.01'), rounding=ROUND_UP)
     
+    def unit_price_for_date(self, date):
+        up = self.price
+        specials = Special.objects.filter(
+            product=self,
+            from_date__lte=date,
+            to_date__gte=date)
+        if specials:
+            special = specials[0]
+            up = special.price
+        return up
+
     def avail_items(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
@@ -627,6 +641,24 @@ class Product(models.Model):
 
     class Meta:
         ordering = ('short_name',)
+
+
+class Special(models.Model):
+    product = models.ForeignKey(Product, 
+        limit_choices_to = {'sellable': True}, verbose_name=_('product'), 
+        related_name="specials")
+    price = models.DecimalField(_('price'), max_digits=8, decimal_places=2, default=Decimal(0))
+    headline = models.CharField(_('headline'), max_length=128)
+    description = models.TextField(_('description'))
+    from_date = models.DateField(_('from_date'), )
+    to_date = models.DateField(_('to_date'), )
+
+    class Meta:
+        ordering = ('-from_date',)
+
+    def formatted_price(self):
+        return self.price.quantize(Decimal('.01'), rounding=ROUND_UP)
+
 
 PLAN_ROLE_CHOICES = (
     ('consumer', _('consumer')),

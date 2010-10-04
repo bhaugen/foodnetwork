@@ -81,7 +81,7 @@ class MemberPlanSelectionForm(forms.Form):
     plan_to_date = forms.DateField(
         widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
     list_type = forms.ChoiceField( widget=forms.RadioSelect(), choices=[
-        ['M','My Product List'],['A','All Products']] )
+        ['M','My Product Lists'],['A','All Products']] )
 
 
 class ProductListForm(forms.ModelForm):

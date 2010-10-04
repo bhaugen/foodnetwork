@@ -801,7 +801,7 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
                     #'producers': producers,
                     'avail': totavail, 
                     'ordered': totordered, 
-                    'unit_price': prod.price, 
+                    'unit_price': prod.unit_price_for_date(availdate), 
                     #'fee': fee,  
                     'quantity': 0})
                 oiform.description = prod.long_name

@@ -26,6 +26,23 @@
 	{% include "customer/customer_tabnav.html" %}
 	
 	<h3 style="padding-top: 0; margin-top: 0; " >{{ food_network.long_name }} Customer Dashboard for {{ customer.long_name }}</h3>
+
+	<p>This is a rough draft of a customer dashboard page.  What do you want to see here?</p>
+
+	{% if specials %}
+	<div style="border: 2px solid grey; width: 50%; margin-top: 1em; padding-left: 1em; padding-bottom: 4px;" >
+		<h2>Specials</h2>
+		{% for special in specials %}
+		<h4>{{ special.headline }}</h4>
+		<p style="margin-top: 0;" >{{ special.description|linebreaksbr }}<br />
+		<b>Special Product:</b> {{ special.product.long_name }}<br />
+		<b>Special Price:</b> {{ special.formatted_price }} 
+		<b>from:</b> {{ special.from_date|date:"D, M j" }} <b>to:</b> {{ special.to_date|date:"D, M j" }}
+
+		</p>
+		{% endfor %}
+	</div>
+	{% endif %}
 </div>
 {% endblock %}
 

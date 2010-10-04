@@ -27,8 +27,8 @@ table thead
 	{% include "distribution/tabnav.html" %}
 
 	<h2>
-		{% blocktrans %}
-		{{ member.long_name }} {{ plan_type }} Plans from {{ from_date }} to {{ to_date }}
+		{% blocktrans with member.long_name as member_long_name %}
+		{{ member_long_name }} {{ plan_type }} Plans from {{ from_date }} to {{ to_date }}
 		{% endblocktrans %}
 	</h2>
 

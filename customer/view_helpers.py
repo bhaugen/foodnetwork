@@ -30,7 +30,7 @@ def create_edit_product_list_forms(customer, data=None):
     return
 
 
-def create_order_item_forms(order, product_list, availdate, orderdate, data=None):
+def create_order_item_forms(order, product_list, availdate, data=None):
     form_list = []
     item_dict = {}
     if order:
@@ -93,7 +93,7 @@ def create_order_item_forms(order, product_list, availdate, orderdate, data=None
                     'description': prod.long_name, 
                     'avail': totavail, 
                     #'ordered': totordered, 
-                    'unit_price': prod.formatted_unit_price(), 
+                    'unit_price': prod.formatted_unit_price_for_date(availdate), 
                     'quantity': 0})
                 oiform.description = prod.long_name
                 oiform.producers = producers
@@ -120,7 +120,7 @@ class HistoryRow(object):
 def create_history_table(customer, from_date, to_date):
     items = OrderItem.objects.filter(
         order__customer=customer, 
-        order__order_date__range=(from_date, to_date),
+        order__delivery_date__range=(from_date, to_date),
         order__state__contains="Paid"
     )
     row_dict = {}

@@ -80,11 +80,11 @@
                 <td>{{ header_form.customer }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >{% trans "Week of" %}:</th>
-                <td>{{ header_form.order_date}}</td>
-				{% if header_form.order_date.errors %}
+                <th style="text-align: right; " >{% trans "Delivery date" %}:</th>
+                <td>{{ header_form.delivery_date}}</td>
+				{% if header_form.delivery_date.errors %}
 					<td style="color: red; " >
-						{{ header_form.order_date.errors }}
+						{{ header_form.delivery_date.errors }}
 					</td>
 				{% endif %}
             </tr>

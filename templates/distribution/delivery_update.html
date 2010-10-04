@@ -171,9 +171,9 @@
 
     <p style='margin-left: 2em;' >
 		{% if customer %}
-        	<i>{% blocktrans %}Order Items for {{ customer }} on {{order_date}}{% endblocktrans %}</i>
+        	<i>{% blocktrans %}Order Items for {{ customer }} on {{delivery_date}}{% endblocktrans %}</i>
 		{% else %}
-        	<i>{% blocktrans %}All order Items for {{order_date}}{% endblocktrans %}</i>
+        	<i>{% blocktrans %}All order Items for {{delivery_date}}{% endblocktrans %}</i>
 		{% endif %}
     </p>
     <form action="." method="POST" >
