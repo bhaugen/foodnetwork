@@ -20,9 +20,7 @@
 				<td>
 					<h3>{{ network.long_name }}</h3>
 					Billing Questions: {{ network.billing_phone }} <br />
-					{% for header_line in network.formatted_billing_address %}
-						{{ header_line }}<br />
-					{% endfor %}
+					{{ network.billing_address|linebreaksbr }}
 					{{ network.billing_email_address }}
 				</td>
 				<td>
@@ -61,9 +59,7 @@
 						{{order.customer.short_name}}
 					{% endif %}
 					<br />
-					{% for address_line in order.customer.formatted_address %}
-						{{ address_line }}<br />
-					{% endfor %}
+					{{order.customer.address|linebreaksbr}}
 				</td>
 			</tr>
 		</table>
@@ -113,9 +109,11 @@
 				<td style="text-align: right; font-weight: bold; " >${{ order.grand_total }}</td>
 			</tr>
 			<tr>
-				<td colspan="2" style="text-align: right;" >
-					<button>Pay Now</button>
-				</td>
+				<th style="text-align: right; vertical-align: middle;" >
+					<b>Pay now using</b>
+				</th>
+				<td>{{ paypal_form.sandbox }}</td>
+
 			</tr>
 		</table>
 	</div>

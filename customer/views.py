@@ -17,12 +17,15 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.mail import send_mail
 from django.forms.models import inlineformset_factory
 from django.db.models import Q
+from django.contrib.sites.models import Site
 
 from distribution.models import *
 from customer.forms import *
 from customer.view_helpers import *
 from distribution.forms import DateRangeSelectionForm
 from distribution.view_helpers import plan_weeks, create_weekly_plan_forms
+from paypal.standard.forms import PayPalPaymentsForm
+from pay.models import *
 
 try:
     from notification import models as notification
@@ -682,9 +685,28 @@ def unpaid_invoice(request, order_id):
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
 
+    if order.is_paid():
+        paypal_form = None
+    else:
+        pp_settings = PayPalSettings.objects.get(pk=1)
+        domain = Site.objects.get_current().domain
+        paypal_dict = {
+            "business": pp_settings.business,
+            "amount": order.grand_total,
+            "item_name": " ".join(["Fifth Season order #", str(order.id)]),
+            "invoice": order.id,
+            "notify_url": 'http://%s%s' % (domain, reverse('paypal-ipn')),
+            "return_url": 'http://%s%s' % (domain, reverse('unpaid_invoice',
+                kwargs={'order_id': order.id})),
+            "cancel_return": 'http://%s%s' % (domain, reverse('unpaid_invoice',
+                kwargs={'order_id': order.id})),
+        }
+        paypal_form = PayPalPaymentsForm(initial=paypal_dict)
+
     return render_to_response('customer/unpaid_invoice.html', {
         'order': order,
         'network': fn,
+        'paypal_form': paypal_form,
     })
 
 

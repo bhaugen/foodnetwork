@@ -168,7 +168,7 @@ class Party(models.Model):
     phone = PhoneNumberField(_('phone'), blank=True)
     cell = PhoneNumberField(_('cell'), blank=True)
     fax = PhoneNumberField(_('fax'), blank=True)
-    address = models.CharField(_('address'), max_length=96, blank=True)
+    address = models.TextField(_('address'), blank=True)
     email_address = models.EmailField(_('email_address'), max_length=96, blank=True, null=True)
     content_type = models.ForeignKey(ContentType,editable=False,null=True)
     
@@ -214,9 +214,6 @@ class Party(models.Model):
             self.content_type = ContentType.objects.get_for_model(self.__class__)
         self.save_base(force_insert=False, force_update=False)
         
-    def formatted_address(self):
-        return self.address.split(',')
-
 
 class PartyUser(models.Model):
     party = models.ForeignKey(Party, related_name="users", verbose_name=_('party'))
@@ -227,8 +224,7 @@ class PartyUser(models.Model):
 class FoodNetwork(Party):
     billing_contact = models.CharField(_('billing_contact'), max_length=64, blank=True)
     billing_phone = PhoneNumberField(_('billing_phone'), blank=True, null=True)
-    billing_address = models.CharField(_('billing_address'), max_length=96, blank=True, null=True, 
-            help_text=_('Enter commas only where you want to split address lines for formatting.'))
+    billing_address = models.TextField(_('billing_address'), blank=True)
     billing_email_address = models.EmailField(_('billing_email_address'), max_length=96, blank=True, null=True)
     customer_terms = models.IntegerField(_('customer_terms'), default=0,
         help_text=_('Net number of days for customer to pay invoice'))
@@ -252,9 +248,7 @@ class FoodNetwork(Party):
 
     def __unicode__(self):
         return self.short_name
-    def formatted_billing_address(self):
-        return self.billing_address.split(',')
-    
+   
     @property
     def email(self):
         return self.email_address
@@ -427,9 +421,6 @@ class Customer(Party):
 
     def __unicode__(self):
         return self.short_name
-
-    def formatted_address(self):
-        return self.address.split(',')
     
     def distributor(self):
         #todo: revise when 5S distributor assignments are clear

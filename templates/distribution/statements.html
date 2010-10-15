@@ -25,9 +25,7 @@
 						<tr>
 							<td>
 								<b>{{ network.long_name }}</b><br />
-								{% for header_line in network.formatted_billing_address %}
-									{{ header_line }}<br />
-								{% endfor %}
+								{{network.billing_address|linebreaksbr }}
 								{{ network.billing_phone }} <br />
 								{{ network.billing_email_address }}
 							</td>
@@ -44,9 +42,7 @@
 							<th style="text-align: right; vertical-align: top; " >{% trans "Payment to" %}: </th>
 							<td>
 								{{payment.to_whom.long_name}} <br />
-								{% for header_line in payment.paid_to.formatted_address %}
-									{{ header_line }}<br />
-								{% endfor %}
+								{{payment.to_whom.address|linebreaksbr}}
 							</td>
 						</tr>
 					</table>
