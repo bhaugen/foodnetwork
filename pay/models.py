@@ -4,7 +4,7 @@ from decimal import *
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from distribution.models import Order, Payment
+from distribution.models import FoodNetwork, Order, Payment
 
 class PayPalSettings(models.Model):
     business = models.CharField(_('business'), max_length=128,
@@ -50,7 +50,8 @@ def register_payment(sender, **kwargs):
                 cp.save()
                 order.register_customer_payment()
             except:
-                ipn_obj.custom += " ".join([" update error", sys.exc_info()[0]])
+                #ipn_obj.custom += " ".join([" update error", sys.exc_info()[0]])
+                ipn_obj.custom = "update error"
                 ipn_obj.save
             
 
