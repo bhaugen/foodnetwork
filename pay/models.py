@@ -16,6 +16,7 @@ class PayPalSettings(models.Model):
     
     class Meta:
         verbose_name = "PayPal Settings"
+        verbose_name_plural = "PayPal Settings"
 
     def save(self, *args, **kwargs):
         self.email = self.email.lower()
