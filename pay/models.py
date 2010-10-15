@@ -23,7 +23,8 @@ class PayPalSettings(models.Model):
         super(PayPalSettings, self).save(*args, **kwargs)
 
 from paypal.standard.ipn.signals import payment_was_successful
-        
+import sys
+
 def register_payment(sender, **kwargs):
     ipn_obj = sender
     ipn_obj.custom = "received IPN"
@@ -49,7 +50,8 @@ def register_payment(sender, **kwargs):
                 cp.save()
                 order.register_customer_payment()
             except:
-                pass
+                ipn_obj.custom += " ".join([" update error", sys.exc_info()[0]])
+                ipn_obj.save
             
 
 payment_was_successful.connect(register_payment)
