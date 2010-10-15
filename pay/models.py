@@ -41,13 +41,13 @@ def register_payment(sender, **kwargs):
                     amount = amount,
                     reference = " ".join(["PayPal Payment", str(ipn_obj.txn_id)]),
                 )
-                #payment.save()
+                payment.save()
                 cp = CustomerPayment(
                     paid_order = order,
                     payment = payment,
                     amount_paid = amount)
-                #cp.save()
-                #order.register_customer_payment()
+                cp.save()
+                order.register_customer_payment()
             except:
                 pass
             
