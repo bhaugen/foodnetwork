@@ -4,7 +4,7 @@ from decimal import *
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from distribution.models import FoodNetwork, Order, Payment
+from distribution.models import *
 
 class PayPalSettings(models.Model):
     business = models.CharField(_('business'), max_length=128,
@@ -43,6 +43,7 @@ def register_payment(sender, **kwargs):
                     reference = " ".join(["PayPal Payment", str(ipn_obj.txn_id)]),
                 )
                 payment.save()
+                #todo: this section causes an error
                 cp = CustomerPayment(
                     paid_order = order,
                     payment = payment,
