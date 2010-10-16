@@ -43,7 +43,6 @@ def register_payment(sender, **kwargs):
                     reference = " ".join(["PayPal Payment", str(ipn_obj.txn_id)]),
                 )
                 payment.save()
-                #todo: this section causes an error
                 cp = CustomerPayment(
                     paid_order = order,
                     payment = payment,

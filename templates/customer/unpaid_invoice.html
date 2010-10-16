@@ -109,10 +109,16 @@
 				<td style="text-align: right; font-weight: bold; " >${{ order.grand_total }}</td>
 			</tr>
 			<tr>
+				{% if paypal_form %}
 				<th style="text-align: right; vertical-align: middle;" >
 					<b>Pay now using</b>
 				</th>
 				<td>{{ paypal_form.sandbox }}</td>
+				{% else %}
+				<td colspan="2" style=text-align: center;" > 
+					<b>Thank you for your payment!</b>
+				</td>
+				{% endif %}
 
 			</tr>
 		</table>
