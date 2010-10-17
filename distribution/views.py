@@ -1323,6 +1323,8 @@ def dashboard(request):
     
     thisdate = ""
     week_form = ""
+    item_list = []
+    by_lot = False
     if food_network:
         thisdate = current_week()
         week_form = CurrentWeekForm(initial={"current_week": thisdate})
@@ -1928,6 +1930,10 @@ def customer_payment(request, payment_id):
 
 @login_required
 def payment_update_selection(request):
+    try:
+        food_net = FoodNetwork.objects.get(pk=1)
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
     msform = PaymentUpdateSelectionForm(data=request.POST or None)
     csform = CustomerPaymentSelectionForm(data=request.POST or None)
     if request.method == "POST":
