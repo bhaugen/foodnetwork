@@ -31,17 +31,21 @@
 
 	<h3>{% trans "Input Lot" %}:</h3>
     <table class="ga-event-table" >
-        <tr>
-			<th>{% trans "Lot Id" %}</th>
-			<th>{% trans "Field" %}</th>
+	<tr>
+		<th>{% trans "Producer" %}</th>
+		<th>{% trans "Product" %}</th>
+		<th>{% trans "Lot Id" %}</th>
+		<th>{% trans "Field" %}</th>
            	<th>{% trans "Quantity" %}</th>
         </tr>
         {% for tx in process.inputs %}
-            <tr>
-				<td>{{ tx.inventory_item.lot_id }}</td>
-				<td>{{ tx.inventory_item.field_id }}</td>
-				<td style="text-align: right; ">{{ tx.amount }}</td>
-			</tr>
+	<tr>
+		<td>{{ tx.inventory_item.producer }}</td>
+		<td>{{ tx.inventory_item.product }}</td>
+		<td>{{ tx.inventory_item.lot_id }}</td>
+		<td>{{ tx.inventory_item.field_id }}</td>
+		<td style="text-align: right; ">{{ tx.amount }}</td>
+	</tr>
         {% endfor %}
     </table>
 
@@ -62,17 +66,21 @@
 
 	<h3>{% trans "Output Lot" %}{{process.outputs.count|pluralize}}:</h3>
     <table class="ga-event-table" >
-        <tr>
-			<th>{% trans "Lot id" %}</th>
-			<th>{% trans "Field" %}</th>
+	<tr>
+		<th>{% trans "Producer" %}</th>
+		<th>{% trans "Product" %}</th>
+		<th>{% trans "Lot id" %}</th>
+		<th>{% trans "Field" %}</th>
         	<th>{% trans "Custodian" %}</th>
         	<th>{% trans "Quantity" %}</th>
         </tr>
         {% for tx in process.outputs %}
-            <tr>
-				<td>{{ tx.inventory_item.lot_id }}</td>
-				<td>{{ tx.inventory_item.field_id }}</td>
-				<td>{{ tx.inventory_item.custodian }}</td>
+	<tr>
+		<td>{{ tx.inventory_item.producer }}</td>
+		<td>{{ tx.inventory_item.product }}</td>
+		<td>{{ tx.inventory_item.lot_id }}</td>
+		<td>{{ tx.inventory_item.field_id }}</td>
+		<td>{{ tx.inventory_item.custodian }}</td>
                 <td style="text-align: right; ">{{ tx.amount }}</td>
 			</tr>
         {% endfor %}
