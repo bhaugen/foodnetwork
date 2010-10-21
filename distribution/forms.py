@@ -445,7 +445,7 @@ class InventoryItemForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super(InventoryItemForm, self).__init__(*args, **kwargs)
-        self.fields['custodian'].choices = [('', '------------')] + [(prod.id, prod.short_name) for prod in Party.objects.all().exclude(pk=1)]
+        self.fields['custodian'].choices = [('', '------------')] + [(prod.id, prod.short_name) for prod in Party.subclass_objects.possible_custodians()]
 
 
 def create_inventory_item_forms(producer, avail_date, data=None):
