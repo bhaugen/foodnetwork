@@ -1342,12 +1342,12 @@ class ServiceType(models.Model):
 class ProcessType(models.Model):
     name = models.CharField(_('name'), max_length=64)
     input_type = models.ForeignKey(Product, 
-        related_name='input_types', verbose_name=_('input_type'))
-    use_existing_input_lot = models.BooleanField(_('use_existing_input_lot'), default=True)
-    number_of_processing_steps = models.IntegerField(_('number_of_processing_steps'), default=1)
+        related_name='input_types', verbose_name=_('input type'))
+    use_existing_input_lot = models.BooleanField(_('use existing input_lot'), default=True)
+    number_of_processing_steps = models.IntegerField(_('number of processing_steps'), default=1)
     output_type = models.ForeignKey(Product, 
-        related_name='output_types', verbose_name=_('output_type'))
-    number_of_output_lots = models.IntegerField(_('number_of_output_lots'), default=1)
+        related_name='output_types', verbose_name=_('output type'))
+    number_of_output_lots = models.IntegerField(_('number of output lots'), default=1)
     notes = models.TextField(_('notes'), blank=True)
 
     def __unicode__(self):
