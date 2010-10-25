@@ -94,7 +94,7 @@
 		<table style="page-break-before: avoid; margin-top: 1em; margin-left: 53%; " >
 			{% if order.transportation_fee %}
 				<tr>
-					<th style="text-align: right;" >Transportation fee:</th>
+					<th style="text-align: right; " >Transportation fee:</th>
 					<td style="text-align: right; width: 8em;" >${{ order.display_transportation_fee }}</td>
 				</tr>
 			{% endif %}
@@ -108,16 +108,22 @@
 				<th style="text-align: right;" >Total:</th>
 				<td style="text-align: right; font-weight: bold; " >${{ order.grand_total }}</td>
 			</tr>
+		</table>
+		<table style="page-break-before: avoid; margin-left: 50%; ">
 			<tr>
 				{% if paypal_form %}
-				<th style="text-align: right; vertical-align: middle;" >
-					<b>Pay now using</b>
-				</th>
-				<td>{{ paypal_form.sandbox }}</td>
+					<th style="text-align: right; vertical-align: middle;" >
+						<b>Pay now using</b>
+					</th>
+					{% if paypal_form.use_sandbox %}
+						<td>{{ paypal_form.sandbox }}</td>
+					{% else %}
+						<td>{{ paypal_form.render }}</td>
+					{% endif %}
 				{% else %}
-				<td colspan="2" style=text-align: center;" > 
-					<b>Thank you for your payment!</b>
-				</td>
+					<td colspan="2" style=text-align: center;" > 
+						<b>Thank you for your payment!</b>
+					</td>
 				{% endif %}
 
 			</tr>

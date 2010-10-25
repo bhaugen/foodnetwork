@@ -63,8 +63,5 @@ urlpatterns = patterns('',
     url(r'^supplydemandweek/(?P<week_date>\w{10})/$', supply_and_demand_week, name='supply_and_demand_week'),
     url(r'^resetweek/$', reset_week, name='reset_week'),
     (r'^notices/', include('notification.urls')),
-    url(r'^sendemail/$', send_email, name="send_email"),
-    (r'^sendgaemail/$', send_ga_email),
-    url(r'^email_sent/$', direct_to_template, {"template": "distribution/email_sent.html"}, name="email_sent"),
-    url(r'^ga_email_sent/$', direct_to_template, {"template": "distribution/ga_email_sent.html"}, name="ga_email_sent"),
 )
+

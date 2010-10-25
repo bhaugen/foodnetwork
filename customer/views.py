@@ -24,8 +24,6 @@ from customer.forms import *
 from customer.view_helpers import *
 from distribution.forms import DateRangeSelectionForm
 from distribution.view_helpers import plan_weeks, create_weekly_plan_forms
-from paypal.standard.forms import PayPalPaymentsForm
-from pay.models import *
 
 try:
     from notification import models as notification
@@ -541,7 +539,14 @@ def resave_short_adjusted_order(request, order_id):
 
 def order(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
-    return render_to_response('customer/order.html', {'order': order})
+    if order.is_paid():
+        paypal_form = None
+    else:
+        paypal_form = create_paypal_form(order, return_page='order')
+    return render_to_response('customer/order.html', {
+        'order': order,
+        'paypal_form': paypal_form,
+    })
 
 # todo: remove when no longer needed for cut-n-pasting
 @login_required
@@ -688,21 +693,7 @@ def unpaid_invoice(request, order_id):
     if order.is_paid():
         paypal_form = None
     else:
-        pp_settings = PayPalSettings.objects.get(pk=1)
-        domain = Site.objects.get_current().domain
-        paypal_dict = {
-            "business": pp_settings.business,
-            "amount": order.grand_total,
-            "item_name": " ".join(["Fifth Season order #", str(order.id)]),
-            "invoice": order.id,
-            "notify_url": 'http://%s%s' % (domain, reverse('paypal-ipn')),
-            "return_url": 'http://%s%s' % (domain, reverse('unpaid_invoice',
-                kwargs={'order_id': order.id})),
-            "cancel_return": 'http://%s%s' % (domain, reverse('unpaid_invoice',
-                kwargs={'order_id': order.id})),
-        }
-        paypal_form = PayPalPaymentsForm(initial=paypal_dict)
-
+        paypal_form = create_paypal_form(order)
     return render_to_response('customer/unpaid_invoice.html', {
         'order': order,
         'network': fn,

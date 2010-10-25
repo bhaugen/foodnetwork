@@ -2147,67 +2147,6 @@ def invoices(request, cust_id, year, month, day):
     }, context_instance=RequestContext(request))
 
 
-def advance_dates():
-    orders = list(Order.objects.all())
-    for order in orders:
-        order.order_date = order.order_date + datetime.timedelta(days=7)
-        order.save()
-    items = list(InventoryItem.objects.all())
-    for item in items:
-        item.inventory_date = item.inventory_date + datetime.timedelta(days=7)
-        item.save()
-    txs = list(InventoryTransaction.objects.all())
-    for tx in txs:
-        tx.transaction_date = tx.transaction_date + datetime.timedelta(days=7)
-        tx.save()
-    payments = Payment.objects.all()
-    for payment in payments:
-        payment.transaction_date = payment.transaction_date + datetime.timedelta(days=7)
-        payment.save()
-
-@login_required
-def next_week(request):
-    if request.method == "POST":
-        advance_dates()
-        return HttpResponseRedirect('/distribution/dashboard')
-    else:
-        return render_to_response('distribution/next_week.html')
-    
-def send_email(request):
-    if request.method == "POST":
-        email_form = EmailForm(request.POST)
-        if email_form.is_valid():
-            data = email_form.cleaned_data
-            from_email = data["email_address"]
-            subject = " ".join(["[Food Accounting]", data["subject"]])
-            message = data["message"]
-            send_mail(subject, message, from_email, ["bob.haugen@gmail.com",])      
-            return HttpResponseRedirect(reverse("email_sent"))
-    else:
-        email_form = EmailForm()
-    
-    return render_to_response("distribution/send_email.html", {
-        "email_form": email_form,
-    })
-    
-def send_ga_email(request):
-    if request.method == "POST":
-        email_form = EmailForm(request.POST)
-        if email_form.is_valid():
-            data = email_form.cleaned_data
-            from_email = data["email_address"]
-            subject = " ".join(["[Group Accounting]", data["subject"]])
-            message = data["message"]
-            send_mail(subject, message, from_email, ["bob.haugen@gmail.com",])      
-            return HttpResponseRedirect(reverse("ga_email_sent"))
-    else:
-        email_form = EmailForm()
-    
-    return render_to_response("distribution/send_email.html", {
-        "email_form": email_form,
-    })
-
-
 # todo: replace with new Processes
 def create_meat_item_forms(producer, avail_date, data=None):
     monday = avail_date - datetime.timedelta(days=datetime.date.weekday(avail_date))

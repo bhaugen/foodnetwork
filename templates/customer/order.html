@@ -68,7 +68,7 @@
             </tr>
         {% endfor %}
     </table>
-    <table style="margin-top: 1em; margin-left: 9em; " >
+    <table style="margin-top: 1em; margin-left: 14em; " >
 		<tr>
 			<th style="text-align: right;" >Total Price:</th>
 			<td style="text-align: right;" >${{ order.total_price }}</td>
@@ -87,9 +87,28 @@
 
 		<tr>
 			<th style="text-align: right;" >Grand Total:</th>
-			<td style="text-align: right;" >${{ order.grand_total }}</td>
+			<td style="text-align: right; font-weight: bold;" >${{ order.grand_total }}</td>
 		</tr>
-    </table>
+	</table>
+	<table style="margin-left: 10em; ">
+		<tr>
+			{% if paypal_form %}
+				<th style="text-align: right; vertical-align: middle;" >
+					<b>Pay now using</b>
+				</th>
+				{% if paypal_form.use_sandbox %}
+					<td>{{ paypal_form.sandbox }}</td>
+				{% else %}
+					<td>{{ paypal_form.render }}</td>
+				{% endif %}
+			{% else %}
+				<td colspan="2" style=text-align: center;" > 
+					<b>Thank you for your payment!</b>
+				</td>
+			{% endif %}
+
+		</tr>
+	</table>
     
 </div>    
 {% endblock %} 
