@@ -36,7 +36,7 @@ table thead
 				{% if forloop.first %}
 					<th style="text-align: right; width: 13em; " >{{ column }}</th>
 				{% else %}
-				<th style="width: 4em; " >{{ column }}</th>
+				<th style="width: 6em; " >{{ column }}</th>
 				{% endif %}
 			{% endfor %}
 		</tr>
@@ -52,7 +52,7 @@ table thead
 					{% if forloop.first %}
 						<th style="text-align: left; width: 13em; " >{{ cell }}</th>
 					{% else %}
-						<td style="text-align: right; width: 4em; " >{{ cell|intcomma }}</td>
+						<td style="text-align: right; width: 6em; " >{{ cell|intcomma }}</td>
 					{% endif %}
 				{% endfor %}			
 			</tr>

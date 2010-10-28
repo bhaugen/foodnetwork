@@ -26,19 +26,26 @@ table thead
 
 	{% include "distribution/tabnav.html" %}
 
-	<h2>{% blocktrans %}Weekly Gross Income based on Suppliable Demand from {{ from_date }} to {{ to_date }}{% endblocktrans %}</h2>
+	<h2 style="margin-bottom: 0;" >{% blocktrans %}
+		Weekly Gross Income based on Suppliable Demand from {{ from_date }} to {{ to_date }}
+	{% endblocktrans %}</h2>
 
-	<p><i>{% trans "You may drill down into any column to see all supply and demand for that week" %}</i></p>
+	<h4 style="margin-top: 4px; margin_bottom: 0;" >{% blocktrans with total_gross|intcomma as total_g and total_net|intcomma as total_n %}
+		Total Gross Income from this table: ${{ total_g }} Net: ${{ total_n }}
+	{% endblocktrans %}</h4>
 
-	<table class="ga-event-table" style="font-size: 90%;" >
+	<p style="font-style: italic;">
+		{% trans "You may drill down into any column to see all supply and demand for that week" %}
+	</p>
+
+	<table class="ga-event-table" style="font-size: 90%; table-layout: fixed;" >
 		<thead>
 		<tr>
 			{% for column in income_table.columns %}
 				{% if forloop.first %}
 					<th style="text-align: right; width: 102px;" >{{ column }}</th>
 				{% else %}
-				
-					{% if forloop.last %}
+					{% if forloop.revcounter < 3 %}
 						<th style="width: 48px; " >
 						{{ column }}
 					{% else %}
@@ -52,16 +59,20 @@ table thead
 		</thead>
 	</table>
 	<br />
-	<table class="ga-event-table" style="font-size: 90%;" >
+	<table class="ga-event-table" style="font-size: 90%; table-layout: fixed;" >
 		<tbody>
 
 		{% for row in income_table.rows %}
 			<tr>
 				{% for cell in row %}
 					{% if forloop.first %}
-						<th style="text-align: left; width: 108px;" >{{ cell }}</th>
+						<th style="text-align: left; width: 102px;" >{{ cell }}</th>
 					{% else %}
-						<td style="text-align: right; width:40px; " >{{ cell|intcomma }}</td>
+						{% if forloop.revcounter < 3 %}
+							<td style="text-align: right; width:48px; " >{{ cell|intcomma }}</td>
+						{% else %}
+							<td style="text-align: right; width:40px; " >{{ cell|intcomma }}</td>
+						{% endif %}
 					{% endif %}
 				{% endfor %}			
 			</tr>

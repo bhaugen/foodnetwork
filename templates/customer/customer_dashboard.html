@@ -35,7 +35,7 @@
 		{% for special in specials %}
 		<h4>{{ special.headline }}</h4>
 		<p style="margin-top: 0;" >{{ special.description|linebreaksbr }}<br />
-		<b>Special Product:</b> {{ special.product.long_name }}<br />
+		<b>Special Product:</b> {{ special.product.growing_method }} {{ special.product.long_name }}<br />
 		<b>Special Price:</b> {{ special.formatted_price }} 
 		<b>from:</b> {{ special.from_date|date:"D, M j" }} <b>to:</b> {{ special.to_date|date:"D, M j" }}
 

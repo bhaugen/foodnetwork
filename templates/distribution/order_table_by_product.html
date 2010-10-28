@@ -21,7 +21,8 @@
     <table class="ga-event-table" >
         <tr>
             <th>{% trans "Category" %}</th>
-            <th>{% trans "Product" %}</th>
+	    <th>{% trans "Product" %}</th>
+	    <th>{% trans "Growing Method" %}</th>
             <th>{% trans "Producers" %}</th>
             <th>{% trans "Avail" %}</th>
             <th>{% trans "Ordered" %}</th>
@@ -31,9 +32,13 @@
         </tr>
         {% for cells in item_list %}
             <tr>
-                {% for cell in cells %}
-                    <td style="text-align: center; " >{{ cell }}</td>
-                {% endfor %}
+               {% for cell in cells %}
+			{% if forloop.counter > 4 %}
+				<td style="text-align: right;" >{{ cell }}</td>
+			{% else %}
+				<td>{{ cell }}</td>
+			{% endif %}
+		{% endfor %} 
             </tr>
         {% endfor %}
     </table>

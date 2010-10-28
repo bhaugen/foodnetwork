@@ -103,7 +103,7 @@ def supply_demand_weekly_table(week_date):
             columns.append(plan.member)
     #columns = list(set(columns))
     #columns.sort(lambda x, y: cmp(x.short_name, y.short_name))
-    columns.insert(0, "Product/Member")
+    columns.insert(0, "Product\Member")
     columns.append("Balance")
     for plan in plans:
         if not rows.get(plan.product):
@@ -166,13 +166,12 @@ def suppliable_demand(from_date, to_date, member=None):
             week += 1
     #import pdb; pdb.set_trace()
     rows = rows.values()
+    cust_fee = customer_fee()
     for row in rows:
         #import pdb; pdb.set_trace()
         for x in range(1, len(row)):
             sd = row[x].suppliable()
             if sd >= 0:
-                #if not row[0].price:
-                #    print row[0]
                 income = sd * row[0].price
                 row[x] = income
             else:
@@ -180,19 +179,28 @@ def suppliable_demand(from_date, to_date, member=None):
     income_rows = []
     #import pdb; pdb.set_trace()
     for row in rows:
+        base = Decimal("0")
         total = Decimal("0")
         for cell in row[1:len(row)]:
+            base += cell
+            cell += cell * cust_fee
+            cell = cell.quantize(Decimal('1.'), rounding=ROUND_UP)
             total += cell
         if total:
+            net = base * cust_fee + (base * producer_fee())
+            net = net.quantize(Decimal('1.'), rounding=ROUND_UP)
+            #total = total.quantize(Decimal('1.'), rounding=ROUND_UP)
             row.append(total)
+            row.append(net)
             income_rows.append(row)
-    label = "Product/Weeks"
+    label = "Item\Weeks"
     columns = [label]
     wkdate = from_date
     while wkdate <= to_date:
         columns.append(wkdate)
         wkdate = wkdate + datetime.timedelta(days=7)
     columns.append("Total")
+    columns.append("Net")
     income_rows.sort(lambda x, y: cmp(x[0].long_name, y[0].short_name))
     sdtable = SupplyDemandTable(columns, income_rows)
     return sdtable

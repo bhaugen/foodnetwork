@@ -465,6 +465,8 @@ class Product(models.Model):
         limit_choices_to = {'is_parent': True}, verbose_name=_('parent'))
     short_name = models.CharField(_('short name'), max_length=32, unique=True)
     long_name = models.CharField(_('long name'), max_length=64)
+    growing_method = models.CharField(_('growing method'), max_length=255,
+        blank=True)
     sellable = models.BooleanField(_('sellable'), default=True,
         help_text=_('Should this product appear in Order form?'))
     plannable = models.BooleanField(_('plannable'), default=True,
@@ -1128,6 +1130,7 @@ class Order(models.Model):
     
     def coop_fee(self):
         total = self.total_price()
+        # todo: shd consider customer_fee_override?
         fee = customer_fee()
         answer = total * fee
         return answer.quantize(Decimal('.01'), rounding=ROUND_UP)

@@ -66,7 +66,8 @@
 						
 		<table class="ga-event-table" style="font-size: 100%; page-break-before: avoid; page-break-after: avoid; width: 100%; " >
 			<tr>
-				 <th style="width: 40%; ">Item</th>
+				<th>Item</th>
+				<th>Growing Method</th>
 				 <th>Producer</th>
 				 <th>Quantity</th>
 				 <th>Unit Price</th>
@@ -74,7 +75,12 @@
 			</tr>
 			{% for orderitem in order.orderitem_set.all %}
 				<tr>
-					<td>{{ orderitem.product.long_name }}</td>
+					<td>
+						{{ orderitem.product.long_name }}
+					</td>
+					<td>
+						{{ orderitem.product.growing_method }}
+					</td>
 					<td>{{ orderitem.producers }}</td>
 					<td style="text-align: right; ">{{ orderitem.quantity }}</td>
 					<td style="text-align: right; ">{{ orderitem.formatted_unit_price }}</td>

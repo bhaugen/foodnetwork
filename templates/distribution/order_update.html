@@ -276,22 +276,24 @@
             <i>{% blocktrans %}Availability as of {{avail_date}}{% endblocktrans %}</i>
         </p>
         <table class="ga-event-table" style="font-size: 70%;" >
-			<tr>
-				<th>{% trans "Category" %}</th>
-                <th>{% trans "Product" %}</th>
-                <th>{% trans "Producers" %}</th>
-                <th>{% trans "Avail" %}</th>
-                <th>{% trans "Ordered" %}</th>
-                <th>{% trans "Unit Price" %}</th>
-                <!--<th>{% trans "Fee" %}</th>-->
-                <th>{% trans "This Order" %}</th>
-                <th>{% trans "Extended" %}</th>
-                <th>{% trans "Notes" %}</th>
+		<tr>
+			<th>{% trans "Category" %}</th>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Growing Method" %}</th>
+	                <th>{% trans "Producers" %}</th>
+        	        <th>{% trans "Avail" %}</th>
+                	<th>{% trans "Ordered" %}</th>
+	                <th>{% trans "Unit Price" %}</th>
+        	        <!--<th>{% trans "Fee" %}</th>-->
+                	<th>{% trans "This Order" %}</th>
+	                <th>{% trans "Extended" %}</th>
+        	        <th>{% trans "Notes" %}</th>
             </tr>
             {% for item_form in item_forms %}
                  <tr>
 					 <td class="read-only-td" > {{ item_form.parents }} </td>
-					<td class="read-only-td"  > {{ item_form.description }} </td>
+					 <td class="read-only-td"  > {{ item_form.description }} </td>
+					 <td class="read-only-td"  > {{ item_form.growing_method }} </td>
 					<td class="read-only-td" > {{ item_form.producers }} </td>
 					<td class="read-only-td" > {{ item_form.avail }} </td>
 					<td class="read-only-td" > {{ item_form.ordered }} </td>

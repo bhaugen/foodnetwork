@@ -56,16 +56,18 @@
     </table>
     <table class="ga-event-table" >
         <tr>
-             <th>{% trans "Product" %}</th>
-             <th>{% trans "Quantity" %}</th>
-             <th>{% trans "Unit Price" %}</th>
-             <th>{% trans "Extended Price" %}</th>
-             <th>{% trans "Producer" %}</th>
-             <th>{% trans "Notes" %}</th>
+		<th>{% trans "Product" %}</th>
+		<th>{% trans "Growing Method" %}</th>
+             	<th>{% trans "Quantity" %}</th>
+             	<th>{% trans "Unit Price" %}</th>
+             	<th>{% trans "Extended Price" %}</th>
+             	<th>{% trans "Producer" %}</th>
+             	<th>{% trans "Notes" %}</th>
         </tr>
         {% for orderitem in order.orderitem_set.all %}
             <tr>
-                <td>{{ orderitem.product.long_name }}</td>
+		<td>{{ orderitem.product.long_name }}</td>
+		<td>{{ orderitem.product.growing_method }}</td>
                 <td style="text-align: right; ">{{ orderitem.quantity }}</td>
                 <td style="text-align: right; ">{{ orderitem.unit_price }}</td>
                 <td style="text-align: right; ">{{ orderitem.extended_price }}</td>

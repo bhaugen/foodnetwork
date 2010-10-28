@@ -49,7 +49,7 @@
     <table class="ga-event-table" >
         <tr>
              <th>Product</th>
-             <!--<th>Description</th>-->
+             <th>Growing Method</th>
              <th>Quantity</th>
              <th>Unit Price</th>
              <th>Extended Price</th>
@@ -58,8 +58,8 @@
         </tr>
         {% for orderitem in order.orderitem_set.all %}
             <tr>
-                <!--<td>{{ orderitem.product }}</td>-->
-                <td>{{ orderitem.product.long_name }}</td>
+		<td>{{ orderitem.product.long_name }}</td>
+		<td>{{ orderitem.product.growing_method }}</td>
                 <td style="text-align: right; ">{{ orderitem.quantity }}</td>
                 <td style="text-align: right; ">{{ orderitem.formatted_unit_price }}</td>
                 <td style="text-align: right; ">{{ orderitem.extended_price }}</td>
@@ -68,7 +68,7 @@
             </tr>
         {% endfor %}
     </table>
-    <table style="margin-top: 1em; margin-left: 14em; " >
+    <table style="margin-top: 1em; margin-left: 22em; " >
 		<tr>
 			<th style="text-align: right;" >Total Price:</th>
 			<td style="text-align: right;" >${{ order.total_price }}</td>
@@ -90,7 +90,7 @@
 			<td style="text-align: right; font-weight: bold;" >${{ order.grand_total }}</td>
 		</tr>
 	</table>
-	<table style="margin-left: 10em; ">
+	<table style="margin-left: 16em; ">
 		<tr>
 			{% if paypal_form %}
 				<th style="text-align: right; vertical-align: middle;" >

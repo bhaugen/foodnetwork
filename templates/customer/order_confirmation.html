@@ -87,7 +87,7 @@
     <table class="ga-event-table" >
         <tr>
              <th>Product</th>
-             <!--<th>Description</th>-->
+             <th>Growing Method</th>
              <th>Quantity</th>
              <th>Unit Price</th>
              <th>Extended Price</th>
@@ -96,8 +96,8 @@
         </tr>
         {% for orderitem in order.orderitem_set.all %}
             <tr>
-                <!--<td>{{ orderitem.product }}</td>-->
-                <td>{{ orderitem.product.long_name }}</td>
+		<td>{{ orderitem.product.long_name }}</td>
+		<td>{{ orderitem.product.growing_method }}</td>
 		<td style="text-align: right; ">
 			
 			{% ifnotequal orderitem.quantity orderitem.short_adjusted_qty  %}
@@ -115,7 +115,7 @@
             </tr>
         {% endfor %}
     </table>
-    <table style="margin-top: 1em; margin-left: 9em; " >
+    <table style="margin-top: 1em; margin-left: 20em; " >
 		<tr>
 			<th style="text-align: right;" >Total Price:</th>
 			<td style="text-align: right;" >${{ order.total_price }}</td>

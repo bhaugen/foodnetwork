@@ -105,6 +105,7 @@ def create_order_item_forms(order, product_list, availdate, data=None):
             oiform.producers = producers
             oiform.description = prod.long_name
             oiform.parents = prod.parents
+            oiform.growing_method = prod.growing_method
             form_list.append(oiform)
         else:
             if totavail > 0:
@@ -120,6 +121,7 @@ def create_order_item_forms(order, product_list, availdate, data=None):
                 oiform.description = prod.long_name
                 oiform.producers = producers
                 oiform.parents = prod.parents
+                oiform.growing_method = prod.growing_method
                 form_list.append(oiform)
     return form_list
 

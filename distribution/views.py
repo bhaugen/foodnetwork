@@ -939,12 +939,13 @@ def order_item_rows_by_product(thisdate):
         totordered = prod.total_ordered(thisdate)
         if totordered > 0:
             producers = prod.avail_producers(thisdate)
-            product_dict[prod.short_name] = [prod.parent_string(), prod.long_name, producers, totavail, totordered]
+            product_dict[prod.short_name] = [prod.parent_string(),
+                prod.long_name, prod.growing_method, producers, totavail, totordered]
             for x in range(order_count):
                 product_dict[prod.short_name].append(' ')
     items = OrderItem.objects.filter(order__delivery_date=thisdate)
     for item in items:
-        prod_cell = order_list.index(item.order.id) + 5
+        prod_cell = order_list.index(item.order.id) + 6
         product_dict[item.product.short_name][prod_cell] = item.quantity
     item_list = product_dict.values()
     item_list.sort()
@@ -1201,10 +1202,14 @@ def income(request, from_date, to_date):
     except ValueError:
             raise Http404
     income_table = suppliable_demand(from_date, to_date)
+    total_net =  sum(row[len(row)-1] for row in income_table.rows)
+    total_gross =  sum(row[len(row)-2] for row in income_table.rows)
     return render_to_response('distribution/income.html', 
         {
             'from_date': from_date,
             'to_date': to_date,
+            'total_net': total_net,
+            'total_gross': total_gross,
             'income_table': income_table,
         }, context_instance=RequestContext(request))
 
@@ -1342,7 +1347,7 @@ def dashboard(request):
                 if totavail + totordered > 0:
                     producers = prod.active_producers(thisdate)
                     product_dict[prod.short_name] = [prod.parent_string(), 
-                        prod.long_name, producers, totavail, totordered, prod.total_delivered(thisdate)]
+                        prod.long_name, prod.growing_method, producers, totavail, totordered, prod.total_delivered(thisdate)]
             item_list = product_dict.values()
             item_list.sort()
     return render_to_response('distribution/dashboard.html', 
