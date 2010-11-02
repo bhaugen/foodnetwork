@@ -506,12 +506,13 @@ class Product(models.Model):
         return up
 
     def avail_items(self, thisdate):
+        # todo: looks all wrong, shd just be thisdate
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
         expired_date = weekstart + datetime.timedelta(days=5)
         items = InventoryItem.objects.filter(product=self, 
-            inventory_date__lte=weekend,
-            expiration_date__gte=expired_date)
+            inventory_date__lte=thisdate,
+            expiration_date__gte=thisdate)
         items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
         return items
     
@@ -1116,13 +1117,13 @@ class Order(models.Model):
     def transportation_fee(self):
         try:
             transportation_tx = TransportationTransaction.objects.get(order=self)
-            return transportation_tx.amount
+            return transportation_tx.amount.quantize(Decimal('.01'), rounding=ROUND_UP)
         except TransportationTransaction.DoesNotExist:
-            return self.customer.transportation_fee()
+            return self.customer.transportation_fee().quantize(Decimal('.01'), rounding=ROUND_UP)
     
     def total_price(self):
         items = self.orderitem_set.all()
-        total = self.transportation_fee()
+        total = Decimal("0")
         for item in items:
             total += item.extended_price()
             total += item.service_cost()
@@ -1136,7 +1137,7 @@ class Order(models.Model):
         return answer.quantize(Decimal('.01'), rounding=ROUND_UP)
     
     def grand_total(self):
-        return self.total_price() + self.coop_fee()
+        return self.transportation_fee() + self.total_price() + self.coop_fee()
     
     def payment_due_date(self):
         term_days = customer_terms()

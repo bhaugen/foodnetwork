@@ -32,7 +32,7 @@
 
 			<li>
 				<a href="{% url unpaid_invoice order_id=order.id %}">
-					#{{ order.id }} {{ order.order_date }} ${{ order.total_price }} 
+					#{{ order.id }} {{ order.order_date }} ${{ order.grand_total }} 
 					- click here to pay now
 				</a>
 			</li>

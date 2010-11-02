@@ -198,6 +198,7 @@ def edit_product_list(request, list_id):
                 saved_cps = formset.save(commit=False)
                 for cp in saved_cps:
                     cp.customer = plist.member
+                    cp.product_list = plist
                     cp.save()
             return HttpResponseRedirect('/%s/'
                % ('customer/listselection', ))
@@ -517,8 +518,13 @@ def order_confirmation(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
     food_network = FoodNetwork.objects.get(pk=1)
     if not order.state == "Unsubmitted":
+        if order.is_paid():
+            paypal_form = None
+        else:
+            paypal_form = create_paypal_form(order, return_page='order')
         return render_to_response('customer/order.html', {
             'order': order,
+            'paypal_form': paypal_form,
         }, context_instance=RequestContext(request))
     shorts = order.short_items()
     return render_to_response('customer/order_confirmation.html', {
