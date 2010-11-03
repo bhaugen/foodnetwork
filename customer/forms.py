@@ -20,6 +20,7 @@ class NewOrderSelectionForm(forms.Form):
 
 class OrderForm(forms.ModelForm):
     transportation_fee = forms.DecimalField(required=False, widget=forms.TextInput(attrs={'size': '8'}))
+    purchase_order = forms.CharField(required=False)
 
     class Meta:
         model = Order

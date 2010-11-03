@@ -257,6 +257,9 @@ def create_payment_transaction_forms(producer=None, payment=None, data=None):
         for p in payment.paid_service_transactions():
             form_list.append(create_processing_payment_form(p, pay_all, data))
 
+        for p in payment.paid_transportation_transactions():
+            form_list.append(create_transportation_payment_form(p, pay_all, data))
+
     for d in InventoryTransaction.objects.filter(inventory_item__producer=producer):
         if d.should_be_paid():
             form_list.append(create_payment_transaction_form(d, pay_all, data))
@@ -269,7 +272,7 @@ def create_payment_transaction_forms(producer=None, payment=None, data=None):
 
     due4 = TransportationTransaction.objects.filter(from_whom=producer)
     for d in due4:
-        if d.order.is_paid():
+        if d.should_be_paid():
             form_list.append(create_transportation_payment_form(d, pay_all, data))
     return form_list
 
@@ -720,6 +723,7 @@ class OrderSelectionForm(forms.Form):
 
 class OrderForm(forms.ModelForm):
     transportation_fee = forms.DecimalField(required=False, widget=forms.TextInput(attrs={'size': '8'}))
+    purchase_order = forms.CharField(required=False)
 
     class Meta:
         model = Order
@@ -779,13 +783,20 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
             # is that because the form has an instance?
             # no, it is because those shd not be fields, but just strings
             producers = prod.avail_producers(availdate)
-            oiform = OrderItemForm(data, prefix=prod.short_name, instance=item)
+            initial_data = {
+                'prod_id': prod.id,
+                'avail': totavail,
+                'unit_price': item.formatted_unit_price(),
+                'ordered': totordered,
+            }
+            oiform = OrderItemForm(data, prefix=prod.id, instance=item,
+                                   initial=initial_data)
             #oiform.fields['parents'].widget.attrs['value'] = prod.parents
-            oiform.fields['prod_id'].widget.attrs['value'] = prod.id
+            #oiform.fields['prod_id'].widget.attrs['value'] = prod.id
             #oiform.fields['description'].widget.attrs['value'] = prod.long_name
             #oiform.fields['producers'].widget.attrs['value'] = producers
-            oiform.fields['avail'].widget.attrs['value'] = totavail
-            oiform.fields['ordered'].widget.attrs['value'] = totordered
+            #oiform.fields['avail'].widget.attrs['value'] = totavail
+            #oiform.fields['ordered'].widget.attrs['value'] = totordered
             oiform.producers = producers
             oiform.description = prod.long_name
             oiform.parents = prod.parents
@@ -835,7 +846,8 @@ class InputLotSelectionForm(forms.Form):
 
     def __init__(self, input_lots, *args, **kwargs):
         super(InputLotSelectionForm, self).__init__(*args, **kwargs)
-        self.fields['lot'].choices = [(lot.id, lot.lot_id()) for lot in input_lots]
+        self.fields['lot'].choices = [
+            (lot.id, " ".join([lot.producer.short_name, lot.product.short_name, lot.lot_id()])) for lot in input_lots]
 
 
 class InputLotCreationForm(forms.ModelForm):
