@@ -75,20 +75,12 @@ def create_order_item_forms(order, product_list, availdate, data=None):
             prods.append(prod)
     prods.sort(lambda x, y: cmp(x.parents, y.parents))
     for prod in prods:
-        #totavail = prod.total_avail(availdate)
         totavail = prod.avail_for_customer(availdate)
-        #totordered = prod.total_ordered(orderdate)
         try:
             item = item_dict[prod.id]
         except KeyError:
             item = False
         if item:
-            #todo: these fields shd be form initial data 
-            # (or can they be? got an instance)
-            # cd also use formsets - see d.view_helpers.create_weekly_plan_forms
-            # Can't find an example of instance + initial in a ModelForm in my
-            # code, but see http://django-reversion.googlecode.com/svn/tags/1.1.2/src/reversion/admin.py
-            # ModelForm(request.POST, request.FILES, instance=obj, initial=self.get_revision_form_data(request, obj, version))
             producers = prod.avail_producers(availdate)
             # maybe like this?
             initial_data = {
@@ -99,9 +91,6 @@ def create_order_item_forms(order, product_list, availdate, data=None):
             }
             oiform = OrderItemForm(data, prefix=prod.id, instance=item,
                                    initial=initial_data)
-            #oiform.fields['prod_id'].widget.attrs['value'] = prod.id
-            #oiform.fields['avail'].widget.attrs['value'] = totavail
-            #oiform.fields['ordered'].widget.attrs['value'] = totordered
             oiform.producers = producers
             oiform.description = prod.long_name
             oiform.parents = prod.parents

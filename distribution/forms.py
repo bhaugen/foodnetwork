@@ -779,9 +779,6 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
         except KeyError:
             item = False
         if item:
-            #todo: this code is seriously overwrought, but works
-            # is that because the form has an instance?
-            # no, it is because those shd not be fields, but just strings
             producers = prod.avail_producers(availdate)
             initial_data = {
                 'prod_id': prod.id,
@@ -791,12 +788,6 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
             }
             oiform = OrderItemForm(data, prefix=prod.id, instance=item,
                                    initial=initial_data)
-            #oiform.fields['parents'].widget.attrs['value'] = prod.parents
-            #oiform.fields['prod_id'].widget.attrs['value'] = prod.id
-            #oiform.fields['description'].widget.attrs['value'] = prod.long_name
-            #oiform.fields['producers'].widget.attrs['value'] = producers
-            #oiform.fields['avail'].widget.attrs['value'] = totavail
-            #oiform.fields['ordered'].widget.attrs['value'] = totordered
             oiform.producers = producers
             oiform.description = prod.long_name
             oiform.parents = prod.parents
@@ -807,10 +798,8 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
             if totavail > 0:
                 producers = prod.avail_producers(availdate)
                 oiform = OrderItemForm(data, prefix=prod.short_name, initial={
-                    #'parents': prod.parents, 
                     'prod_id': prod.id, 
                     'description': prod.long_name, 
-                    #'producers': producers,
                     'avail': totavail, 
                     'ordered': totordered, 
                     'unit_price': prod.unit_price_for_date(availdate), 

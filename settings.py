@@ -7,7 +7,7 @@ HOME = os.path.abspath(os.path.dirname(__file__))
 WELCOME = True
 
 ADMINS = (
-    ('Bob Haugen', 'bob.haugen@gmail.com'),
+    ('Bob Haugen', 'info@foodnetworksoftware.org'),
 )
 
 MANAGERS = ADMINS
