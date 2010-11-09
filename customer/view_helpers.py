@@ -42,7 +42,7 @@ def create_new_product_list_forms(data=None):
             }
         form = CustomerProductForm(data, prefix=prod.id, 
             initial=initial_data)
-        form.product_name = prod.long_name
+        form.product_name = " ".join([prod.long_name, prod.growing_method])
         form.category = prod.parents
         form_list.append(form)
     return form_list

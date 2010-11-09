@@ -107,6 +107,12 @@ class CustomerProductForm(forms.ModelForm):
 
 class InlineCustomerProductForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super(InlineCustomerProductForm, self).__init__(*args, **kwargs)
+        self.fields['product'].choices = [('', '-------------')] + [
+            (prod.id, " ".join([prod.long_name, prod.growing_method])) for prod in Product.objects.filter(sellable=True)]
+
+    
     class Meta:
         model = CustomerProduct
         exclude = ('customer', 'product_list')

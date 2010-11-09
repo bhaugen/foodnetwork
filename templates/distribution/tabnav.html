@@ -85,6 +85,8 @@ ul#tabnav a:hover
 
 </style>
 
+<div style="float: left;">
+
 	<ul id="tabnav" class="do-not-print" >
 		<li class="dashboard" ><a title="Home page" href="/distribution/dashboard">{% trans "Dashboard" %}</a> </li>
 		<li class="inventory-update" ><a title="Update inventory for one producer at a time" href="/distribution/inventoryselection">{% trans "Avail" %}</a></li>
@@ -104,3 +106,12 @@ ul#tabnav a:hover
 		<li class="admin" ><a title="Maintain Producers, Products and Customers" href="/admin">{% trans "Admin" %}</a> </li>
 		<li class="help" ><a title="Food Distribution System documentation" href="/help">{% trans "Help" %}</a> </li>
 	</ul>
+</div>
+
+<div style="float: right;">
+	{{ user }} <a href="{% url acct_logout %}">Logout</a>
+</div>
+
+<div style="clear: both; margin-bottom: 0; padding-bottom: 0;">
+</div>
+

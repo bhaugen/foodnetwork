@@ -2453,20 +2453,21 @@ def new_process(request, process_type_id):
                 for form in output_formset.forms:
                     if form.is_valid():
                         data = form.cleaned_data
-                        lot = form.save(commit=False)
                         qty = data["planned"]
-                        producer = data["producer"]
-                        lot.inventory_date = weekstart
-                        lot.save()
-                        tx = InventoryTransaction(
-                            transaction_type = "Production",
-                            process = process,
-                            from_whom = producer, 
-                            to_whom = producer, 
-                            inventory_item = lot,
-                            transaction_date = weekstart,
-                            amount = qty)
-                        tx.save()
+                        if qty:
+                            lot = form.save(commit=False)
+                            producer = data["producer"]
+                            lot.inventory_date = weekstart
+                            lot.save()
+                            tx = InventoryTransaction(
+                                transaction_type = "Production",
+                                process = process,
+                                from_whom = producer, 
+                                to_whom = producer, 
+                                inventory_item = lot,
+                                transaction_date = weekstart,
+                                amount = qty)
+                            tx.save()
 
             return HttpResponseRedirect('/%s/%s/'
                % ('distribution/process', process.id))
