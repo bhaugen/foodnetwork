@@ -507,12 +507,13 @@ class Product(models.Model):
 
     def avail_items(self, thisdate):
         # todo: looks all wrong, shd just be thisdate
+        #import pdb; pdb.set_trace()
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
         expired_date = weekstart + datetime.timedelta(days=5)
         items = InventoryItem.objects.filter(product=self, 
-            inventory_date__lte=thisdate,
-            expiration_date__gte=thisdate)
+            #inventory_date__lte=thisdate,
+            expiration_date__gte=expired_date)
         items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
         return items
     
