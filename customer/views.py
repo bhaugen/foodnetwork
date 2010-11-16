@@ -360,7 +360,6 @@ def planning_table(request, member_id, list_type, from_date, to_date):
             'member': member,
             'list_type': list_type,
             'tabnav': "customer/customer_tabnav.html",
-            'nav_class': 'plans',
         })
 
 

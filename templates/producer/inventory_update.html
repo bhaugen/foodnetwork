@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block title %}
-     {% trans "Plan Update" %}
+     {% trans "Inventory Update" %}
 {% endblock %}
 
 {% block header %}
@@ -87,59 +87,57 @@
 
 {% block content %}
 
-<div class="plans">
+<div class="inventory-update">
 
 	{% include "distribution/tabnav.html" %}
 
     <form action="." method="POST" >
-	<input name='member-id' type='hidden' value='{{ member.id }}' />
+		<input name='producer-id' type='hidden' value='{{ producer.id }}' />
+		<input name='avail-date' type='hidden' value='{{ avail_date }}' />
         <table>
             <tr>
-                <th style="text-align: right; " >{% trans "Member" %}:</th>
-                <td>{{ member.short_name }} - {{ member.long_name }}</td>
+                <th style="text-align: right; " >{% trans "Producer" %}:</th>
+                <td>{{ producer.long_name }}</td>
             </tr>
             <tr>
-                <th style="text-align: right; " >{% trans "Contact" %}:</th>
-               <td  id="contact" >{{member.contact}}</td>
+                <th style="text-align: right; " >{% trans "Week of" %}:</th>
+                <td>{{ avail_date}}</td>
             </tr>
-            <tr>
-                <th style="text-align: right; " >{% trans "Phone" %}:</th>
-                <td id="phone" >{{member.phone}}</td>
-            </tr>
-        </table>
 
-        <table class="ga-event-table" >
-			<tr>
-                <th>{% trans "Category" %}</th>
-                <th>{% trans "Product" %}</th>
-				<th>{% trans "From Date" %}</th>
-				<th>{% trans "To Date" %}</th>
-				<th>{% trans "Qty Per Week" %}</th>
-				{% if member.is_producer %}
-					<th>{% trans "Inventoried?" %}</th>
-				{% endif %}
-				<th>{% trans "Distributor" %}</th>
+    	</table>
+    	<p>
+            <input type="submit" value="{% trans 'Submit' %}" />
+        </p>
+
+	<table class="ga-event-table" >
+		<tr>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Lot Id" %}</th>
+            		<th>{% trans "Field" %}</th>
+			<th>{% trans "Custodian" %}</th>
+			<th>{% trans "Date" %}</th>
+            		<th>{% trans "Ready Qty" %}</th>
+			<th>{% trans "Notes" %}</th>
             </tr>
             {% for item_form in item_forms %}
                  <tr>
-                    <td class="read-only-td"  > {{ item_form.parents }} </td>
-                    <td class="read-only-td" > {{ item_form.long_name }} </td>
-                    <td> {{ item_form.from_date }} </td>
-				    <td> {{ item_form.to_date }} </td>
-				    <td> {{ item_form.quantity }} </td>
-				    {% if member.is_producer %}
-				    	<td> {{ item_form.inventoried }} </td>
-				    {% endif %}
-				    <td>{{ item_form.distributor }}</td>
-                    {{ item_form.item_id }}
-				    {{ item_form.prodname }}
+			 <td class="read-only-td" > {{ item_form.description }} </td>
+			 <td> {{ item_form.freeform_lot_id }} </td>
+			 <td> {{ item_form.field_id }} </td>
+			<td> {{ item_form.custodian }} </td>
+			<td> {{ item_form.inventory_date }} </td>
+			<td> {{ item_form.planned }} </td>
+			<td> {{ item_form.notes }} </td>
+			{{ item_form.item_id }}
+			{{ item_form.prod_id }}
                 </tr>
            {% endfor %} 
         </table>
 
-        <p style="margin-bottom: 3em;" >
+        <p style="padding-bottom: 1em;" >
             <input type="submit" value="{% trans 'Submit' %}" />
         </p>
     </form>
 </div>
 {% endblock %}
+

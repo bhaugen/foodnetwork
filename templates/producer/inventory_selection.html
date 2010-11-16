@@ -22,7 +22,7 @@
 		function producerChanged(evt)
 		{
 			dojo.byId("contact").innerHTML = '---';
-ii			dojo.byId("phone").innerHTML = '---';
+			dojo.byId("phone").innerHTML = '---';
 			var jsonUrl = "/distribution/jsonproducer/" + evt.target.value + "/";
 			dojo.xhrGet( 
 			{
@@ -51,37 +51,18 @@ ii			dojo.byId("phone").innerHTML = '---';
 
 <div class="inventory-update">
 
-	{% include "distribution/tabnav.html" %}
+	{% include "producer/producer_tabnav.html" %}
 
     <form action="." method="POST" >
         <table>
             <tr>
-                <th style="text-align: right; " >{% trans "Producer" %}:</th>
-                <td>
-					{{ header_form.producer }}
-				</td>
-				{% if header_form.producer.errors %}
-					<td style="color: red; " >
-						{{ header_form.producer.errors }}
-					</td>
-				{% endif %}
-            </tr>
-            <tr>
                 <th style="text-align: right; " >{% trans "Week of" %}:</th>
-                <td>{{ header_form.avail_date}}</td>
-				{% if header_form.avail_date.errors %}
+                <td>{{ form.current_week}}</td>
+				{% if form.current_week.errors %}
 					<td style="color: red; " >
-						{{ header_form.avail_date.errors }}
+						{{ form.current_week.errors }}
 					</td>
 				{% endif %}
-            </tr>
-            <tr>
-                <th style="text-align: right; " >{% trans "Contact" %}:</th>
-               <td  id="contact" >---</td>
-            </tr>
-            <tr>
-                <th style="text-align: right; " >{% trans "Phone" %}:</th>
-                <td id="phone" >---</td>
             </tr>
         </table>
         <p>
@@ -90,3 +71,4 @@ ii			dojo.byId("phone").innerHTML = '---';
     </form>
 </div>
 {% endblock %}
+

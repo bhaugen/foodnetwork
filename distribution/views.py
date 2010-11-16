@@ -351,8 +351,6 @@ def planning_table(request, member_id, list_type, from_date, to_date):
             'member': member,
             'list_type': list_type,
             'tabnav': "distribution/tabnav.html",
-            'nav_class': 'plan-update',
-
         }, context_instance=RequestContext(request))
 
 
@@ -415,8 +413,6 @@ def inventory_selection(request):
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                % ('distribution/inventoryupdate', producer_id, inv_date.year, inv_date.month, inv_date.day))
     else:
-        #ihform = InventorySelectionForm(initial={'avail_date': availdate, })
-    #return render_to_response('distribution/inventory_selection.html', {'avail_date': availdate, 'header_form': ihform})
         ihform = InventorySelectionForm(initial=init)
     return render_to_response('distribution/inventory_selection.html', {
         'header_form': ihform}, context_instance=RequestContext(request))
@@ -1193,6 +1189,8 @@ def supply_and_demand(request, from_date, to_date):
             'from_date': from_date,
             'to_date': to_date,
             'sdtable': sdtable,
+            'tabnav': "distribution/tabnav.html",
+            'tabs': 'D',
         }, context_instance=RequestContext(request))
 
 @login_required
@@ -1236,22 +1234,25 @@ def member_supply_and_demand(request, from_date, to_date, member_id):
             'to_date': to_date,
             'sdtable': sdtable,
             'member': member,
-            #'member_long_name': member.long_name,
             'plan_type': plan_type,
         }, context_instance=RequestContext(request))
 
 
 @login_required
-def supply_and_demand_week(request, week_date):
+def supply_and_demand_week(request, tabs, week_date):
     try:
         week_date = datetime.datetime(*time.strptime(week_date, '%Y_%m_%d')[0:5]).date()
     except ValueError:
             raise Http404
     sdtable = supply_demand_weekly_table(week_date)
+    tabnav = "distribution/tabnav.html"
+    if tabs == "P":
+        tabnav = "producer/producer_tabnav.html"
     return render_to_response('distribution/supply_demand_week.html', 
         {
             'week_date': week_date,
             'sdtable': sdtable,
+            'tabnav': tabnav,
         }, context_instance=RequestContext(request))
 
 
@@ -2401,7 +2402,9 @@ def new_process(request, process_type_id):
                 qty = data["planned"]
                 process = Process(
                     process_type = pt,
-                    process_date = weekstart)
+                    process_date = weekstart,
+                    managed_by = foodnet,
+                )
                 process.save()
                 lot.inventory_date = weekstart
                 lot.remaining = qty
@@ -2480,6 +2483,7 @@ def new_process(request, process_type_id):
         'service_label': service_label,
         'output_formset': output_formset,
         'output_label': output_label,
+        'tabnav': "distribution/tabnav.html",
         }, context_instance=RequestContext(request))  
 
 @login_required

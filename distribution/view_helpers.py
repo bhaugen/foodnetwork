@@ -181,15 +181,16 @@ def suppliable_demand(from_date, to_date, member=None):
     for row in rows:
         base = Decimal("0")
         total = Decimal("0")
-        for cell in row[1:len(row)]:
+        for x in range(1, len(row)):
+            cell = row[x]
             base += cell
             cell += cell * cust_fee
-            cell = cell.quantize(Decimal('1.'), rounding=ROUND_UP)
             total += cell
+            row[x] = cell.quantize(Decimal('.1'), rounding=ROUND_UP)            
         if total:
             net = base * cust_fee + (base * producer_fee())
             net = net.quantize(Decimal('1.'), rounding=ROUND_UP)
-            #total = total.quantize(Decimal('1.'), rounding=ROUND_UP)
+            total = total.quantize(Decimal('1.'), rounding=ROUND_UP)
             row.append(total)
             row.append(net)
             income_rows.append(row)

@@ -909,7 +909,6 @@ class ProcessServiceForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super(ProcessServiceForm, self).__init__(*args, **kwargs)
-        # todo: shd be producers for output_types
         self.fields['from_whom'].choices = [('', '----------')] + [(proc.id, proc.short_name) for proc in Processor.objects.all()]
 
     class Meta:

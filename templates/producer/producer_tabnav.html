@@ -1,4 +1,5 @@
 {% load foodnetwork_tags %}
+{% load i18n %}
 
 <!-- 
 	CSS Tabs is licensed under Creative Commons Attribution 2.5 - http://creativecommons.org/licenses/by/2.5/ 
@@ -25,9 +26,10 @@ ul#tabnav li
 display: inline;
 }
 
-div.customer-dashboard li.customer-dashboard, 
-div.order li.order,
-div.invoices li.invoices,
+div.producer-dashboard li.producer-dashboard, 
+div.avail li.avail,
+div.process li.process,
+div.statements li.statements,
 div.history li.history, 
 div.plans li.plans, 
 div.help li.help, 
@@ -37,9 +39,10 @@ div.product-lists li.product-lists
 	background-color: #fff !important; /* set background color to match above border color */
 }
 
-div.customer-dashboard li.customer-dashboard a, 
-div.order li.order a,
-div.invoices li.invoices a,
+div.producer-dashboard li.producer-dashboard a, 
+div.avail li.avail a,
+div.process li.process a,
+div.statements li.statements a,
 div.history li.history a, 
 div.plans li.plans a, 
 div.help li.help a, 
@@ -74,13 +77,17 @@ ul#tabnav a:hover
 
 <div style="float: left;">
 	<ul id="tabnav" class="do-not-print" >
-		<li class="customer-dashboard" ><a title="Home page" href="/customer/customerdashboard">Dashboard</a> </li>
-		<li class="order" ><a title="Create or update orders" href="/customer/orderselection">Order</a></li>
-		<li class="product-lists" ><a title="Create or update product lists" href="/customer/listselection">Product Lists</a></li>
-		<li class="invoices" ><a title="View or pay invoices" href="/customer/invoiceselection">Invoices</a></li>
-		<li class="history" ><a title="View purchase history" href="/customer/historyselection">History</a> </li>
-		<li class="plans" ><a title="Create, update or view plans" href="/customer/planselection">Plans</a> </li>
-		<li class="help" ><a title="Food Distribution System documentation" href="/customer/help">Help</a> </li>
+		<li class="producer-dashboard" ><a title="Home page" href="/producer/producerdashboard">Dashboard</a> </li>
+		<li class="avail" ><a title="Update available products" href="/producer/inventoryselection">{% trans "Avail" %}</a></li>
+		<li class="process" ><a title="Create or update processes" href="/producer/processselection">{% trans "Process" %}</a></li>
+		{% comment %}
+		<li class="product-lists" ><a title="Create or update product lists" href="/producer/listselection">Product Lists</a></li>
+		<li class="payments" ><a title="View payment status" href="/producer/paymentselection">Payments</a></li>
+		<li class="statements" ><a title="View statements for past payments" href="/producer/statementselection">Statements</a></li>
+		<li class="history" ><a title="View transaction history" href="/producer/historyselection">History</a> </li>
+		{% endcomment %}		
+		<li class="plans" ><a title="Create, update or view plans" href="/producer/planselection">Plans</a> </li>
+		<li class="help" ><a title="Food Distribution System documentation" href="/producer/help">Help</a> </li>
 	</ul>
 </div>
 

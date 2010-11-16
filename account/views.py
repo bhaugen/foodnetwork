@@ -33,9 +33,10 @@ def login(request, form_class=LoginForm, template_name="account/login.html"):
                 else:
                     party = user_parties[0].party
                     #todo: dashboards maybe shd be in models?
+                    # and what about parties with 2 roles?
                     if party.is_customer():
                         redirect_to = reverse("customer_dashboard")
-                    elif party.is_producer():
+                    elif party.is_producer() or party.is_processor():
                         redirect_to = reverse("producer_dashboard")
             elif user.is_staff:
                 if not next:

@@ -208,6 +208,12 @@ class Party(models.Model):
         else:
             return False
 
+    def is_processor(self):
+        if isinstance(self.as_leaf_class(), Processor):
+            return True
+        else:
+            return False
+
         
     def save(self, force_insert=False, force_update=False):
         #import pdb; pdb.set_trace()
@@ -511,7 +517,8 @@ class Product(models.Model):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
         expired_date = weekstart + datetime.timedelta(days=5)
-        items = InventoryItem.objects.filter(product=self, 
+        items = InventoryItem.objects.filter(product=self,
+            # shd just depend on expiration
             #inventory_date__lte=thisdate,
             expiration_date__gte=expired_date)
         items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
@@ -1370,6 +1377,8 @@ def previous_process_collector(process, collector):
 class Process(models.Model):
     process_type = models.ForeignKey(ProcessType)
     process_date = models.DateField()
+    managed_by = models.ForeignKey(Party, related_name="managed_processes",
+         verbose_name=_('managed by'), blank=True, null=True)
     notes = models.TextField(blank=True)
 
     class Meta:

@@ -5,7 +5,6 @@
      {% trans "Plan Selection" %}
 {% endblock %}
 
-
 {% block extra_head %}
 {{ block.super }}
     <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
@@ -17,37 +16,7 @@
 
 {% endblock %}
 
-
 {% block header %}
-
-
-    <script type="text/javascript" >
-
-		function producerChanged(evt)
-		{
-			dojo.byId("contact").innerHTML = '---';
-			dojo.byId("phone").innerHTML = '---';
-			var jsonUrl = "/distribution/jsonproducer/" + evt.target.value + "/";
-			dojo.xhrGet( 
-			{
-					url: jsonUrl,
-					handleAs: "json",
-					load: function(responseObject, ioArgs) 
-					{
-						var producer = responseObject[0];
-						dojo.byId("contact").innerHTML = producer.fields.contact;
-						dojo.byId("phone").innerHTML = producer.fields.phone;
-					}
-			});
-		}
-
-
-		dojo.addOnLoad(function()
-		{
-			dojo.connect(dojo.byId("id_member"), "onchange", "producerChanged");
-		});
-
-	</script>
 
 	<style>
 		ul {list-style-type:none;}
@@ -59,33 +28,15 @@
 
 <div class="plans">
 
-	{% include "distribution/tabnav.html" %}
-	{% if user.is_authenticated %}
+	{% include "producer/producer_tabnav.html" %}
+
 	<div style="border: 2px solid grey; float: left; width: 30%; padding-left: 1em;">
 
 		<h4>Update Plans</h4>
 
 		<form action="." method="POST" >
         		<table>
-		            <tr>
-                		<th style="text-align: right; vertical-align: top; " >{% trans "Member" %}:</th>
-                		<td>
-					{{ plan_form.member }}
-					{% if plan_form.member.errors %}
-					<span style="color: red; " >
-						{{ plan_form.member.errors }}
-					</span>
-					{% endif %}
-				</td>
-		            </tr>
-		            <tr>
-                		<th style="text-align: right; " >{% trans "Contact" %}:</th>
-               			<td  id="contact" >---</td>
-		            </tr>
-		            <tr>
-                		<th style="text-align: right; " >{% trans "Phone" %}:</th>
-		                <td id="phone" >---</td>
-			</tr>
+
 			<tr>
                 		<th style="text-align: right; " >{% trans "From Date" %}:</th>
                 		<td>
@@ -121,8 +72,8 @@
 	    </form>
 
     	</div>
-	{% endif %}
 
+	{% if member_has_plans %}
 	<div style="float: left; width: 30%; ">
 	<div style="border: 2px solid grey; padding-left: 1em; ">
 		<h4>Supply and Demand Table</h4>
@@ -200,8 +151,16 @@
 	</div>
 
 	</div>
+	{% else %}
+	<h4>
+		When you have made plans of your own,
+		you will be able to see the Supply vs Demand and Planned Income tables.
+	</h4>
+
+	{% endif %}
 
 
 	<div style="clear: both;" />
 </div>
 {% endblock %}
+

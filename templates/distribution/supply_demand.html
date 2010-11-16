@@ -22,10 +22,10 @@ table thead
 
 {% block content %}
 
-<div class="plan-update">
+<div class="plans">
 
 
-	{% include "distribution/tabnav.html" %}
+	{% include tabnav %}
 
 	<h2>{% blocktrans %}Weekly Supply minus Demand from {{ from_date }} to {{ to_date }}{% endblocktrans %}</h2>
 
@@ -39,7 +39,7 @@ table thead
 					<th style="text-align: right; width: 13em;" >{{ column }}</th>
 				{% else %}
 				<th style="width: 3em; " >
-					<a href="{% url supply_and_demand_week week_date=column|date:'Y_m_d' %}">{{ column|date:"n-j" }}</a>
+					<a href="{% url supply_and_demand_week tabs=tabs week_date=column|date:'Y_m_d' %}">{{ column|date:"n-j" }}</a>
 				</th>
 				{% endif %}
 			{% endfor %}

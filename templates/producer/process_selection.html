@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Process Selection" %}
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true"></script>
+    <script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+    </script>
+
+{% endblock %}
+
+{% block header %}
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="process">
+
+	{% include "producer/producer_tabnav.html" %}
+
+
+	<form action="." method="POST" >
+		<table>
+			<tr>
+				<th style="text-align: right; " >{% trans "Process Date" %}:</th>
+				<td>{{ header_form.process_date}}</td>
+				{% if header_form.process_date.errors %}
+					<td style="color: red; " >
+						{{ header_form.process_date.errors }}
+					</td>
+				{% endif %}
+			</tr>
+			<tr>
+                		<th style="text-align: right; " >{% trans "Process Type" %}:</th>
+                		<td>{{ header_form.process_type}}</td>
+				{% if header_form.process_type.errors %}
+					<td style="color: red; " >
+						{{ header_form.process_type.errors }}
+					</td>
+				{% endif %}
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td>
+					<input type="submit" value="{% trans 'Create New Process' %}" />
+				</td>
+        		</tr>
+	</table>
+        
+    </form>
+
+	{% if processes %}
+	<h3>{% trans "Processes" %}:</h3>
+	<table class="ga-event-table" >
+		<tr>
+			<th>{% trans "Type" %}</th>
+			<th>{% trans "Input Lot" %}</th>
+			<th>{% trans "Output Lots" %}</th>
+			<th>{% trans "View" %}</th>
+			<th>{% trans "Delete" %}</th>
+		</tr>
+		{% for process in processes %}
+			<tr>
+				<td>{{ process.process_type }}</td>
+				<td>{{ process.input_lot_id }}</td>
+				<td>{{ process.output_lot_ids }}</td>
+				<td><a href="{% url process process_id=process.id %}">View</a>
+				<td>
+					{% if process.is_deletable %}
+						<form method="POST" action="{% url delete_process_confirmation process_id=process.id %}">
+							<input class="submit-btn" type="submit" value="{% trans 'Delete' %}" />
+						</form>
+					{% else %}
+						{% trans "output used" %}
+					{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+</div>
+{% endblock %}
+

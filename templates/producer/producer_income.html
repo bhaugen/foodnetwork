@@ -3,7 +3,7 @@
 {% load humanize %}
 
 {% block title %}
-     {% trans "Planned Income" %}
+     {% trans "Projected Income" %}
 {% endblock %}
 
 {% block header %}
@@ -24,14 +24,14 @@ table thead
 <div class="plans">
 
 
-	{% include "distribution/tabnav.html" %}
+	{% include "producer/producer_tabnav.html" %}
 
-	<h2 style="margin-bottom: 0;" >{% blocktrans %}
-		Weekly Gross Income based on Suppliable Demand from {{ from_date }} to {{ to_date }}
+	<h2 style="margin-top: 0; margin-bottom: 0;" >{% blocktrans %}
+		Weekly Income based on Suppliable Demand from {{ from_date }} to {{ to_date }}
 	{% endblocktrans %}</h2>
 
-	<h4 style="margin-top: 4px; margin_bottom: 0;" >{% blocktrans with total_gross|intcomma as total_g and total_net|intcomma as total_n %}
-		Total Gross Income from this table: ${{ total_g }} Net: ${{ total_n }}
+	<h4 style="margin-top: 4px; margin_bottom: 0;" >{% blocktrans with total_income|intcomma as total_g %}
+		Total Projected Income from this table: ${{ total_g }}
 	{% endblocktrans %}</h4>
 
 	<p style="font-style: italic;">
@@ -45,12 +45,12 @@ table thead
 				{% if forloop.first %}
 					<th style="text-align: right; width: 102px;" >{{ column }}</th>
 				{% else %}
-					{% if forloop.revcounter < 3 %}
+					{% if forloop.revcounter < 2 %}
 						<th style="width: 48px; " >
 						{{ column }}
 					{% else %}
 						<th style="width: 40px; " >
-						<a href="{% url supply_and_demand_week tabs='D' week_date=column|date:'Y_m_d' %}">{{ column|date:"n-j" }}</a>
+						<a href="{% url supply_and_demand_week tabs='P' week_date=column|date:'Y_m_d' %}">{{ column|date:"n-j" }}</a>
 					{% endif %}
 				</th>
 				{% endif %}
@@ -68,7 +68,7 @@ table thead
 					{% if forloop.first %}
 						<th style="text-align: left; width: 102px;" >{{ cell }}</th>
 					{% else %}
-						{% if forloop.revcounter < 3 %}
+						{% if forloop.revcounter < 2 %}
 							<td style="text-align: right; width:48px; " >{{ cell|intcomma }}</td>
 						{% else %}
 							<td style="text-align: right; width:40px; " >{{ cell|intcomma }}</td>
@@ -86,4 +86,5 @@ table thead
 
  
 {% endblock %} 
+
 
