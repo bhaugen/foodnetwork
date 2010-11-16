@@ -73,8 +73,8 @@
 
     	</div>
 
-	{% if member_has_plans %}
 	<div style="float: left; width: 30%; ">
+	{% if member_has_plans %}
 	<div style="border: 2px solid grey; padding-left: 1em; ">
 		<h4>Supply and Demand Table</h4>
 
@@ -148,17 +148,17 @@
 		            <input name="submit-income" type="submit" value="{% trans 'Submit' %}" />
         		</p>
 	    </form>
-	</div>
-
-	</div>
+    	</div>
 	{% else %}
-	<h4>
-		When you have made plans of your own,
-		you will be able to see the Supply vs Demand and Planned Income tables.
-	</h4>
-
+	<div style="border: 2px solid grey; padding-left: 1em; padding-bottom: 1em; ">
+		<h4>
+			When you have made plans of your own,
+			you will be able to see the Supply vs Demand and Projected Income tables.
+		</h4>
+	</div>
 	{% endif %}
 
+	</div>
 
 	<div style="clear: both;" />
 </div>
