@@ -7,10 +7,8 @@ from producer.forms import *
 
 
 def create_inventory_item_forms(producer, avail_date, data=None):
-    #todo: is this the proper date range for PBC?
     monday = avail_date - datetime.timedelta(days=datetime.date.weekday(avail_date))
     saturday = monday + datetime.timedelta(days=5)
-    #import pdb; pdb.set_trace()
     items = InventoryItem.objects.filter(
         producer=producer, 
         remaining__gt=0,
@@ -31,7 +29,6 @@ def create_inventory_item_forms(producer, avail_date, data=None):
                 custodian_id = item.custodian.id
         except KeyError:
             item = False
-        #import pdb; pdb.set_trace()
         if item:
             the_form = InventoryItemForm(data, prefix=item.product.id, initial={
                 'item_id': item.id,
@@ -93,7 +90,6 @@ def supply_demand_table(from_date, to_date, member):
     columns = [label]
     wkdate = from_date
     while wkdate <= to_date:
-        #columns.append(wkdate.strftime('%m-%d'))
         columns.append(wkdate)
         wkdate = wkdate + datetime.timedelta(days=7)
     rows = rows.values()
@@ -112,7 +108,6 @@ def producer_suppliable_demand(from_date, to_date, producer):
             row.append(SuppliableDemandCell(Decimal("0"), Decimal("0")))
             wkdate = wkdate + datetime.timedelta(days=7)
         product = plan.product.supply_demand_product()
-        #import pdb; pdb.set_trace()
 
         row.insert(0, product)
         rows.setdefault(product, row)
@@ -135,11 +130,9 @@ def producer_suppliable_demand(from_date, to_date, producer):
                     rows[product][week + 1].demand += plan.quantity
                 wkdate = wkdate + datetime.timedelta(days=7)
                 week += 1
-    #import pdb; pdb.set_trace()
     rows = rows.values()
     fee = producer_fee()
     for row in rows:
-        #import pdb; pdb.set_trace()
         for x in range(1, len(row)):
             sd = row[x].suppliable()
             if sd >= 0:
@@ -148,12 +141,8 @@ def producer_suppliable_demand(from_date, to_date, producer):
             else:
                 row[x] = Decimal("0")
     income_rows = []
-    #import pdb; pdb.set_trace()
     for row in rows:
         total = Decimal("0")
-        #for cell in row[1:len(row)]:
-        #    total += cell
-        #    cell = cell.quantize(Decimal('1.'), rounding=ROUND_UP)
         for x in range(1, len(row)):
             total += row[x]
             row[x] = row[x].quantize(Decimal('.1'), rounding=ROUND_UP)

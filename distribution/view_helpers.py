@@ -10,7 +10,6 @@ from forms import *
 # somebody needs headings!
 def create_weekly_plan_forms(rows, data=None):
     form_list = []
-    #rows = plan_weeks(member, from_date, to_date)
     PlanCellFormSet = formset_factory(PlanCellForm, extra=0)
 
     for row in rows:
@@ -81,7 +80,6 @@ def supply_demand_table(from_date, to_date, member=None):
     columns = [label]
     wkdate = from_date
     while wkdate <= to_date:
-        #columns.append(wkdate.strftime('%m-%d'))
         columns.append(wkdate)
         wkdate = wkdate + datetime.timedelta(days=7)
     rows = rows.values()
@@ -101,8 +99,6 @@ def supply_demand_weekly_table(week_date):
     for plan in plans:
         if not plan.member in columns:
             columns.append(plan.member)
-    #columns = list(set(columns))
-    #columns.sort(lambda x, y: cmp(x.short_name, y.short_name))
     columns.insert(0, "Product\Member")
     columns.append("Balance")
     for plan in plans:
@@ -149,7 +145,6 @@ def suppliable_demand(from_date, to_date, member=None):
             row.append(SuppliableDemandCell(Decimal("0"), Decimal("0")))
             wkdate = wkdate + datetime.timedelta(days=7)
         product = plan.product.supply_demand_product()
-        #import pdb; pdb.set_trace()
 
         row.insert(0, product)
         rows.setdefault(product, row)
@@ -157,18 +152,15 @@ def suppliable_demand(from_date, to_date, member=None):
         week = 0
         while wkdate <= to_date:
             if plan.from_date <= wkdate and plan.to_date >= wkdate:
-                #import pdb; pdb.set_trace()
                 if plan.role == "producer":
                     rows[product][week + 1].supply += plan.quantity
                 else:
                     rows[product][week + 1].demand += plan.quantity
             wkdate = wkdate + datetime.timedelta(days=7)
             week += 1
-    #import pdb; pdb.set_trace()
     rows = rows.values()
     cust_fee = customer_fee()
     for row in rows:
-        #import pdb; pdb.set_trace()
         for x in range(1, len(row)):
             sd = row[x].suppliable()
             if sd >= 0:
@@ -177,7 +169,6 @@ def suppliable_demand(from_date, to_date, member=None):
             else:
                 row[x] = Decimal("0")
     income_rows = []
-    #import pdb; pdb.set_trace()
     for row in rows:
         base = Decimal("0")
         total = Decimal("0")

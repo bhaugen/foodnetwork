@@ -231,7 +231,6 @@ def planning_table(request, member_id, list_type, from_date, to_date):
     plan_table = plan_weeks(member, products, from_date, to_date)
     forms = create_weekly_plan_forms(plan_table.rows, data=request.POST or None)
     if request.method == "POST":
-        #import pdb; pdb.set_trace()
         for row in forms:
             if row.formset.is_valid():
                 for form in row.formset.forms:
@@ -249,9 +248,7 @@ def planning_table(request, member_id, list_type, from_date, to_date):
                             plan = None
                     if qty:
                         if plan:
-                            #import pdb; pdb.set_trace()
                             if not qty == plan.quantity:
-                                #import pdb; pdb.set_trace()
                                 if plan.from_date >= from_dt and plan.to_date <= to_dt:
                                     plan.quantity = qty
                                     plan.save()
@@ -296,27 +293,20 @@ def planning_table(request, member_id, list_type, from_date, to_date):
                                 from_date=from_dt,
                                 to_date=to_dt,
                                 role=role,
-                                #inventoried=True,
-                                #distributor,
                             )
                             new_plan.save()
-                            #import pdb; pdb.set_trace()
                             if role == "producer":
                                 listed_product, created = ProducerProduct.objects.get_or_create(
                                     product=product, producer=member)
                             elif role == "consumer":
-                                #todo: shd these be auto-created at all?
-                                # and if so, what MemberProductList?
                                 listed_product, created = CustomerProduct.objects.get_or_create(
                                     product=product, customer=member)
 
                     else:
                         if plan:
                             if plan.from_date >= from_dt and plan.to_date <= to_dt:
-                                #pass
                                 plan.delete()
                             else:
-                                #import pdb; pdb.set_trace()
                                 if plan.to_date > to_dt:
                                     early_from_dt = plan.from_date              
                                     if plan.from_date < from_dt:
@@ -1235,6 +1225,7 @@ def member_supply_and_demand(request, from_date, to_date, member_id):
             'sdtable': sdtable,
             'member': member,
             'plan_type': plan_type,
+            'tabnav': "distribution/tabnav.html",
         }, context_instance=RequestContext(request))
 
 
