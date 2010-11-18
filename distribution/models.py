@@ -159,6 +159,15 @@ class PartyManager(models.Manager):
             if isinstance(party.as_leaf_class(), Processor) or isinstance(party.as_leaf_class(), Distributor):
                 pcs.append(party)
         return pcs
+
+    def producers_and_processors(self):
+        parties = Party.objects.all().exclude(pk=1)
+        pcs = []
+        for party in parties:
+            if isinstance(party.as_leaf_class(), Processor) or isinstance(party.as_leaf_class(), Producer):
+                pcs.append(party)
+        return pcs
+
     
 class Party(models.Model):
     member_id = models.CharField(_('member id'), max_length=12, blank=True)

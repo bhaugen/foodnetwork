@@ -13,7 +13,7 @@
 
 <div class="process">
 
-	{% include "distribution/tabnav.html" %}
+	{% include "producer/producer_tabnav.html" %}
 
     <table style="margin-bottom: 1em;" >
         <tr>
@@ -23,15 +23,10 @@
         <tr>
             <th style="text-align: right; " >{% trans "Process Type" %}: </th>
             <td>{{process.process_type}}</td>
-    	</tr>
-    	<tr>
-            <th style="text-align: right; " >{% trans "Managed By" %}: </th>
-	    <td>{{process.managed_by}}</td>
-   	</tr>
+        </tr>
         <tr>
             <th style="text-align: right; " >{% trans "Date" %}: </th>
-	    <td>{{process.process_date}}</td>
-   	</tr>
+            <td>{{process.process_date}}</td>
     </table>
 
 	<h3>{% trans "Input Lot" %}:</h3>

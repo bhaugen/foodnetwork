@@ -91,7 +91,7 @@
 
 	{% include "distribution/tabnav.html" %}
 
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
 		<input name='producer-id' type='hidden' value='{{ producer.id }}' />
 		<input name='avail-date' type='hidden' value='{{ avail_date }}' />
         <table>

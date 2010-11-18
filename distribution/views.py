@@ -2550,5 +2550,5 @@ def delete_process(request, process_id):
             service.delete() 
         process.delete()
         #todo: retest, this might not work! 
-        return HttpResponseRedirect(reverse("distribution/process_selection"))
+        return HttpResponseRedirect(reverse("process_selection"))
 

@@ -91,7 +91,7 @@
 
 	{% include "distribution/tabnav.html" %}
 
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
 	<input name='member-id' type='hidden' value='{{ member.id }}' />
         <table>
             <tr>

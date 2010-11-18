@@ -132,7 +132,7 @@ class ServiceTypeAdmin(admin.ModelAdmin):
 admin.site.register(ServiceType, ServiceTypeAdmin)
 
 class ProcessAdmin(admin.ModelAdmin):
-    list_display = ('process_type', 'process_date')
+    list_display = ('process_type', 'process_date', 'managed_by')
   
 admin.site.register(Process, ProcessAdmin)
 

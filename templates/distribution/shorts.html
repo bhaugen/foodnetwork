@@ -207,7 +207,7 @@
 
 	<h4>{% blocktrans %}Shorts for {{ date }}{% endblocktrans %}</h4>
 
-	<form action="." method="POST" >
+	<form action="." method="POST" >{% csrf_token %}
 
 	<table class="ga-event-table" >
 		<tr>

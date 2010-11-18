@@ -222,7 +222,7 @@
 
 	{% include tabnav %}
 
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
 		<h3>{% trans "Input Lot" %}:</h3>
 		<table class="ga-event-table" >
 			{% if input_select_form %}

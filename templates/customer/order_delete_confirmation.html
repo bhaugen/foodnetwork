@@ -18,6 +18,7 @@
 
 	<div style="margin-left: 2em; margin-bottom: 1em; ">
 		<form style="display: inline;" action="{% url delete_order order_id=order.id %}" method="POST">
+			{% csrf_token %}
     			<input type="submit" value="Delete" />
 		</form>
 		<form style="display: inline;" action="{% url customer_order_selection %}" method="GET">

@@ -28,7 +28,7 @@
 
 	<h2> {% trans "Enter Order Date" %}</h2>
 
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
         <table>
                 <th style="text-align: right; " >{% trans "Delivery Date" %}:</th>
                 <td>{{ dsform.selected_date}}</td>

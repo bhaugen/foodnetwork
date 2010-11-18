@@ -44,5 +44,18 @@ class PlanSelectionForm(forms.Form):
     plan_to_date = forms.DateField(
         widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
     list_type = forms.ChoiceField( widget=forms.RadioSelect(), choices=[
-        ['M','My Product List'],['A','All Products']] )
+        ['M','My Planned Products'],['A','All Products']] )
+
+
+class ProcessServiceForm(forms.ModelForm):
+    amount = forms.DecimalField(widget=forms.TextInput(attrs={'class': 'quantity-field', 'size': '10'}))
+    
+    def __init__(self, *args, **kwargs):
+        super(ProcessServiceForm, self).__init__(*args, **kwargs)
+        self.fields['from_whom'].choices = [('', '----------')] + [
+            (proc.id, proc.short_name) for proc in Party.subclass_objects.producers_and_processors()]
+
+    class Meta:
+        model = ServiceTransaction
+        exclude = ('process', 'to_whom', 'transaction_date', 'payment', 'notes')
 

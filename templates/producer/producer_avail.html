@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Producer Availability" %}
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="avail">
+
+	{% include "producer/producer_tabnav.html" %}
+
+    <table style="margin-bottom: 1em; ">
+        <tr>
+            <th style="text-align: right; " >{% trans "Producer" %}: </th>
+            <td>{{ producer.short_name }} - {{producer.long_name}}</td>
+        </tr>
+        <tr>
+            <th style="text-align: right; " >{% trans "Availability for week of" %}: </th>
+            <td>{{avail_date}}</td>
+        </tr>
+    </table>
+    <table class="ga-event-table" >
+        <tr>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Lot Id" %}</th>
+			<th>{% trans "Field" %}</th>
+			<th>{% trans "Custodian" %}</th>
+        	<th>{% trans "Date" %}</th>
+        	<th>{% trans "Ready" %}</th>
+			<th>{% trans "Remaining" %}</th>
+        	<th>{% trans "Received" %}</th>
+        	<th>{% trans "Onhand" %}</th>
+        	<th>{% trans "Notes" %}</th>
+        </tr>
+        {% for item in inventory %}
+            <tr>
+				<td>{{ item.product.long_name }}</td>
+				<td>{{ item.lot_id }}</td>
+				<td>{{ item.field_id }}</td>
+				{% if item.custodian %}
+					<td>{{ item.custodian }}</td>
+				{% else %}
+					<td>&nbsp;</td>
+				{% endif %}
+                <td>{{ item.inventory_date }}</td>
+                <td style="text-align: right; ">{{ item.planned }}</td>
+				<td style="text-align: right; ">{{ item.remaining }}</td>
+                <td style="text-align: right; ">{{ item.received }}</td>
+                <td style="text-align: right; ">{{ item.onhand }}</td>
+                <td>{{ item.notes }}</td>
+            </tr>
+        {% endfor %}
+</table>
+
+</div>
+
+{% endblock %} 

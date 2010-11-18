@@ -202,7 +202,7 @@
 
 	{% include "distribution/tabnav.html" %}
 
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
         <table >
             {% if order %}
 		        <tr>

@@ -30,6 +30,7 @@
 		<div style="margin-bottom: 1em; " >
 			If these changes are ok, please
 			<form style="display: inline; " action="{% url resave_short_adjusted_order order_id=order.id %}" method="POST">
+				{% csrf_token %}
 				<input class="submit-btn" type="submit" name="re-save" id="re-save" value="Re-Save" />
 			</form> 
 			this order.
@@ -44,6 +45,7 @@
 	{% else %}
 		<div style="margin-bottom: 1em; " >
 			<form style="display: inline; " action="{% url submit_order order_id=order.id %}" method="POST">
+				{% csrf_token %}
 				<input class="submit-btn" type="submit" name="submit" id="submit" value="Submit order to {{ food_network }}" />
 			</form> 
 			<form style="display: inline; " action="{% url edit_order order_id=order.id %}" method="GET">

@@ -27,7 +27,7 @@
 	<div style="border: 2px solid grey; width: 30%; padding-left: 1em;">
 		<h4>New order:</h4>
 
-		<form action="." method="POST" >
+		<form action="." method="POST" >{% csrf_token %}
         		<table>
 			<tr>
                 		<th style="text-align: right; " >Delivery Date:</th>

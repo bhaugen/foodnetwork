@@ -13,7 +13,7 @@
 
 	<h3 style="padding-top: 0; margin-top: 0; " >Product List Selection</h3>
 
-	<form action="{% url create_product_list cust_id=customer.id %}" method="POST">
+	<form action="{% url create_product_list cust_id=customer.id %}" method="POST">{% csrf_token %}
 		<input class="submit-btn" type="submit" value="Create new product list" />
 	</form>
 

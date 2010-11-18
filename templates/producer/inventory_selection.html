@@ -49,11 +49,11 @@
 
 {% block content %}
 
-<div class="inventory-update">
+<div class="avail">
 
 	{% include "producer/producer_tabnav.html" %}
 
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
         <table>
             <tr>
                 <th style="text-align: right; " >{% trans "Week of" %}:</th>

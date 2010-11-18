@@ -26,7 +26,7 @@
 
 	{% include "distribution/tabnav.html" %}
 
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
         <table>
             <tr>
                 <th style="text-align: right; " >{% trans "From Date" %}:</th>

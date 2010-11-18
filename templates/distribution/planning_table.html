@@ -127,7 +127,7 @@ table thead
 	{% endifequal %}
 	</p>
 
-	<form action="." method="POST" >
+	<form action="." method="POST" >{% csrf_token %}
 	<input style="margin-bottom: 4px;" type="submit" value="Submit" />
 	<table class="ga-event-table" style="font-size: 90%;" >
 		<thead>

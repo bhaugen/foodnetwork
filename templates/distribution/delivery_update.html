@@ -176,7 +176,7 @@
         	<i>{% blocktrans %}All order Items for {{delivery_date}}{% endblocktrans %}</i>
 		{% endif %}
     </p>
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
         <table class="ga-event-table" >
                 <th>{% trans "Order Item" %}</th>
                 <th>{% trans "Order Qty" %}</th>

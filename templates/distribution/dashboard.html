@@ -35,19 +35,19 @@
 	{% comment %}	
 		{% if user.is_authenticated %}
 			<div style="margin-bottom: 1em; " >
-				<form style="display: inline; " action="{% url send_fresh_list %}" method="POST">
+				<form style="display: inline; " action="{% url send_fresh_list %}" method="POST">{% csrf_token %}
 					<input class="submit-btn" type="submit" value="{% trans 'Send Fresh List Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
-				<form style="display: inline; " action="{% url send_pickup_list %}" method="POST">
+				<form style="display: inline; " action="{% url send_pickup_list %}" method="POST">{% csrf_token %}
 					<input class="submit-btn" type="submit" value="{% trans 'Send Pickup List Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
-				<form style="display: inline; " action="{% url send_delivery_list %}" method="POST">
+				<form style="display: inline; " action="{% url send_delivery_list %}" method="POST">{% csrf_token %}
 					<input class="submit-btn" type="submit" value="{% trans 'Send Delivery List Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
-				<form style="display: inline; " action="{% url send_order_notices %}" method="POST">
+				<form style="display: inline; " action="{% url send_order_notices %}" method="POST">{% csrf_token %}
 					<input class="submit-btn" type="submit" value="{% trans 'Send Order Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
@@ -58,7 +58,7 @@
 		<h4 style="margin-bottom: 4px;" >
 			Activity for week of 
 			{% if user.is_authenticated %}
-				<form style="display: inline;" action="{% url reset_week %}" method="POST">
+				<form style="display: inline;" action="{% url reset_week %}" method="POST">{% csrf_token %}
 					{{ week_form.current_week }}
 					<input class="submit-btn" type="submit" value="{% trans 'Reset' %}" />
 				</form>

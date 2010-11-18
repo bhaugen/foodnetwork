@@ -18,6 +18,7 @@ from django.core.mail import send_mail
 from django.forms.models import inlineformset_factory
 from django.db.models import Q
 from django.contrib.sites.models import Site
+#from django.views.decorators.csrf import csrf_protect
 
 from distribution.models import *
 from producer.forms import *
@@ -91,7 +92,7 @@ def inventory_update(request, prod_id, year, month, day):
                     item.freeform_lot_id = freeform_lot_id
                     item.save()
                 else:
-                    if planned + received > 0:
+                    if planned > 0:
                         prod_id = data['prod_id']
                         product = Product.objects.get(pk=prod_id)
                         item = itemform.save(commit=False)
@@ -110,6 +111,26 @@ def inventory_update(request, prod_id, year, month, day):
         'avail_date': availdate, 
         'producer': producer, 
         'item_forms': itemforms}, context_instance=RequestContext(request))
+
+@login_required
+def produceravail(request, prod_id, year, month, day):
+    availdate = datetime.date(int(year), int(month), int(day))
+    availdate = availdate - datetime.timedelta(days=datetime.date.weekday(availdate)) + datetime.timedelta(days=2)
+    weekstart = availdate - datetime.timedelta(days=datetime.date.weekday(availdate))
+    try:
+        producer = Party.objects.get(pk=prod_id)
+        inventory = InventoryItem.objects.filter(
+            producer=producer,
+            inventory_date__range=(weekstart, availdate)
+        )
+            #Q(producer=producer) &
+            #(Q(onhand__gt=0) | Q(inventory_date__range=(weekstart, availdate))))
+    except Party.DoesNotExist:
+        raise Http404
+    return render_to_response('producer/producer_avail.html', 
+        {'producer': producer, 
+         'avail_date': weekstart, 
+         'inventory': inventory }, context_instance=RequestContext(request))
 
 @login_required
 def process_selection(request):
@@ -131,7 +152,7 @@ def process_selection(request):
         'header_form': psform,
         'processes': processes,}, context_instance=RequestContext(request))
 
-from distribution.forms import InputLotSelectionForm, InputLotCreationForm, ProcessServiceForm, OutputLotCreationFormsetForm
+from distribution.forms import InputLotSelectionForm, InputLotCreationForm, OutputLotCreationFormsetForm
 
 @login_required
 def new_process(request, process_type_id):
@@ -139,7 +160,7 @@ def new_process(request, process_type_id):
         foodnet = FoodNetwork.objects.get(pk=1)
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
-    producer = request.user.parties.all()[0].party
+    process_manager = request.user.parties.all()[0].party
 
     weekstart = current_week()
     weekend = weekstart + datetime.timedelta(days=5)
@@ -166,14 +187,22 @@ def new_process(request, process_type_id):
     else:
         input_create_form = InputLotCreationForm(input_types, data=request.POST or None, prefix="inputcreation")
 
-    # todo: default service provider to producer?
+    # todo: default service provider to process_manager?
     service_label = "Processing Service"
     service_formset = None
     steps = pt.number_of_processing_steps
     if steps > 1:
         service_label = "Processing Services"
-    ServiceFormSet = formset_factory(ProcessServiceForm, extra=steps)
-    service_formset = ServiceFormSet(data=request.POST or None, prefix="service")
+    ServiceFormSet = formset_factory(ProcessServiceForm, extra=0)
+    initial_data = []
+    for x in range(steps):
+        initial_data.append({"from_whom": process_manager.id})
+    print "initial_data", initial_data
+    service_formset = ServiceFormSet(
+        data=request.POST or None, 
+        prefix="service",
+        initial=initial_data,
+    )
 
     output_types = pt.output_type.stockable_children()
 
@@ -200,7 +229,7 @@ def new_process(request, process_type_id):
                 process = Process(
                     process_type = pt,
                     process_date = weekstart,
-                    managed_by = producer,
+                    managed_by = process_manager,
                 )
                 process.save()
                 lot.inventory_date = weekstart
@@ -226,7 +255,9 @@ def new_process(request, process_type_id):
                 qty = data["quantity"]
                 process = Process(
                     process_type = pt,
-                    process_date = weekstart)
+                    process_date = weekstart,
+                    managed_by = process_manager,
+                )
                 process.save()
                 issue = InventoryTransaction(
                     transaction_type = "Issue",
@@ -270,7 +301,7 @@ def new_process(request, process_type_id):
                             tx.save()
 
             return HttpResponseRedirect('/%s/%s/'
-               % ('distribution/process', process.id))
+               % ('producer/process', process.id))
 
     return render_to_response('distribution/new_process.html', {
         'input_lot_qties': input_lot_qties,
@@ -281,7 +312,66 @@ def new_process(request, process_type_id):
         'output_formset': output_formset,
         'output_label': output_label,
         'tabnav': "producer/producer_tabnav.html",
-        }, context_instance=RequestContext(request))  
+        }, context_instance=RequestContext(request))
+
+@login_required
+def process(request, process_id):
+    process = get_object_or_404(Process, id=process_id)
+    return render_to_response('producer/process.html', 
+        {"process": process,}, context_instance=RequestContext(request))
+
+@login_required
+def delete_process_confirmation(request, process_id):
+    if request.method == "POST":
+        process = get_object_or_404(Process, id=process_id)
+        outputs = []
+        outputs_with_lot = []
+        for output in process.outputs():
+            lot = output.inventory_item
+            qty = output.amount
+            if lot.planned == qty:
+                outputs_with_lot.append(output)
+            else:
+                outputs.append(output)
+        inputs = []
+        inputs_with_lot = []
+        for inp in process.inputs():
+            lot = inp.inventory_item
+            qty = inp.amount
+            if lot.planned == qty:
+                inputs_with_lot.append(inp)
+            else:
+                inputs.append(inp)
+        return render_to_response('producer/process_delete_confirmation.html', {
+            "process": process,
+            "outputs": outputs,
+            "inputs": inputs,
+            "outputs_with_lot": outputs_with_lot,
+            "inputs_with_lot": inputs_with_lot,
+            }, context_instance=RequestContext(request))
+
+@login_required
+def delete_process(request, process_id):
+    if request.method == "POST":
+        process = get_object_or_404(Process, id=process_id)
+        for output in process.outputs():
+            lot = output.inventory_item
+            qty = output.amount
+            output.delete()
+            if lot.planned == qty:
+                lot.delete()
+        for inp in process.inputs():
+            lot = inp.inventory_item
+            qty = inp.amount
+            inp.delete()
+            if lot.planned == qty:
+                lot.delete()
+        for service in process.services():
+            service.delete() 
+        process.delete()
+        #todo: retest, this might not work! 
+        return HttpResponseRedirect(reverse("producer_process_selection"))
+
 
 #@login_required
 def plan_selection(request):

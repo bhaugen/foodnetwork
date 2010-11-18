@@ -34,7 +34,7 @@
 
 		<h4>Update Plans</h4>
 
-		<form action="." method="POST" >
+		<form action="." method="POST" >{% csrf_token %}
         		<table>
 
 			<tr>
@@ -78,7 +78,7 @@
 	<div style="border: 2px solid grey; padding-left: 1em; ">
 		<h4>Supply and Demand Table</h4>
 
-		<form action="." method="POST" >
+		<form action="." method="POST" >{% csrf_token %}
 
         		<table>
 		            <tr>
@@ -116,7 +116,7 @@
     	<div style="border: 2px solid grey; padding-left: 1em; ">
 		<h4>Planned Income Table</h4>
 
-		<form action="." method="POST" >
+		<form action="." method="POST" >{% csrf_token %}
 
         		<table>
 		            <tr>

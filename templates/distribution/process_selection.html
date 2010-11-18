@@ -28,7 +28,7 @@
 	{% include "distribution/tabnav.html" %}
 
 	<h3> Week of {{ process_date }}</h3>
-    <form action="." method="POST" >
+    <form action="." method="POST" >{% csrf_token %}
         <table>
 {% comment %}
             <tr>
@@ -65,6 +65,7 @@
 	<table class="ga-event-table" >
 		<tr>
 			<th>{% trans "Type" %}</th>
+			<th>{% trans "Managed By" %}</th>
 			<th>{% trans "Input Lot" %}</th>
 			<th>{% trans "Output Lots" %}</th>
 			<th>{% trans "View" %}</th>
@@ -73,12 +74,14 @@
 		{% for process in processes %}
 			<tr>
 				<td>{{ process.process_type }}</td>
+				<td>{{ process.managed_by }}</td>
 				<td>{{ process.input_lot_id }}</td>
 				<td>{{ process.output_lot_ids }}</td>
 				<td><a href="{% url process process_id=process.id %}">View</a>
 				<td>
 					{% if process.is_deletable %}
 						<form method="POST" action="{% url delete_process_confirmation process_id=process.id %}">
+						{% csrf_token %}
 							<input class="submit-btn" type="submit" value="{% trans 'Delete' %}" />
 						</form>
 					{% else %}

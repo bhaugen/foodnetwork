@@ -117,7 +117,7 @@
 
 	{% include "customer/customer_tabnav.html" %}	
 
-	<form action="." method="POST" >
+	<form action="." method="POST" >{% csrf_token %}
 	
 	<table >
 
