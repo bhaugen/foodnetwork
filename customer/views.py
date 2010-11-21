@@ -313,11 +313,11 @@ def planning_table(request, member_id, list_type, from_date, to_date):
                             if role == "producer":
                                 listed_product, created = ProducerProduct.objects.get_or_create(
                                     product=product, producer=member)
-                            elif role == "consumer":
+                            #elif role == "consumer":
                                 #todo: shd these be auto-created at all?
                                 # and if so, what MemberProductList?
-                                listed_product, created = CustomerProduct.objects.get_or_create(
-                                    product=product, customer=member)
+                            #    listed_product, created = CustomerProduct.objects.get_or_create(
+                            #        product=product, customer=member)
 
                     else:
                         if plan:
@@ -349,7 +349,7 @@ def planning_table(request, member_id, list_type, from_date, to_date):
         from_date = from_date.strftime('%Y_%m_%d')
         to_date = to_date.strftime('%Y_%m_%d')
         return HttpResponseRedirect('/%s/%s/%s/%s/'
-                    % ('distribution/membersupplydemand', from_date, to_date, member_id))
+                    % ('customer/customerplans', from_date, to_date, member_id))
     return render_to_response('distribution/planning_table.html', 
         {
             'from_date': from_date,
@@ -360,7 +360,7 @@ def planning_table(request, member_id, list_type, from_date, to_date):
             'member': member,
             'list_type': list_type,
             'tabnav': "customer/customer_tabnav.html",
-        })
+        }, context_instance=RequestContext(request))
 
 
 #todo: split order_update into
@@ -735,4 +735,26 @@ def history(request, cust_id, from_date, to_date):
         'tabnav': "customer/customer_tabnav.html",
     })
 
-
+@login_required
+def customer_plans(request, from_date, to_date, member_id):
+    try:
+        member = Party.objects.get(pk=member_id)
+    except Party.DoesNotExist:
+        raise Http404
+    try:
+        from_date = datetime.datetime(*time.strptime(from_date, '%Y_%m_%d')[0:5]).date()
+        to_date = datetime.datetime(*time.strptime(to_date, '%Y_%m_%d')[0:5]).date()
+    except ValueError:
+            raise Http404
+    sdtable = customer_plans_table(from_date, to_date, member)
+    plan_type = "Consumption"
+    #import pdb; pdb.set_trace()
+    return render_to_response('distribution/member_plans.html', 
+        {
+            'from_date': from_date,
+            'to_date': to_date,
+            'sdtable': sdtable,
+            'member': member,
+            'plan_type': plan_type,
+            'tabnav': "customer/customer_tabnav.html", 
+        }, context_instance=RequestContext(request))

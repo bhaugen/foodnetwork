@@ -546,9 +546,9 @@ def planning_table(request, member_id, list_type, from_date, to_date):
                             if role == "producer":
                                 listed_product, created = ProducerProduct.objects.get_or_create(
                                     product=product, producer=member)
-                            elif role == "consumer":
-                                listed_product, created = CustomerProduct.objects.get_or_create(
-                                    product=product, customer=member)
+                            #elif role == "consumer":
+                            #    listed_product, created = CustomerProduct.objects.get_or_create(
+                            #        product=product, customer=member)
 
                     else:
                         if plan:
@@ -578,7 +578,7 @@ def planning_table(request, member_id, list_type, from_date, to_date):
         from_date = from_date.strftime('%Y_%m_%d')
         to_date = to_date.strftime('%Y_%m_%d')
         return HttpResponseRedirect('/%s/%s/%s/%s/'
-                    % ('producer/membersupplydemand', from_date, to_date, member_id))
+                    % ('producer/producerplans', from_date, to_date, member_id))
     return render_to_response('distribution/planning_table.html', 
         {
             'from_date': from_date,
@@ -639,10 +639,10 @@ def member_supply_and_demand(request, from_date, to_date, member_id):
         to_date = datetime.datetime(*time.strptime(to_date, '%Y_%m_%d')[0:5]).date()
     except ValueError:
             raise Http404
-    sdtable = supply_demand_table(from_date, to_date, member)
+    sdtable = producer_plans_table(from_date, to_date, member)
     plan_type = "Production"
     if member.is_customer():
-        plan_type = "Production"
+        plan_type = "Consumption"
     #import pdb; pdb.set_trace()
     return render_to_response('distribution/member_plans.html', 
         {

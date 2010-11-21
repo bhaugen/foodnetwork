@@ -6,6 +6,7 @@ from distribution.models import *
 from customer.forms import *
 from paypal.standard.forms import PayPalPaymentsForm
 from pay.models import *
+from distribution.view_helpers import SupplyDemandTable
 
 
 def create_paypal_form(order, return_page='unpaid_invoice'):
@@ -29,7 +30,6 @@ def create_paypal_form(order, return_page='unpaid_invoice'):
 def create_new_product_list_forms(data=None):
     #todo: shd these be plannable instead of sellable?
     products = list(Product.objects.filter(sellable=True))
-    #CustomerProductFormSet = formset_factory(CustomerProductForm, extra=0)
     form_list = []
     for prod in products:
         prod.parents = prod.parent_string()
@@ -37,19 +37,12 @@ def create_new_product_list_forms(data=None):
     for prod in products:
         #if prod.id == 24:
         #    import pdb; pdb.set_trace()
-        initial_data = {
-                'prod_id': prod.id,
-            }
-        form = CustomerProductForm(data, prefix=prod.id, 
-            initial=initial_data)
+        initial_data = {'prod_id': prod.id}
+        form = CustomerProductForm(data, prefix=prod.id, initial=initial_data)
         form.product_name = " ".join([prod.long_name, prod.growing_method])
         form.category = prod.parents
         form_list.append(form)
     return form_list
-
-
-def create_edit_product_list_forms(customer, data=None):
-    return
 
 
 def create_order_item_forms(order, product_list, availdate, data=None):
@@ -146,3 +139,33 @@ def create_history_table(customer, from_date, to_date):
     rows = row_dict.values()
     rows.sort(lambda x, y: cmp(x.product.short_name, y.product.short_name))
     return rows
+
+def customer_plans_table(from_date, to_date, customer):
+    plans = ProductPlan.objects.filter(member=customer)
+    rows = {}    
+    for plan in plans:
+        wkdate = from_date
+        product = plan.product.supply_demand_product()
+        row = []
+        while wkdate <= to_date:
+            row.append(Decimal("0"))
+            wkdate = wkdate + datetime.timedelta(days=7)
+        row.insert(0, product)
+        rows.setdefault(product, row)
+        wkdate = from_date
+        week = 0
+        while wkdate <= to_date:
+            if plan.from_date <= wkdate and plan.to_date >= wkdate:
+                rows[product][week + 1] += plan.quantity
+            wkdate = wkdate + datetime.timedelta(days=7)
+            week += 1
+    label = "Product/Weeks"
+    columns = [label]
+    wkdate = from_date
+    while wkdate <= to_date:
+        columns.append(wkdate)
+        wkdate = wkdate + datetime.timedelta(days=7)
+    rows = rows.values()
+    rows.sort(lambda x, y: cmp(x[0].short_name, y[0].short_name))
+    sdtable = SupplyDemandTable(columns, rows)
+    return sdtable

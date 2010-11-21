@@ -39,6 +39,8 @@ urlpatterns = patterns('',
     url(r'^planselection/$', "customer.views.plan_selection", name="plan_selection"),
     url(r'^planningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', 
         "customer.views.planning_table", name='customer_planning_table'),
+    url(r'^customerplans/(?P<from_date>\w{10})/(?P<to_date>\w{10})/(?P<member_id>\d+)/$',
+        "customer.views.customer_plans", name='customer_plans'),
     
     #invoices
     url(r'^invoiceselection/$', "customer.views.invoice_selection",

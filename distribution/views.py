@@ -298,9 +298,9 @@ def planning_table(request, member_id, list_type, from_date, to_date):
                             if role == "producer":
                                 listed_product, created = ProducerProduct.objects.get_or_create(
                                     product=product, producer=member)
-                            elif role == "consumer":
-                                listed_product, created = CustomerProduct.objects.get_or_create(
-                                    product=product, customer=member)
+                            #elif role == "consumer":
+                            #    listed_product, created = CustomerProduct.objects.get_or_create(
+                            #        product=product, customer=member)
 
                     else:
                         if plan:
@@ -1216,7 +1216,7 @@ def member_supply_and_demand(request, from_date, to_date, member_id):
     sdtable = supply_demand_table(from_date, to_date, member)
     plan_type = "Production"
     if member.is_customer():
-        plan_type = "Production"
+        plan_type = "Consumption"
     #import pdb; pdb.set_trace()
     return render_to_response('distribution/member_plans.html', 
         {

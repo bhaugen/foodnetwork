@@ -97,8 +97,8 @@ INSTALLED_APPS = (
 )
 
 PAYPAL_RECEIVER_EMAIL = "bobha_1286809456_biz@gmail.com"
-PAYPAL_IMAGE = "https://www.paypalobjects.com/WEBSCR-640-20101004-1/en_US/i/bnr/horizontal_solution_PP.gif"
-PAYPAL_SANDBOX_IMAGE = "https://www.paypalobjects.com/WEBSCR-640-20101004-1/en_US/i/bnr/horizontal_solution_PP.gif"
+PAYPAL_IMAGE = "https://www.paypalobjects.com/WEBSCR-640-20101108-1/en_US/i/bnr/horizontal_solution_PP.gif"
+PAYPAL_SANDBOX_IMAGE = "https://www.paypalobjects.com/WEBSCR-640-20101108-1/en_US/i/bnr/horizontal_solution_PP.gif"
 
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.

@@ -14,7 +14,7 @@
             <p><span class="warning">{% trans "Note" %}</span>: {% blocktrans %}you are already logged in as {{ user }}.{% endblocktrans %}</p>
         {% endif %}
         
-        <form class="login" method="POST" action="">
+        <form class="login" method="POST" action="">{% csrf_token %}
             <table>
 				<tr>
 					<td colspan="2" style="font-size: 110%; font-weight: bold; font-style: italic;" >

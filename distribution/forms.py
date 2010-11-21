@@ -97,7 +97,8 @@ class CustomerPaymentSelectionForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(CustomerPaymentSelectionForm, self).__init__(*args, **kwargs)
         self.fields['customer'].choices = [('', '----------')] + [(cust.id, cust.short_name) for cust in Customer.objects.all()]
-        self.fields['payment'].choices = [('', 'New')] + [(payment.id, payment) for payment in EconomicEvent.objects.payments_from_members()]
+        self.fields['payment'].choices = [('', 'New')] + [
+            (payment.id, payment) for payment in CustomerPayment.objects.all()]
 
 
 class PaymentTransactionForm(forms.Form):

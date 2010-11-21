@@ -160,4 +160,34 @@ def producer_suppliable_demand(from_date, to_date, producer):
     sdtable = SupplyDemandTable(columns, income_rows)
     return sdtable
 
+def producer_plans_table(from_date, to_date, producer):
+    plans = ProductPlan.objects.filter(member=producer)
+    rows = {}    
+    for plan in plans:
+        wkdate = from_date
+        product = plan.product.supply_demand_product()
+        row = []
+        while wkdate <= to_date:
+            row.append(Decimal("0"))
+            wkdate = wkdate + datetime.timedelta(days=7)
+        row.insert(0, product)
+        rows.setdefault(product, row)
+        wkdate = from_date
+        week = 0
+        while wkdate <= to_date:
+            if plan.from_date <= wkdate and plan.to_date >= wkdate:
+                rows[product][week + 1] += plan.quantity
+            wkdate = wkdate + datetime.timedelta(days=7)
+            week += 1
+    label = "Product/Weeks"
+    columns = [label]
+    wkdate = from_date
+    while wkdate <= to_date:
+        columns.append(wkdate)
+        wkdate = wkdate + datetime.timedelta(days=7)
+    rows = rows.values()
+    rows.sort(lambda x, y: cmp(x[0].short_name, y[0].short_name))
+    sdtable = SupplyDemandTable(columns, rows)
+    return sdtable
+
 

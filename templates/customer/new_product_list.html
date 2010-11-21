@@ -143,8 +143,10 @@
 		    <tr>
 			<th style="width: 20em; " >Category</th>
                 	<th style="width: 18em; " >Product</th>
-	                <th style="width: 7em; " >Default Qty</th>
-        	        <th style="width: 30px; " >Plan</th>
+			<th style="width: 7em; " >Default Qty</th>
+			{% comment %}
+			<th style="width: 30px; " >Plan</th>
+			{% endcomment %}
                 	<th style="width: 30px; " >Add</th>
 		</tr>
 		</thead>
@@ -161,7 +163,9 @@
 				<td class="read-only-td"  style="width: 20em; "  > {{ form.category }} </td>
 				<td class="read-only-td"  style="width: 18em; "  > {{ form.product_name }} </td>
 				<td style="width: 7em; text-align: center; " > {{ form.default_quantity }} </td>
+				{% comment %}
 				<td style="width: 30px; " > {{ form.planned }} </td>
+				{% endcomment %}
 				<td style="width: 30px; " > {{ form.added }} </td>
 			</tr>
 		{% endfor %} 
