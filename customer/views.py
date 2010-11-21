@@ -32,7 +32,7 @@ except ImportError:
 
 
 def customer_dashboard(request):
-    food_network = FoodNetwork.objects.get(pk=1)
+    food_network = food_network()
     #todo: all uses of the next statement shd be changed
     customer = request.user.parties.all()[0].party
     cw = current_week()
@@ -48,7 +48,7 @@ def customer_dashboard(request):
          }, context_instance=RequestContext(request))
 
 def order_selection(request):
-    food_network = FoodNetwork.objects.get(pk=1)
+    food_network = food_network()
     customer = request.user.parties.all()[0].party
     selection_form = NewOrderSelectionForm(customer, data=request.POST or None)
     unsubmitted_orders = Order.objects.filter(
@@ -82,7 +82,7 @@ def order_selection(request):
          }, context_instance=RequestContext(request))
 
 def list_selection(request):
-    food_network = FoodNetwork.objects.get(pk=1)
+    food_network = food_network()
     customer = request.user.parties.all()[0].party
     product_lists = MemberProductList.objects.filter(member=customer)
     return render_to_response('customer/list_selection.html', 
@@ -92,7 +92,7 @@ def list_selection(request):
          }, context_instance=RequestContext(request))
 
 def history_selection(request):
-    food_network = FoodNetwork.objects.get(pk=1)
+    food_network = food_network()
     customer = request.user.parties.all()[0].party
     if request.method == "POST":
         drform = DateRangeSelectionForm(request.POST)  
@@ -117,7 +117,7 @@ def history_selection(request):
          }, context_instance=RequestContext(request))
 
 def plan_selection(request):
-    food_network = FoodNetwork.objects.get(pk=1)
+    food_network = food_network()
     customer = request.user.parties.all()[0].party
     if request.method == "POST":
         psform = MemberPlanSelectionForm(request.POST)  
@@ -515,7 +515,7 @@ def update_order(order, itemforms):
 
 def order_confirmation(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
-    food_network = FoodNetwork.objects.get(pk=1)
+    food_network = food_network()
     if not order.state == "Unsubmitted":
         if order.is_paid():
             paypal_form = None
@@ -665,7 +665,7 @@ def invoices(request, cust_id, from_date, to_date):
             raise Http404
 
     try:
-        fn = FoodNetwork.objects.get(pk=1)
+        fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
     cust_id = int(cust_id)
@@ -691,7 +691,7 @@ def invoices(request, cust_id, from_date, to_date):
 def unpaid_invoice(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
     try:
-        fn = FoodNetwork.objects.get(pk=1)
+        fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
 
@@ -715,7 +715,7 @@ def history(request, cust_id, from_date, to_date):
             raise Http404
 
     try:
-        fn = FoodNetwork.objects.get(pk=1)
+        fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
     cust_id = int(cust_id)

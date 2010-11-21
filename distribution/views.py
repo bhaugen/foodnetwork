@@ -32,7 +32,7 @@ def send_fresh_list(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = FoodNetwork.objects.get(pk=1)
+                food_network = food_network()
                 food_network_name = food_network.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
@@ -51,7 +51,7 @@ def send_pickup_list(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = FoodNetwork.objects.get(pk=1)
+                food_network = food_network()
                 food_network_name = food_network.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
@@ -76,7 +76,7 @@ def send_delivery_list(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = FoodNetwork.objects.get(pk=1)
+                food_network = food_network()
                 food_network_name = food_network.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
@@ -101,7 +101,7 @@ def send_order_notices(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = FoodNetwork.objects.get(pk=1)
+                food_network = food_network()
                 food_network_name = food_network.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
@@ -516,7 +516,7 @@ def order_update(request, cust_id, year, month, day):
     availdate = delivery_date
 
     try:
-        fn = FoodNetwork.objects.get(pk=1)
+        fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
 
@@ -616,7 +616,7 @@ def order_update(request, cust_id, year, month, day):
 
 def create_order_by_lot_forms(order, delivery_date, data=None):    
     try:
-        food_network = FoodNetwork.objects.get(pk=1)
+        food_network = food_network()
     except FoodNetwork.DoesNotExist:
         raise Http404
     
@@ -680,7 +680,7 @@ def order_by_lot(request, cust_id, year, month, day):
     orderdate = datetime.date(int(year), int(month), int(day))
     
     try:
-        fn = FoodNetwork.objects.get(pk=1)
+        fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
 
@@ -840,7 +840,7 @@ def delivery_update(request, cust_id, year, month, day):
         customer = ''
         
     try:
-        food_network = FoodNetwork.objects.get(pk=1)
+        food_network = food_network()
     except FoodNetwork.DoesNotExist:
         raise Http404
     
@@ -1107,7 +1107,7 @@ def send_short_change_notices(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = FoodNetwork.objects.get(pk=1)
+                food_network = food_network()
                 food_network_name = food_network.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
@@ -1313,10 +1313,10 @@ class ProductActivity():
 @login_required
 def dashboard(request):
     try:
-        food_network = FoodNetwork.objects.get(pk=1)
-        food_network_name = food_network.long_name
+        fn = food_network()
+        food_network_name = fn.long_name
     except FoodNetwork.DoesNotExist:
-        food_network = None
+        fn = None
         food_network_name = ""
     
     thisdate = ""
@@ -1355,7 +1355,7 @@ def dashboard(request):
 def reset_week(request):
     if request.method == "POST":
         try:
-            food_network = FoodNetwork.objects.get(pk=1)
+            food_network = food_network()
             food_network_name = food_network.long_name
             form = CurrentWeekForm(request.POST)
             if form.is_valid():
@@ -1439,7 +1439,7 @@ def statements(request, from_date, to_date):
             raise Http404
         
     try:
-        network = FoodNetwork.objects.get(pk=1)
+        network = food_network()
     except FoodNetwork.DoesNotExist:
         raise Http404
     
@@ -1929,7 +1929,7 @@ def customer_payment(request, payment_id):
 @login_required
 def payment_update_selection(request):
     try:
-        food_net = FoodNetwork.objects.get(pk=1)
+        food_net = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
     msform = PaymentUpdateSelectionForm(data=request.POST or None)
@@ -1959,7 +1959,7 @@ def payment_update_selection(request):
 def payment_update(request, producer_id, payment_id):
 
     try:
-        food_net = FoodNetwork.objects.get(pk=1)
+        food_net = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
 
@@ -2028,7 +2028,7 @@ def payment_update(request, producer_id, payment_id):
 def customer_payment_update(request, customer_id, payment_id):
 
     try:
-        food_net = FoodNetwork.objects.get(pk=1)
+        food_net = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
 
@@ -2114,7 +2114,7 @@ def invoice_selection(request):
 @login_required
 def invoices(request, cust_id, year, month, day):
     try:
-        fn = FoodNetwork.objects.get(pk=1)
+        fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
     thisdate = datetime.date(int(year), int(month), int(day))
@@ -2332,7 +2332,7 @@ def process_selection(request):
 @login_required
 def new_process(request, process_type_id):
     try:
-        foodnet = FoodNetwork.objects.get(pk=1)
+        foodnet = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
 

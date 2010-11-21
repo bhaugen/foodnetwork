@@ -11,10 +11,16 @@ from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
 
+def food_network():
+    try:
+        return FoodNetwork.objects.all()[0]
+    except IndexError:
+        raise FoodNetwork.DoesNotExist()
+
 def customer_fee():
     answer = 0
     try:
-        answer = FoodNetwork.objects.get(pk=1).customer_fee
+        answer = food_network().customer_fee
     except FoodNetwork.DoesNotExist:
         answer = 0
     return answer
@@ -22,7 +28,7 @@ def customer_fee():
 def producer_fee():
     answer = 0
     try:
-        answer = FoodNetwork.objects.get(pk=1).producer_fee
+        answer = food_network().producer_fee
     except FoodNetwork.DoesNotExist:
         answer = 0
     return answer
@@ -30,24 +36,24 @@ def producer_fee():
 def current_week():
     answer = datetime.date.today()
     try:
-        answer = FoodNetwork.objects.get(pk=1).current_week
+        answer = food_network().current_week
     except FoodNetwork.DoesNotExist:
         answer = datetime.date.today()
     return answer
 
 def ordering_by_lot():
     try:
-        answer = FoodNetwork.objects.get(pk=1).order_by_lot
+        answer = food_network().order_by_lot
     except FoodNetwork.DoesNotExist:
         answer = False
     return answer
 
 def customer_terms():
-    return FoodNetwork.objects.get(pk=1).customer_terms
+    return food_network().customer_terms
 
 
 def member_terms():
-    return FoodNetwork.objects.get(pk=1).member_terms
+    return food_network().member_terms
 
 class ProductAndProducers(object):
      def __init__(self, product, qty, price, producers):
@@ -448,7 +454,7 @@ class Customer(Party):
             if self.customer_transportation_fee:
                 return self.customer_transportation_fee
             else:
-                return FoodNetwork.objects.get(pk=1).transportation_fee
+                return food_network().transportation_fee
         else:
             return Decimal("0")
 
@@ -904,12 +910,12 @@ class EconomicEventManager(models.Manager):
         return payments
 
     def payments_to_members(self):
-        fn = FoodNetwork.objects.get(pk=1)
+        fn = food_network()
         payments = Payment.objects.all().exclude(to_whom=fn)
         return payments
 
     def payments_from_members(self):
-        fn = FoodNetwork.objects.get(pk=1)
+        fn = food_network()
         payments = Payment.objects.all().filter(to_whom=fn)
         return payments
 

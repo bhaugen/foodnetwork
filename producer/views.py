@@ -33,7 +33,7 @@ except ImportError:
 
 
 def producer_dashboard(request):
-    food_network = FoodNetwork.objects.get(pk=1)
+    food_network = food_network()
     #todo: all uses of the next statement shd be changed
     producer = request.user.parties.all()[0].party
     return render_to_response('producer/producer_dashboard.html', 
@@ -157,7 +157,7 @@ from distribution.forms import InputLotSelectionForm, InputLotCreationForm, Outp
 @login_required
 def new_process(request, process_type_id):
     try:
-        foodnet = FoodNetwork.objects.get(pk=1)
+        foodnet = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
     process_manager = request.user.parties.all()[0].party
