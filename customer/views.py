@@ -32,7 +32,7 @@ except ImportError:
 
 
 def customer_dashboard(request):
-    food_network = food_network()
+    fn = food_network()
     #todo: all uses of the next statement shd be changed
     customer = request.user.parties.all()[0].party
     cw = current_week()
@@ -43,12 +43,12 @@ def customer_dashboard(request):
         to_date__gte=weekstart)
     return render_to_response('customer/customer_dashboard.html', 
         {'customer': customer,
-         'food_network': food_network,
+         'food_network': fn,
          'specials': specials,
          }, context_instance=RequestContext(request))
 
 def order_selection(request):
-    food_network = food_network()
+    fn = food_network()
     customer = request.user.parties.all()[0].party
     selection_form = NewOrderSelectionForm(customer, data=request.POST or None)
     unsubmitted_orders = Order.objects.filter(
@@ -74,7 +74,7 @@ def order_selection(request):
 
     return render_to_response('customer/order_selection.html', 
         {'customer': customer,
-         'food_network': food_network,
+         'food_network': fn,
          'selection_form': selection_form,
          'unsubmitted_orders': unsubmitted_orders,
          'changeable_orders': changeable_orders,
@@ -82,17 +82,17 @@ def order_selection(request):
          }, context_instance=RequestContext(request))
 
 def list_selection(request):
-    food_network = food_network()
+    fn = food_network()
     customer = request.user.parties.all()[0].party
     product_lists = MemberProductList.objects.filter(member=customer)
     return render_to_response('customer/list_selection.html', 
         {'customer': customer,
-         'food_network': food_network,
+         'food_network': fn,
          'product_lists': product_lists,
          }, context_instance=RequestContext(request))
 
 def history_selection(request):
-    food_network = food_network()
+    fn = food_network()
     customer = request.user.parties.all()[0].party
     if request.method == "POST":
         drform = DateRangeSelectionForm(request.POST)  
@@ -112,12 +112,12 @@ def history_selection(request):
         drform = DateRangeSelectionForm(initial=init)
     return render_to_response('customer/history_selection.html', 
         {'customer': customer,
-         'food_network': food_network,
+         'food_network': fn,
         'date_range_form': drform,
          }, context_instance=RequestContext(request))
 
 def plan_selection(request):
-    food_network = food_network()
+    fn = food_network()
     customer = request.user.parties.all()[0].party
     if request.method == "POST":
         psform = MemberPlanSelectionForm(request.POST)  
@@ -145,7 +145,7 @@ def plan_selection(request):
     return render_to_response('customer/plan_selection.html', 
         {'customer': customer,
          'plan_form': psform,
-         'food_network': food_network,
+         'food_network': fn,
          }, context_instance=RequestContext(request))
 
 @login_required
@@ -515,7 +515,7 @@ def update_order(order, itemforms):
 
 def order_confirmation(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
-    food_network = food_network()
+    fn = food_network()
     if not order.state == "Unsubmitted":
         if order.is_paid():
             paypal_form = None
@@ -529,7 +529,7 @@ def order_confirmation(request, order_id):
     return render_to_response('customer/order_confirmation.html', {
         'order': order,
         'shorts': shorts,
-        'food_network': food_network,
+        'food_network': fn,
     }, context_instance=RequestContext(request))
 
 def resave_short_adjusted_order(request, order_id):

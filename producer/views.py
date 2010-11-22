@@ -33,12 +33,12 @@ except ImportError:
 
 
 def producer_dashboard(request):
-    food_network = food_network()
+    fn = food_network()
     #todo: all uses of the next statement shd be changed
     producer = request.user.parties.all()[0].party
     return render_to_response('producer/producer_dashboard.html', 
         {'producer': producer,
-         'food_network': food_network,
+         'food_network': fn,
          }, context_instance=RequestContext(request))
 
 @login_required
