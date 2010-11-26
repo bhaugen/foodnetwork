@@ -32,16 +32,16 @@ def send_fresh_list(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = food_network()
-                food_network_name = food_network.long_name
+                fn = food_network()
+                food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
 
-            if food_network:
+            if fn:
                 week_of = current_week()
-                fresh_list = food_network.fresh_list()
+                fresh_list = fn.fresh_list()
                 users = list(Customer.objects.all())
-                users.append(food_network)
+                users.append(fn)
                 notification.send(users, "distribution_fresh_list", {"fresh_list": fresh_list, "week_of": week_of})
                 request.user.message_set.create(message="Fresh List emails have been sent")
         return HttpResponseRedirect(request.POST["next"])
@@ -51,19 +51,19 @@ def send_pickup_list(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = food_network()
-                food_network_name = food_network.long_name
+                fn = food_network()
+                food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
 
-            if food_network:
+            if fn:
                 pickup_date = current_week()
-                pickup_list = food_network.pickup_list()
+                pickup_list = fn.pickup_list()
                 for pickup in pickup_list:
                     dist = pickup_list[pickup]
                     item_list = dist.custodians.values()
                     item_list.sort(lambda x, y: cmp(x.custodian, y.custodian))   
-                    users = [dist, food_network]
+                    users = [dist, fn]
                     notification.send(users, "distribution_pickup_list", {
                             "pickup_list": item_list, 
                             "pickup_date": pickup_date,
@@ -76,19 +76,19 @@ def send_delivery_list(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = food_network()
-                food_network_name = food_network.long_name
+                fn = food_network()
+                food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
 
-            if food_network:
+            if fn:
                 delivery_date = current_week()
-                delivery_list = food_network.delivery_list()
+                delivery_list = fn.delivery_list()
                 for distributor in delivery_list:
                     dist = delivery_list[distributor]
                     order_list = dist.customers.values()
                     order_list.sort(lambda x, y: cmp(x.customer, y.customer))
-                    users = [dist, food_network]
+                    users = [dist, fn]
                     notification.send(users, "distribution_order_list", {
                             "order_list": order_list, 
                             "order_date": delivery_date,
@@ -101,18 +101,18 @@ def send_order_notices(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = food_network()
-                food_network_name = food_network.long_name
+                fn = food_network()
+                food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
 
-            if food_network:
+            if fn:
                 thisdate = current_week()
                 weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
                 weekend = weekstart + datetime.timedelta(days=5)
                 order_list = Order.objects.filter(delivery_date__range=(weekstart, weekend))
                 for order in order_list:
-                    users = [order.customer, food_network]
+                    users = [order.customer, fn]
                     notification.send(users, "distribution_order_notice", {
                             "order": order, 
                             "order_date": thisdate})
@@ -616,11 +616,11 @@ def order_update(request, cust_id, year, month, day):
 
 def create_order_by_lot_forms(order, delivery_date, data=None):    
     try:
-        food_network = food_network()
+        fn = food_network()
     except FoodNetwork.DoesNotExist:
         raise Http404
     
-    items = food_network.all_avail_items(delivery_date)
+    items = fn.all_avail_items(delivery_date)
 
     initial_data = []
     
@@ -840,12 +840,12 @@ def delivery_update(request, cust_id, year, month, day):
         customer = ''
         
     try:
-        food_network = food_network()
+        fn = food_network()
     except FoodNetwork.DoesNotExist:
         raise Http404
     
     #todo: finish this thought
-    lots = food_network.all_avail_items(thisdate)
+    lots = fn.all_avail_items(thisdate)
     lot_list = []
     for lot in lots:
         lot_list.append([lot.id, float(lot.avail_qty())])
@@ -1107,12 +1107,12 @@ def send_short_change_notices(request):
     if request.method == "POST":
         if notification:
             try:
-                food_network = food_network()
-                food_network_name = food_network.long_name
+                fn = food_network()
+                food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
                 request.user.message_set.create(message="Food Network does not exist")
 
-            if food_network:
+            if fn:
                 thisdate = current_week()
                 changed_items = OrderItem.objects.filter(
                     order__delivery_date=thisdate,
@@ -1125,7 +1125,7 @@ def send_short_change_notices(request):
                     orders[item.order].append(item)
 
                 for order in orders:
-                    users = [order.customer, food_network]
+                    users = [order.customer, fn]
                     notification.send(users, "distribution_short_change_notice", {
                         "order": order, 
                         "items": orders[order],
@@ -1323,13 +1323,13 @@ def dashboard(request):
     week_form = ""
     item_list = []
     by_lot = False
-    if food_network:
+    if fn:
         thisdate = current_week()
         week_form = CurrentWeekForm(initial={"current_week": thisdate})
         by_lot = ordering_by_lot()
         if by_lot:
             item_list = []
-            item_list = food_network.all_active_items().order_by("custodian")
+            item_list = fn.all_active_items().order_by("custodian")
         else:
             prods = Product.objects.all()
             product_dict = {}
@@ -1355,13 +1355,13 @@ def dashboard(request):
 def reset_week(request):
     if request.method == "POST":
         try:
-            food_network = food_network()
-            food_network_name = food_network.long_name
+            fn = food_network()
+            food_network_name = fn.long_name
             form = CurrentWeekForm(request.POST)
             if form.is_valid():
                 current_week = form.cleaned_data['current_week']
-                food_network.current_week = current_week
-                food_network.save()
+                fn.current_week = current_week
+                fn.save()
         except FoodNetwork.DoesNotExist:
             pass
     return HttpResponseRedirect("/distribution/dashboard/")   

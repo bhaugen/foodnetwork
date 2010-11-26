@@ -22,7 +22,7 @@
 		function producerChanged(evt)
 		{
 			dojo.byId("contact").innerHTML = '---';
-ii			dojo.byId("phone").innerHTML = '---';
+			dojo.byId("phone").innerHTML = '---';
 			var jsonUrl = "/distribution/jsonproducer/" + evt.target.value + "/";
 			dojo.xhrGet( 
 			{
@@ -40,7 +40,9 @@ ii			dojo.byId("phone").innerHTML = '---';
 
 		dojo.addOnLoad(function()
 		{
-			dojo.connect(dojo.byId("id_producer"), "onchange", "producerChanged");
+			var node = dojo.byId("id_producer");
+			dojo.connect(node, "onchange", "producerChanged");
+			node.focus();
 		});
 
     </script>
