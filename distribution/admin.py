@@ -37,12 +37,15 @@ class CustomerAdmin(admin.ModelAdmin):
     
 admin.site.register(Customer, CustomerAdmin)
 
+class ProducerProductInline(admin.TabularInline):
+    model = ProducerProduct
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('short_name', 'long_name', 'growing_method', 'parent', 'price',
         'expiration_days', 'pay_producer', 'sellable', 'plannable', 'stockable')
     list_filter = [ 'sellable', 'plannable', 'stockable', 'parent']
     search_fields = ['short_name', 'long_name', 'growing_method']
+    inlines = [ ProducerProductInline, ]
     
 admin.site.register(Product, ProductAdmin)
 

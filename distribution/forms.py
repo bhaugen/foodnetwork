@@ -468,6 +468,8 @@ def create_inventory_item_forms(producer, avail_date, data=None):
         member=producer, 
         from_date__lte=avail_date, 
         to_date__gte=saturday)
+    if not plans:
+        plans = producer.producer_products.all()
     form_list = []
     for plan in plans:
         custodian_id = ""

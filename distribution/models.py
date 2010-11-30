@@ -127,7 +127,7 @@ class PartyManager(models.Manager):
         all_prods = Party.subclass_objects.all()
         for prod in all_prods:
             if prod.is_producer():
-                if prod.product_plans.all().count():
+                if prod.producer_products.all().count():
                     producers.append(prod)
         return producers
 
@@ -492,7 +492,7 @@ class Product(models.Model):
         help_text=_('Should this product appear in Order form?'))
     plannable = models.BooleanField(_('plannable'), default=True,
         help_text=_('Should this product appear in Plan form?'))
-    stockable = models.BooleanField(_('stockable'), default=True,
+    stockable = models.BooleanField(_('inventoried'), default=True,
         help_text=_('Should this product be stored as Inventory Items?'))
     is_parent = models.BooleanField(_('is parent'), default=False,
         help_text=_('Should this product appear in parent selections?'))
