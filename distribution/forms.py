@@ -730,7 +730,7 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model = Order
-        exclude = ('customer', 'state', 'paid')
+        exclude = ('customer', 'state', 'paid', 'created_by', 'changed_by')
         
     def __init__(self, order=None, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)

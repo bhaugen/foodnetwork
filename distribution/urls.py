@@ -68,6 +68,8 @@ urlpatterns = patterns('',
     # invoices
     (r'^invoiceselection/$', invoice_selection),
     url(r'^invoices/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', invoices),
+    url(r'^sendinvoices/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
+        send_invoices, name="send_invoices"),
 
     # statements
     (r'^statementselection/$', statement_selection),
@@ -78,7 +80,7 @@ urlpatterns = patterns('',
     url(r'^sendpickuplist/$', send_pickup_list, name="send_pickup_list"),
     url(r'^senddeliverylist/$', send_delivery_list, name="send_delivery_list"),
     url(r'^sendordernotices/$', send_order_notices, name="send_order_notices"),
-    url(r'^sendshortchangenotices/$', send_short_change_notices, name="send_short_change_notices"),
+    url(r'^sendshortchangenotices/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', send_short_change_notices, name="send_short_change_notices"),
     
     url(r'^resetweek/$', reset_week, name='reset_week'),
     (r'^notices/', include('notification.urls')),

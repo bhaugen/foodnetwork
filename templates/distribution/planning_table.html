@@ -148,7 +148,7 @@ table thead
 		<tbody>
 			{% for row in forms %}
 			<tr>
-				<th style="text-align: right; width: 104px; " >{{ row.product }}</th>
+				<th style="text-align: right; width: 107px; " >{{ row.product }}</th>
 				{{ row.formset.management_form }}
 				{% for cell in row.formset.forms %}
 					<td style="width: 4em; " >{{ cell.quantity }}</td>

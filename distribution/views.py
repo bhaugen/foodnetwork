@@ -547,9 +547,12 @@ def order_update(request, cust_id, year, month, day):
         #import pdb; pdb.set_trace()
         if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
             if order:
-                the_order = ordform.save()
+                the_order = ordform.save(commit=False)
+                the_order.changed_by = request.user
+                the_order.save()
             else:
                 the_order = ordform.save(commit=False)
+                the_order.created_by = request.user
                 the_order.customer = customer
                 #the_order.delivery_date = delivery_date
                 the_order.save()
@@ -1102,7 +1105,7 @@ def shorts_changes(request, year, month, day):
          'changed_items': changed_items }, context_instance=RequestContext(request))
 
 @login_required
-def send_short_change_notices(request):
+def send_short_change_notices(request, year, month, day):
     #import pdb; pdb.set_trace()
     if request.method == "POST":
         if notification:
@@ -1113,7 +1116,7 @@ def send_short_change_notices(request):
                 request.user.message_set.create(message="Food Network does not exist")
 
             if fn:
-                thisdate = current_week()
+                thisdate = datetime.date(int(year), int(month), int(day))
                 changed_items = OrderItem.objects.filter(
                     order__delivery_date=thisdate,
                     orig_qty__gt=Decimal("0")
@@ -1126,6 +1129,14 @@ def send_short_change_notices(request):
 
                 for order in orders:
                     users = [order.customer, fn]
+                    if order.created_by:
+                        if request.user.id == order.created_by.id:
+                            parties = request.user.parties.all()
+                            if parties:
+                                user_party = parties[0]
+                                if user_party.id == order.customer.id:
+                                    if not user.email == order.customer.email:
+                                        users.append(request.user)             
                     notification.send(users, "distribution_short_change_notice", {
                         "order": order, 
                         "items": orders[order],
@@ -2141,9 +2152,60 @@ def invoices(request, cust_id, year, month, day):
     return render_to_response('distribution/invoices.html', {
         'orders': orders, 
         'network': fn,
+        'cust_id': cust_id,
+        'year': year,
+        'month': month,
+        'day': day,
         'tabnav': "distribution/tabnav.html",
     }, context_instance=RequestContext(request))
 
+
+@login_required
+def send_invoices(request, cust_id, year, month, day):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        if notification:
+            try:
+                fn = food_network()
+            except FoodNetwork.DoesNotExist:
+                return render_to_response('distribution/network_error.html')
+        thisdate = datetime.date(int(year), int(month), int(day))
+        cust_id = int(cust_id)
+        if cust_id:
+            try:
+                customer = Customer.objects.get(pk=cust_id)
+            except Customer.DoesNotExist:
+                raise Http404
+        else:
+            customer = ''
+        if customer:
+            orders = Order.objects.filter(
+                customer=customer, 
+                delivery_date=thisdate,
+                state__contains="Delivered"
+            )
+        else:
+            orders = Order.objects.filter(
+                delivery_date=thisdate,
+                state__contains="Delivered"
+            )
+        #import pdb; pdb.set_trace()
+        for order in orders:
+            users = [order.customer, fn]
+            if order.created_by:
+                if request.user.id == order.created_by.id:
+                    parties = request.user.parties.all()
+                    if parties:
+                        user_party = parties[0]
+                        if user_party.id == order.customer.id:
+                            if not user.email == order.customer.email:
+                                users.append(request.user)             
+            notification.send(users, "distribution_invoice", {
+                "order": order,
+                "network": fn,
+            })
+            request.user.message_set.create(message="Invoice emails have been sent")
+        return HttpResponseRedirect(request.POST["next"])
 
 # todo: replace with new Processes
 def create_meat_item_forms(producer, avail_date, data=None):

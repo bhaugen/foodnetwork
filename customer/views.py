@@ -363,12 +363,6 @@ def planning_table(request, member_id, list_type, from_date, to_date):
         }, context_instance=RequestContext(request))
 
 
-#todo: split order_update into
-# new_order
-# change_order
-# order_update(request, order)
-# Q: do new and change need to do redirect, render_to_response, etc? 
-
 @login_required
 def new_order(request, cust_id, year, month, day, list_id=None):
     delivery_date = datetime.date(int(year), int(month), int(day))
@@ -393,6 +387,7 @@ def new_order(request, cust_id, year, month, day, list_id=None):
             the_order.customer = customer
             the_order.distributor = customer.distributor()
             the_order.state = "Unsubmitted"
+            the_order.created_by = request.user
             the_order.save()
 
             update_order(the_order, itemforms)
@@ -428,6 +423,8 @@ def edit_order(request, order_id):
         #import pdb; pdb.set_trace()
         itemforms = create_order_item_forms(order, product_list, availdate, request.POST)     
         if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
+            order.changed_by = request.user
+            order.save()
             update_order(order, itemforms)
             return HttpResponseRedirect('/%s/%s/'
                % ('customer/orderconfirmation', order.id))
@@ -502,9 +499,6 @@ def update_order(order, itemforms):
                 itemform.instance.delete()
         else:                    
             if qty > 0:
-                # these product gyrations wd not be needed if I cd make the product field readonly
-                # or display the product field value (instead of the input widget) in the template
-                #todo: change to product_id
                 prod_id = data['prod_id']
                 product = Product.objects.get(id=prod_id)
                 oi = itemform.save(commit=False)
@@ -552,79 +546,6 @@ def order(request, order_id):
         'order': order,
         'paypal_form': paypal_form,
     })
-
-# todo: remove when no longer needed for cut-n-pasting
-@login_required
-def order_update(request, orderdate, customer, order=None):
-    availdate = orderdate
-
-    if request.method == "POST":
-        if order:
-            ordform = OrderForm(order=order, data=request.POST, instance=order)
-        else:
-            ordform = OrderForm(data=request.POST)
-        #import pdb; pdb.set_trace()
-        itemforms = create_order_item_forms(order, availdate, orderdate, request.POST)     
-        if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
-            if order:
-                the_order = ordform.save()
-            else:
-                the_order = ordform.save(commit=False)
-                the_order.customer = customer
-                the_order.order_date = orderdate
-                the_order.save()
-
-            order_data = ordform.cleaned_data
-            transportation_fee = order_data["transportation_fee"]
-            distributor = order_data["distributor"]
-            #import pdb; pdb.set_trace()
-            if transportation_fee:
-                transportation_tx = None
-                if order:
-                    try:
-                        transportation_tx = TransportationTransaction.objects.get(order=order)
-                        if transportation_fee != transportation_tx.amount:
-                            transportation_tx.amount = transportation_fee
-                            transportation_tx.save()
-                    except TransportationTransaction.DoesNotExist:
-                        pass
-                if not transportation_tx:
-                    transportation_tx = TransportationTransaction(
-                        from_whom=distributor,
-                        to_whom=customer,
-                        order=the_order, 
-                        amount=transportation_fee,
-                        transaction_date=orderdate)
-                    transportation_tx.save()
-
-            for itemform in itemforms:
-                data = itemform.cleaned_data
-                qty = data['quantity'] 
-                if itemform.instance.id:
-                    if qty > 0:
-                        itemform.save()
-                    else:
-                        itemform.instance.delete()
-                else:                    
-                    if qty > 0:
-                        # these product gyrations wd not be needed if I cd make the product field readonly
-                        # or display the product field value (instead of the input widget) in the template
-                        prod_id = data['prod_id']
-                        product = Product.objects.get(id=prod_id)
-                        oi = itemform.save(commit=False)
-                        oi.order = the_order
-                        oi.product = product
-                        oi.save()
-            return HttpResponseRedirect('/%s/%s/'
-               % ('customer/order', the_order.id))
-    else:
-        if order:
-            ordform = OrderForm(order=order, instance=order)
-        else:
-            ordform = OrderForm(initial={'customer': customer, 'order_date': orderdate, })
-        itemforms = create_order_item_forms(order, availdate, orderdate)
-    return render_to_response('customer/order_update.html', 
-        {'customer': customer, 'order': order, 'order_date': orderdate, 'avail_date': availdate, 'order_form': ordform, 'item_forms': itemforms})
 
 
 @login_required

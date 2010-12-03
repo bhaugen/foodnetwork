@@ -1,1 +1,1 @@
-Short changes for {{ order.customer }} for {{ order_date }}
+Short changes for {{ order.customer.long_name }} for {{ order.delivery_date }}

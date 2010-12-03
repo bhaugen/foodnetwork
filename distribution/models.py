@@ -178,7 +178,7 @@ class PartyManager(models.Manager):
 class Party(models.Model):
     member_id = models.CharField(_('member id'), max_length=12, blank=True)
     short_name = models.CharField(_('short name'), max_length=32, unique=True)
-    long_name = models.CharField(_('long name'), max_length=64, blank=True)
+    long_name = models.CharField(_('long name'), max_length=64)
     contact = models.CharField(_('contact'), max_length=64, blank=True)
     phone = PhoneNumberField(_('phone'), blank=True)
     cell = PhoneNumberField(_('cell'), blank=True)
@@ -1067,6 +1067,10 @@ class Order(models.Model):
     product_list = models.ForeignKey(MemberProductList, blank=True, null=True,
         related_name="orders", verbose_name=_('product list'),
         help_text=_("Optional: The product list this order was created from. Maintained by customer."))
+    created_by = models.ForeignKey(User, verbose_name=_('created by'),
+        related_name='orders_created', blank=True, null=True)
+    changed_by = models.ForeignKey(User, verbose_name=_('changed by'),
+        related_name='orders_changed', blank=True, null=True)
 
     class Meta:
         ordering = ('order_date', 'customer')

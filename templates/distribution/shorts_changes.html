@@ -36,7 +36,7 @@
 	</table>
 	{% if changed_items %}
 		<div style="margin: 1em; " >
-			<form action="{% url send_short_change_notices %}" method="POST">{% csrf_token %}
+			<form action="{% url send_short_change_notices year=date.year month=date.month day=date.day %}" method="POST">{% csrf_token %}
 				<input class="submit-btn" type="submit" value="{% trans 'Send Short Change Emails' %}" />
 				<input type="hidden" name="next" value="{% url dashboard %}" />
 			</form>

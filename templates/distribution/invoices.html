@@ -14,6 +14,14 @@
 <div class="invoices">
 	
 	{% include tabnav %}
+	<div class="do-not-print">
+		<form style="display: inline; " 
+			action="{% url send_invoices cust_id=cust_id, year=year, month=month, day=day %}" 
+			method="POST">{% csrf_token %}
+			<input class="submit-btn" type="submit" value="{% trans 'Send emails for these Invoices' %}" />
+			<input type="hidden" name="next" value="{% url dashboard %}" />
+		</form>
+	</div>
 
 	{% for order in orders %}
 	<div style="page-break-after: always; page-break-inside: avoid; width: 7in; " >
