@@ -137,6 +137,7 @@ class PartyManager(models.Manager):
         for party in parties:
             if isinstance(party.as_leaf_class(), Distributor):
                 dists.append(party)
+        dists.append(food_network())
         return dists
 
     def all_planners(self):

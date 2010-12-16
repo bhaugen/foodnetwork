@@ -6,7 +6,7 @@
 {{ network.billing_email_address }}
 
 {% trans "To" %}: {{order.customer.long_name}}
-{% trans "Purchase Order" %}: {{order.purchase_order}}
+{% if order.purchase_order %}{% trans "Purchase Order" %}: {{order.purchase_order}}{% endif %}
 
 {% trans "Items" %}:{% for orderitem in order.orderitem_set.all %}
 * {{ orderitem.product.long_name }}, {% trans "Ordered" %}: {% if orderitem.orig_qty %}{{ orderitem.orig_qty }},{% else %}{{ orderitem.quantity }},{% endif %} {% trans "Shipped" %}: {{ orderitem.quantity }}
@@ -17,6 +17,8 @@
 {% if order.coop_fee %}{{ order.coop_fee_label }}:${{ order.coop_fee }}{% endif %}
 {% trans "Total" %}:${{ order.grand_total }}
 
-{% trans "Terms" %}: {% trans "Net" %} {{ network.terms }}
+{% trans "Terms" %}: {% trans "Net" %} {{ network.customer_terms }}
 {% trans "Due Date" %}: {{order.payment_due_date}}
 
+{% trans "Pay To" %}: {{ network.long_name }}
+{% if network.billing_address %}{{ network.billing_address }}{% else %}{{ network.address }}{% endif %}

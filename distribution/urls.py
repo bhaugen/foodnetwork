@@ -21,6 +21,8 @@ urlpatterns = patterns('',
     url(r'^shortschanges/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', shorts_changes, name="shorts_changes"),
     url(r'^ordercsv/(?P<delivery_date>\w{10})/$', order_csv, name="export_orders_as_csv"),
     url(r'^ordercsvbyproduct/(?P<delivery_date>\w{10})/$', order_csv_by_product, name="order_csv_by_product"),
+    url(r'^sendorderemails/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
+        send_order_emails, name="send_order_emails"),
 
     # processes
     url(r'^processselection/$', process_selection, name="process_selection"),

@@ -18,6 +18,7 @@
     <h4>{% blocktrans %}Orders for {{ date }}{% endblocktrans %}</h4>
 
     <p><a href="{% url export_orders_as_csv order_date=datestring %}">{% trans "Export table as CSV file" %}</a></p>
+
     <table class="ga-event-table" >
         <tr>
             {% for heading in heading_list %}

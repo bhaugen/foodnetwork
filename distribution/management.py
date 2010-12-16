@@ -15,6 +15,8 @@ try:
             _("Short Change Notice"), _("Here are the short changes for this order"), default=2)
         notification.create_notice_type("distribution_invoice",
             _("Invoice Email"), _("Sending emails of selected invoices"), default=2)
+        notification.create_notice_type("distribution_order",
+            _("Order Email"), _("Sending emails of selected orders"), default=2)
         
     signals.post_syncdb.connect(create_notice_types, sender=notification)
 except ImportError:

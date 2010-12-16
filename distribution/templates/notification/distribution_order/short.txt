@@ -1,0 +1,1 @@
+Order for {{ order.customer.long_name }} for {{ order.delivery_date }}

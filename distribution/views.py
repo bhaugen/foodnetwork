@@ -35,7 +35,7 @@ def send_fresh_list(request):
                 fn = food_network()
                 food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
-                request.user.message_set.create(message="Food Network does not exist")
+                return render_to_response('distribution/network_error.html')
 
             if fn:
                 week_of = current_week()
@@ -54,7 +54,7 @@ def send_pickup_list(request):
                 fn = food_network()
                 food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
-                request.user.message_set.create(message="Food Network does not exist")
+                return render_to_response('distribution/network_error.html')
 
             if fn:
                 pickup_date = current_week()
@@ -79,7 +79,7 @@ def send_delivery_list(request):
                 fn = food_network()
                 food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
-                request.user.message_set.create(message="Food Network does not exist")
+                return render_to_response('distribution/network_error.html')
 
             if fn:
                 delivery_date = current_week()
@@ -104,7 +104,7 @@ def send_order_notices(request):
                 fn = food_network()
                 food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
-                request.user.message_set.create(message="Food Network does not exist")
+                return render_to_response('distribution/network_error.html')
 
             if fn:
                 thisdate = current_week()
@@ -510,6 +510,7 @@ def order_selection(request):
     #return render_to_response('distribution/order_selection.html', {'header_form': ihform})
 
 #todo: this whole view shd be changed a la PBC
+# plus, it is a logical mess...
 @login_required
 def order_update(request, cust_id, year, month, day):
     delivery_date = datetime.date(int(year), int(month), int(day))
@@ -540,7 +541,8 @@ def order_update(request, cust_id, year, month, day):
             ordform = OrderForm(data=request.POST, initial={
                 'customer': customer,
                 'order_date': datetime.date.today(),
-                'delivery_date': delivery_date, 
+                'delivery_date': delivery_date,
+                'transportation_fee': fn.transportation_fee,
                 })
         #import pdb; pdb.set_trace()
         itemforms = create_order_item_forms(order, availdate, delivery_date, request.POST)
@@ -559,7 +561,7 @@ def order_update(request, cust_id, year, month, day):
 
             order_data = ordform.cleaned_data
             transportation_fee = order_data["transportation_fee"]
-            distributor = order_data["distributor"]
+            distributor = order_data["distributor"] or fn 
             #import pdb; pdb.set_trace()
             if transportation_fee:
                 transportation_tx = None
@@ -607,7 +609,9 @@ def order_update(request, cust_id, year, month, day):
             ordform = OrderForm(initial={
                 'customer': customer,
                 'order_date': datetime.date.today(),
-                'delivery_date': delivery_date, })
+                'delivery_date': delivery_date,
+                'transportation_fee': fn.transportation_fee,
+            })
         itemforms = create_order_item_forms(order, availdate, delivery_date)
     return render_to_response('distribution/order_update.html', 
         {'customer': customer, 
@@ -618,10 +622,7 @@ def order_update(request, cust_id, year, month, day):
          'item_forms': itemforms}, context_instance=RequestContext(request))
 
 def create_order_by_lot_forms(order, delivery_date, data=None):    
-    try:
-        fn = food_network()
-    except FoodNetwork.DoesNotExist:
-        raise Http404
+    fn = food_network()
     
     items = fn.all_avail_items(delivery_date)
 
@@ -845,7 +846,7 @@ def delivery_update(request, cust_id, year, month, day):
     try:
         fn = food_network()
     except FoodNetwork.DoesNotExist:
-        raise Http404
+        return render_to_response('distribution/network_error.html')
     
     #todo: finish this thought
     lots = fn.all_avail_items(thisdate)
@@ -1113,7 +1114,7 @@ def send_short_change_notices(request, year, month, day):
                 fn = food_network()
                 food_network_name = fn.long_name
             except FoodNetwork.DoesNotExist:
-                request.user.message_set.create(message="Food Network does not exist")
+                return render_to_response('distribution/network_error.html')
 
             if fn:
                 thisdate = datetime.date(int(year), int(month), int(day))
@@ -1452,7 +1453,7 @@ def statements(request, from_date, to_date):
     try:
         network = food_network()
     except FoodNetwork.DoesNotExist:
-        raise Http404
+        return render_to_response('distribution/network_error.html')
     
     payments = Payment.objects.filter(
         transaction_date__gte=from_date, 
@@ -1659,6 +1660,11 @@ def one_producer_payments(producer, from_date, to_date, due, paid_member):
     return producer
 
 def all_producer_payments(from_date, to_date, due, paid_member):
+    try:
+        network = food_network()
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
+
     delivery_producers = {}
     processors = {}
     transporters = {}
@@ -1687,7 +1693,7 @@ def all_producer_payments(from_date, to_date, due, paid_member):
         transaction_date__range=(from_date, to_date))
 
     trans = TransportationTransaction.objects.filter(
-        transaction_date__range=(from_date, to_date))
+        transaction_date__range=(from_date, to_date)).exclude(from_whom=network)
 
     # filter by payment status
 
@@ -2206,6 +2212,54 @@ def send_invoices(request, cust_id, year, month, day):
             })
             request.user.message_set.create(message="Invoice emails have been sent")
         return HttpResponseRedirect(request.POST["next"])
+
+@login_required
+def send_order_emails(request, cust_id, year, month, day):
+    #import pdb; pdb.set_trace()
+    if request.method == "POST":
+        next = request.POST.get("next")
+        if not next:
+            next = "/distribution/dashboard/"
+        if notification:
+            try:
+                fn = food_network()
+            except FoodNetwork.DoesNotExist:
+                return render_to_response('distribution/network_error.html')
+        thisdate = datetime.date(int(year), int(month), int(day))
+        cust_id = int(cust_id)
+        if cust_id:
+            try:
+                customer = Customer.objects.get(pk=cust_id)
+            except Customer.DoesNotExist:
+                raise Http404
+        else:
+            customer = ''
+        if customer:
+            orders = Order.objects.filter(
+                customer=customer, 
+                delivery_date=thisdate,
+            )
+        else:
+            orders = Order.objects.filter(
+                delivery_date=thisdate,
+            )
+        #import pdb; pdb.set_trace()
+        for order in orders:
+            users = [order.customer, fn]
+            if order.created_by:
+                if request.user.id == order.created_by.id:
+                    parties = request.user.parties.all()
+                    if parties:
+                        user_party = parties[0]
+                        if user_party.id == order.customer.id:
+                            if not user.email == order.customer.email:
+                                users.append(request.user)             
+            notification.send(users, "distribution_order", {
+                "order": order,
+                "network": fn,
+            })
+            request.user.message_set.create(message="Order emails have been sent")
+        return HttpResponseRedirect(next)
 
 # todo: replace with new Processes
 def create_meat_item_forms(producer, avail_date, data=None):

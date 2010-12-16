@@ -186,6 +186,18 @@
 			validateNumber(evt);
 		}
 
+		function checkForDistributor(evt)
+		{
+			var fee = evt.target.value;
+			var distributorField = dojo.byId("id_distributor");
+			var x = 0;
+		}
+
+		function transportationFeeChanged(evt)
+		{
+			validateNumber(evt, checkForDistributor);
+		}
+
 		dojo.addOnLoad(function()
 		{
 			var queryNodes = dojo.query(".quantity-field");
@@ -213,6 +225,9 @@
 				var thisNode = queryNodes[i];
 				orderedTotals[thisNode.id] = thisNode.value;
 			}
+			node = dojo.byId("id_transportation_fee");
+			dojo.connect(node, "onblur", "transportationFeeChanged");
+
 		});
 
     </script>
