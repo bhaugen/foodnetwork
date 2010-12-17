@@ -718,7 +718,7 @@ class ProducerProduct(models.Model):
         related_name="producer_products", verbose_name=_('producer')) 
     product = models.ForeignKey(Product, verbose_name=_('product'))
     default_quantity = models.DecimalField(max_digits=8, decimal_places=2,
-        default=Decimal('0'), verbose_name=_('Qty per week'))
+        default=Decimal('0'), verbose_name=_('Qty per year'))
     inventoried = models.BooleanField(_('inventoried'), default=True,
         help_text=_("If not inventoried, the default or planned qty per week will be used for ordering"))
     planned = models.BooleanField(_('planned'), default=True,
