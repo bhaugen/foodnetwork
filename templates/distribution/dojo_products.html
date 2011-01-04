@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Dojo Products" %}
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.4.0/dojo/resources/dojo.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.4.0/dijit/themes/tundra/tundra.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.4.0/dojox/grid/resources/Grid.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.4.0/dojox/grid/resources/tundraGrid.css"/>
+
+  <style type="text/css">
+    .dojoxGrid {
+       height: 500px;
+    }
+	.dijitOffScreen { display: none;}
+  </style>
+
+  <script type="text/javascript"
+          src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"
+          baseUrl='./'
+          djConfig="parseOnLoad:true">
+  </script>
+{% endblock %}
+		
+{% block header %}
+<script type="text/javascript">
+dojo.require("dijit.dijit");
+dojo.require("dojox.data.JsonRestStore");
+dojo.require("dojox.grid.DataGrid");
+dojo.require("dijit.form.Button");
+dojo.require("dijit.form.ValidationTextBox");
+dojo.require("dijit.form.NumberTextBox");
+dojo.require("dojox.grid.cells.dijit");
+//dojo.require("dojo.currency");
+dojo.require("dojo.parser");
+</script>
+
+<script type="text/javascript">
+
+		formatNumber = function(value){
+			return isNaN(value) ? value + ' is not a number' : value;
+
+		}
+
+
+	function init() 
+	{
+		dojo.connect(saveButton, "onClick", jsonStore, "save");	
+	}
+
+	dojo.addOnLoad(init);
+
+</script>
+</head>
+
+{% endblock %}
+
+{% block content %}
+
+<button dojoType="dijit.form.Button" type="button" jsId="saveButton">
+    Submit changes
+</button>
+
+
+<div dojoType="dojox.data.JsonRestStore" target="{% url json_products %}" idAttribute="id" jsId="jsonStore"></div>
+
+<table jsid="grid" store="jsonStore" dojoType="dojox.grid.DataGrid" class="grid" singleClickEdit="true" escapeHTMLInData="false" selectionMode="none">
+
+	<colgroup span="1" noscroll="true"></colgroup>
+	<colgroup span="8"></colgroup>
+
+    <thead>
+        <tr>
+            <th field="long_name" width="200px" ><a href="{% url dashboard %}">Name</a></th>
+            <th field="price" width="200px" editable="true" formatter="formatNumber" >Price</th>
+            <th field="sellable" width="200px" cellType="dojox.grid.cells.Bool" editable="true" >Sellable</th>
+            <th field="plannable" width="200px" >Plannable</th>
+            <th field="stockable" width="200px" >Inventoried</th>
+            <th field="pay_producer" width="200px" >Pay Producer</th>
+            <th field="pay_producer_on_terms" width="200px" >Pay Producer on Terms</th>
+            <th field="expiration_days" width="200px" >Expiration Days</th>
+            <th field="customer_fee_override" width="200px" >Customer fee override</th>
+        </tr>
+    </thead>
+
+</table> 
+
+{% endblock %}

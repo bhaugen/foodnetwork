@@ -6,6 +6,13 @@ from django.forms.formsets import formset_factory
 from models import *
 from forms import *
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
 # shd plan_weeks go to the view and include headings?
 # somebody needs headings!
 def create_weekly_plan_forms(rows, data=None):
@@ -251,4 +258,48 @@ def plan_weeks(member, products, from_date, to_date):
     sdtable = SupplyDemandTable(columns, rows)
     return sdtable
 
+def plans_for_dojo(member, products, from_date, to_date):
+    plans = ProductPlan.objects.filter(member=member)
+    rows = {}    
+    for pp in products:
+        try:
+            product = pp.product
+        except:
+            product = pp
+        wkdate = from_date
+        row = {}
+        row["product"] = product.long_name
+        row["id"] = product.id
+        row["member_id"] = member.id
+        row["from_date"] = from_date.strftime('%Y-%m-%d')
+        row["to_date"] = to_date.strftime('%Y-%m-%d')
+        while wkdate <= to_date:
+            enddate = wkdate + datetime.timedelta(days=6)
+            #row.append(PlannedWeek(product, wkdate, enddate, Decimal("0")))
+            row[wkdate.strftime('%Y-%m-%d')] = "0"
+            wkdate = enddate + datetime.timedelta(days=1)
+        rows.setdefault(product, row)
+    for plan in plans:
+        product = plan.product
+        wkdate = from_date
+        week = 0
+        while wkdate <= to_date:
+            enddate = wkdate + datetime.timedelta(days=6)
+            if plan.from_date <= wkdate and plan.to_date >= wkdate:
+                #rows[product][week + 1].quantity = plan.quantity
+                #rows[product][week + 1].plan = plan
+                rows[product][wkdate.strftime('%Y-%m-%d')] = str(plan.quantity)
+                rows[product][":".join([wkdate.strftime('%Y-%m-%d'), "plan_id"])] = plan.id
+            wkdate = wkdate + datetime.timedelta(days=7)
+            week += 1
+    label = "Product"
+    columns = [label]
+    wkdate = from_date
+    while wkdate <= to_date:
+        columns.append(wkdate.strftime('%Y-%m-%d'))
+        wkdate = wkdate + datetime.timedelta(days=7)
+    rows = rows.values()
+    rows.sort(lambda x, y: cmp(x["product"], y["product"]))
+    sdtable = SupplyDemandTable(columns, rows)
+    return sdtable
 

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Planning Table" %}
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.4.0/dojo/resources/dojo.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.4.0/dijit/themes/tundra/tundra.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.4.0/dojox/grid/resources/Grid.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.4.0/dojox/grid/resources/tundraGrid.css"/>
+
+  <style type="text/css">
+    .dojoxGrid {
+       height: 450px;
+    }
+	.dijitOffScreen { display: none;}
+  </style>
+
+  <script type="text/javascript"
+          src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"
+          baseUrl='./'
+          djConfig="parseOnLoad:true">
+  </script>
+{% endblock %}
+		
+{% block header %}
+<script type="text/javascript">
+dojo.require("dijit.dijit");
+dojo.require("dojox.data.JsonRestStore");
+dojo.require("dojox.grid.DataGrid");
+dojo.require("dijit.form.Button");
+dojo.require("dijit.form.ValidationTextBox");
+dojo.require("dijit.form.NumberTextBox");
+dojo.require("dojox.grid.cells.dijit");
+dojo.require("dojo.parser");
+dojo.require("dojo.window");
+</script>
+
+<script type="text/javascript">
+
+		formatNumber = function(value){
+			return isNaN(value) ? value + ' is not a number' : value;
+
+		}
+
+	function saveFailed()
+	{
+		dojo.style("saveMessage", "color", "red");
+		dojo.byId("saveMessage").innerHTML = "Error";
+	}
+
+	function saveSucceeded()
+	{
+		dojo.style("saveMessage", "color", "green");
+		dojo.byId("saveMessage").innerHTML = "Changes saved";
+		dojo.fadeOut({ node:"saveMessage", duration:3000  }).play();
+		window.location = "{% url member_supply_demand from_date=from_datestring to_date=to_datestring member_id=member.id %}";
+	}
+
+	function saveStore()
+	{
+		jsonStore.save({onComplete: saveSucceeded, onError: saveFailed});
+
+	}
+
+
+	function init() 
+	{
+		dojo.connect(saveButton, "onClick", "saveStore");
+		var vs = dojo.window.getBox();
+		var gridHeight = vs.h * .75;
+		var domNode = dojo.byId("grid");
+		dojo.contentBox(domNode, {h: gridHeight});
+	}
+
+	dojo.addOnLoad(init);
+
+</script>
+</head>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="plans">
+
+	{% include tabnav %}
+
+	<h2 style="margin-bottom: 0; padding-top: 0; margin-top: 0; ">
+		{% blocktrans %}{{ plan_type }} Plan from {{ from_date }} to {{ to_date }}{% endblocktrans %}
+	</h2>
+	<p style="margin-top: 0; font-style: italic; " >
+	{% ifequal list_type "A" %}
+		{% blocktrans %}Using All Products.  Planned products go onto the {{ member }} Product List.{% endblocktrans %}
+	{% else %}
+		{% blocktrans %}Using {{ member }} Product Lists{% endblocktrans %}
+	{% endifequal %}
+	</p>
+
+<button dojoType="dijit.form.Button" type="button" jsId="saveButton">
+    Submit changes
+</button>
+<span id="saveMessage" style="color: green;" ></span>
+
+
+<div 
+	dojoType="dojox.data.JsonRestStore" 
+	target="{% url json_planning_table member_id=member.id list_type=list_type from_date=from_datestring to_date=to_datestring %}" 
+	idAttribute="id" 
+	jsId="jsonStore">
+</div>
+
+<table 
+	id="grid" 
+	jsid="grid" 
+	store="jsonStore" 
+	dojoType="dojox.grid.DataGrid" 
+	class="grid" 
+	singleClickEdit="true" 
+	escapeHTMLInData="false" 
+	selectionMode="none">
+
+	<colgroup span="1" noscroll="true"></colgroup>
+	<colgroup span="{{ column_count }}"></colgroup>
+
+    <thead>
+        <tr>
+            <th field="product" width="16em" >Product</a></th>
+            {% for column in columns %}
+            	<th field="{{ column }}" width="3em" styles="text-align: right;" editable="true" formatter="formatNumber" >
+					{{ column|slice:"5:" }}
+				</th>
+			{% endfor %}
+
+        </tr>
+    </thead>
+
+</table> 
+</div>
+
+{% endblock %}

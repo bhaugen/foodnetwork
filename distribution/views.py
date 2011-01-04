@@ -17,6 +17,8 @@ from django.core import serializers
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.mail import send_mail
+from utils import DojoDataJSONResponse, serialize
+from django.utils import simplejson
 
 try:
     from notification import models as notification
@@ -183,7 +185,7 @@ def plan_selection(request):
                 to_date = psdata['plan_to_date'].strftime('%Y_%m_%d')
                 list_type = psdata['list_type']
                 return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                   % ('distribution/planningtable', member_id, list_type, from_date, to_date))
+                   % ('distribution/dojoplanningtable', member_id, list_type, from_date, to_date))
             else:
                 sdform = DateRangeSelectionForm(prefix='sd', initial=init)
                 income_form = DateRangeSelectionForm(prefix = 'inc', initial=init)
@@ -229,6 +231,7 @@ def planning_table(request, member_id, list_type, from_date, to_date):
         products = Product.objects.filter(plannable=True)
         list_type = "A"
     plan_table = plan_weeks(member, products, from_date, to_date)
+    #import pdb; pdb.set_trace()
     forms = create_weekly_plan_forms(plan_table.rows, data=request.POST or None)
     if request.method == "POST":
         for row in forms:
@@ -343,6 +346,210 @@ def planning_table(request, member_id, list_type, from_date, to_date):
             'tabnav': "distribution/tabnav.html",
         }, context_instance=RequestContext(request))
 
+# todo: needs 2 views, this one to present the page,
+# the other to respond to the JsonRestStore
+@login_required
+def dojo_planning_table(request, member_id, list_type, from_date, to_date):
+    try:
+        member = Party.objects.get(pk=member_id)
+    except Party.DoesNotExist:
+        raise Http404
+    role = "producer"
+    plan_type = "Production"
+    if member.is_customer():
+        role = "consumer"
+        plan_type = "Consumption"
+    from_datestring = from_date
+    to_datestring = to_date
+    try:
+        from_date = datetime.datetime(*time.strptime(from_date, '%Y_%m_%d')[0:5]).date()
+        to_date = datetime.datetime(*time.strptime(to_date, '%Y_%m_%d')[0:5]).date()
+    except ValueError:
+            raise Http404
+    # force from_date to Monday, to_date to Sunday
+    from_date = from_date - datetime.timedelta(days=datetime.date.weekday(from_date))
+    to_date = to_date - datetime.timedelta(days=datetime.date.weekday(to_date)+1)
+    to_date = to_date + datetime.timedelta(days=7)
+    products = None
+    if list_type == "M":
+        if role == "consumer":
+            products = CustomerProduct.objects.filter(customer=member, planned=True)
+        else:
+            products = ProducerProduct.objects.filter(producer=member, planned=True)
+    if not products:
+        products = Product.objects.filter(plannable=True)
+        list_type = "A"
+
+    # all we need is columns here, shd have a separate view_helper method
+    # and all we need is the weekly date columns
+    plan_table = plans_for_dojo(member, products, from_date, to_date)
+    columns = plan_table.columns[1:]
+
+    return render_to_response('distribution/dojo_planning_table.html', 
+        {
+            'from_date': from_date,
+            'to_date': to_date,
+            'from_datestring': from_datestring,
+            'to_datestring': to_datestring,
+            'columns': columns,
+            'column_count': len(columns),
+            'plan_type': plan_type,
+            'member': member,
+            'list_type': list_type,
+            'tabnav': "distribution/tabnav.html",
+        }, context_instance=RequestContext(request))
+
+
+def json_planning_table(request, member_id, list_type, from_date, to_date, row_id=None):
+    #import pdb; pdb.set_trace()
+    try:
+        member = Party.objects.get(pk=member_id)
+    except Party.DoesNotExist:
+        raise Http404
+    role = "producer"
+    plan_type = "Production"
+    if member.is_customer():
+        role = "consumer"
+        plan_type = "Consumption"
+
+    #import pdb; pdb.set_trace()
+    if row_id:
+        if request.method == "GET":
+            import pdb; pdb.set_trace()
+            response = HttpResponse(request.raw_post_data, mimetype="text/json-comment-filtered")
+            response['Cache-Control'] = 'no-cache'
+            return response
+        elif request.method == "PUT":
+            #import pdb; pdb.set_trace()
+            product = Product.objects.get(id=row_id)
+            data = simplejson.loads(request.raw_post_data)
+            member = Party.objects.get(id=data['member_id'])
+            fd = data["from_date"]
+            td = data["to_date"]
+            from_date = datetime.datetime(*time.strptime(fd, '%Y-%m-%d')[0:5]).date()
+            to_date = datetime.datetime(*time.strptime(td, '%Y-%m-%d')[0:5]).date() 
+            wkdate = from_date
+            while wkdate <= to_date:
+                key = wkdate.strftime('%Y-%m-%d')
+                qty = data[key]
+                if is_number(qty):
+                    qty = Decimal(qty)
+                    plan_id = data.get(":".join([key, "plan_id"]))
+                    from_dt = wkdate
+                    to_dt = from_dt + datetime.timedelta(days=6)
+                    plan = None
+                    if plan_id:
+                        plan = ProductPlan.objects.get(id=plan_id)
+                        if plan.to_date < from_dt or plan.from_date > to_dt:
+                            plan = None
+                    if qty:
+                        if plan:
+                            if not qty == plan.quantity:
+                                if plan.from_date >= from_dt and plan.to_date <= to_dt:
+                                    plan.quantity = qty
+                                    plan.save()
+                                else:
+                                    if plan.from_date < from_dt:
+                                        new_to_dt = from_dt - datetime.timedelta(days=1)
+                                        earlier_plan = ProductPlan(
+                                            member=plan.member,
+                                            product=plan.product,
+                                            quantity=plan.quantity,
+                                            from_date=plan.from_date,
+                                            to_date=new_to_dt,
+                                            role=plan.role,
+                                            inventoried=plan.inventoried,
+                                            distributor=plan.distributor,
+                                        )
+                                        earlier_plan.save()
+                                    if plan.to_date > to_dt:
+                                        new_plan = ProductPlan(
+                                            member=plan.member,
+                                            product=plan.product,
+                                            quantity=qty,
+                                            from_date=from_dt,
+                                            to_date=to_dt,
+                                            role=plan.role,
+                                            inventoried=plan.inventoried,
+                                            distributor=plan.distributor,
+                                        )
+                                        new_plan.save()
+                                        plan.from_date = to_dt + datetime.timedelta(days=1)
+                                        plan.save()
+                                    else:
+                                        plan.from_date=from_dt
+                                        plan.quantity=qty
+                                        plan.save()      
+                        else:
+                            new_plan = ProductPlan(
+                                member=member,
+                                product=product,
+                                quantity=qty,
+                                from_date=from_dt,
+                                to_date=to_dt,
+                                role=role,
+                            )
+                            new_plan.save()
+                            if role == "producer":
+                                listed_product, created = ProducerProduct.objects.get_or_create(
+                                    product=product, producer=member)
+
+                    else:
+                        if plan:
+                            if plan.from_date >= from_dt and plan.to_date <= to_dt:
+                                plan.delete()
+                            else:
+                                if plan.to_date > to_dt:
+                                    early_from_dt = plan.from_date              
+                                    if plan.from_date < from_dt:
+                                        early_to_dt = from_dt - datetime.timedelta(days=1)
+                                        earlier_plan = ProductPlan(
+                                            member=plan.member,
+                                            product=plan.product,
+                                            quantity=plan.quantity,
+                                            from_date=early_from_dt,
+                                            to_date=early_to_dt,
+                                            role=plan.role,
+                                            inventoried=plan.inventoried,
+                                            distributor=plan.distributor,
+                                         )
+                                        earlier_plan.save()
+                                    plan.from_date = to_dt + datetime.timedelta(days=1)
+                                    plan.save()
+                                else:
+                                    plan.to_date= from_dt - datetime.timedelta(days=1)
+                                    plan.save()
+
+                wkdate = wkdate + datetime.timedelta(days=7)
+
+            response = HttpResponse(request.raw_post_data, mimetype="text/json-comment-filtered")
+            response['Cache-Control'] = 'no-cache'
+            return response
+    else:
+        try:
+            from_date = datetime.datetime(*time.strptime(from_date, '%Y_%m_%d')[0:5]).date()
+            to_date = datetime.datetime(*time.strptime(to_date, '%Y_%m_%d')[0:5]).date()
+        except ValueError:
+            raise Http404
+        # force from_date to Monday, to_date to Sunday
+        from_date = from_date - datetime.timedelta(days=datetime.date.weekday(from_date))
+        to_date = to_date - datetime.timedelta(days=datetime.date.weekday(to_date)+1)
+        to_date = to_date + datetime.timedelta(days=7)
+        products = None
+        if list_type == "M":
+            if role == "consumer":
+                products = CustomerProduct.objects.filter(customer=member, planned=True)
+            else:
+                products = ProducerProduct.objects.filter(producer=member, planned=True)
+        if not products:
+            products = Product.objects.filter(plannable=True)
+            list_type = "A"
+        plan_table = plans_for_dojo(member, products, from_date, to_date)
+        #import pdb; pdb.set_trace()
+        data = simplejson.dumps(plan_table.rows)
+        response = HttpResponse(data, mimetype="text/json-comment-filtered")
+        response['Cache-Control'] = 'no-cache'
+        return response
 
 @login_required
 def plan_update(request, prod_id):
@@ -2097,8 +2304,8 @@ def customer_payment_update(request, customer_id, payment_id):
                     order.delete_payments()
             return HttpResponseRedirect('/%s/%s/'
                % ('distribution/customerpayment', the_payment.id))
-        else:
-            import pdb; pdb.set_trace()
+        #else:
+            #import pdb; pdb.set_trace()
         
     return render_to_response('distribution/customer_payment_update.html', 
         {'payment': payment,
@@ -2111,6 +2318,30 @@ def json_payments(request, producer_id):
     # todo: shd limit to a few most recent payments
     data = serializers.serialize("json", EconomicEvent.objects.payments_to_party(producer_id))
     return HttpResponse(data, mimetype="text/json-comment-filtered")
+
+def json_products(request, product_id=None):
+    #import pdb; pdb.set_trace()
+    if product_id:
+        if request.method == "GET":
+            return DojoDataJSONResponse(Product.objects.get(id=product_id), exclude_fields=("parent",))
+        elif request.method == "PUT":
+            #import pdb; pdb.set_trace()
+            product = Product.objects.get(id=product_id)
+            data = simplejson.loads(request.raw_post_data)
+            price = data["price"]
+            if is_number(price):
+                product.price=Decimal(price)
+                product.save()
+            return DojoDataJSONResponse(Product.objects.get(id=product_id), exclude_fields=("parent",))
+    else:
+        return DojoDataJSONResponse(Product.objects.all(), exclude_fields=("parent",))
+
+
+@login_required
+def dojo_products(request):
+
+    return render_to_response('distribution/dojo_products.html', context_instance=RequestContext(request))
+
 
 @login_required
 def invoice_selection(request):

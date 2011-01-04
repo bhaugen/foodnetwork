@@ -67,6 +67,18 @@ urlpatterns = patterns('',
     url(r'^jsonproducer/(?P<producer_id>\d+)/$', json_producer_info),    
     url(r'^jsonpayments/(?P<producer_id>\d+)/$', json_payments),
     
+
+    # dojo
+    url(r'^dojoproducts/$', dojo_products, name="dojo_products"),
+    url(r'^jsonproducts/$', json_products, name="json_products"),
+    url(r'^jsonproducts/(?P<product_id>\d+)$', json_products, name="json_products"),
+    url(r'^dojoplanningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', 
+        dojo_planning_table, name='dojo_planning_table'),
+    url(r'^josonplanningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', 
+        json_planning_table, name='json_planning_table'),
+    url(r'^josonplanningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/(?P<row_id>\d+)$', 
+        json_planning_table, name='json_planning_table'),
+    
     # invoices
     (r'^invoiceselection/$', invoice_selection),
     url(r'^invoices/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', invoices),
@@ -86,5 +98,7 @@ urlpatterns = patterns('',
     
     url(r'^resetweek/$', reset_week, name='reset_week'),
     (r'^notices/', include('notification.urls')),
+
+
 )
 
