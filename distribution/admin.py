@@ -42,7 +42,8 @@ class ProducerProductInline(admin.TabularInline):
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('short_name', 'long_name', 'growing_method', 'parent', 'price',
-        'expiration_days', 'pay_producer', 'sellable', 'plannable', 'stockable')
+        'expiration_days', 'pay_producer', 'sellable', 'plannable', 'stockable', 
+        'producer_totals')
     list_filter = [ 'sellable', 'plannable', 'stockable', 'parent']
     search_fields = ['short_name', 'long_name', 'growing_method']
     inlines = [ ProducerProductInline, ]

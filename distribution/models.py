@@ -657,6 +657,8 @@ class Product(models.Model):
                 stockables.append(kid)
         return stockables
 
+    def producer_totals(self):
+        return sum(producer.default_quantity for producer in self.product_producers.all())
 
     class Meta:
         ordering = ('short_name',)
@@ -716,7 +718,8 @@ class ProductPlan(models.Model):
 class ProducerProduct(models.Model):
     producer = models.ForeignKey(Party, 
         related_name="producer_products", verbose_name=_('producer')) 
-    product = models.ForeignKey(Product, verbose_name=_('product'))
+    product = models.ForeignKey(Product, 
+        related_name="product_producers", verbose_name=_('product'))
     default_quantity = models.DecimalField(max_digits=8, decimal_places=2,
         default=Decimal('0'), verbose_name=_('Qty per year'))
     inventoried = models.BooleanField(_('inventoried'), default=True,

@@ -132,13 +132,17 @@ dojo.require("dojo.window");
 	<colgroup span="{{ column_count }}"></colgroup>
 
     <thead>
-        <tr>
+	<tr>
             <th field="product" width="16em" >Product</a></th>
             {% for column in columns %}
-            	<th field="{{ column }}" width="3em" styles="text-align: right;" editable="true" formatter="formatNumber" >
-					{{ column|slice:"5:" }}
-				</th>
-			{% endfor %}
+	    <th field="{{ column }}" 
+		    width="3em" 
+		    styles="text-align: right;" 
+		    editable="true" 
+		    formatter="formatNumber" >
+			{{ column|slice:"5:" }}
+	    </th>
+	    {% endfor %}
 
         </tr>
     </thead>
