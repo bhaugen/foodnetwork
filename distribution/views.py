@@ -1581,6 +1581,22 @@ def reset_week(request):
                 current_week = form.cleaned_data['current_week']
                 fn.current_week = current_week
                 fn.save()
+                #todo: nips shd be rethought with delivery skeds
+                #import pdb; pdb.set_trace()
+                nips = ProducerProduct.objects.filter(
+                    inventoried=False, 
+                    default_avail_qty__gt=0, 
+                    product__sellable=True)
+                for nip in nips:
+                    item, created = InventoryItem.objects.get_or_create(
+                        product=nip.product,
+                        producer=nip.producer,
+                        inventory_date=current_week,
+                        planned=nip.default_avail_qty)
+                    if created:
+                        item.remaining = nip.default_avail_qty
+                        item.save()
+                        
         except FoodNetwork.DoesNotExist:
             pass
     return HttpResponseRedirect("/distribution/dashboard/")   
