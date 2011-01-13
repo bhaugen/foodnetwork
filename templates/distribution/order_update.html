@@ -106,7 +106,7 @@
 		{
 			var up = parseFloat(dojo.byId(row + '-unit_price').value);
 			var qty = parseFloat(dojo.byId(row + '-quantity').value);
-			dojo.byId(row + '-ext_price').innerHTML = up * qty;
+			dojo.byId(row + '-ext_price').innerHTML = (up * qty).toFixed(2);
 		}
 
 		function finishQuantityChange(evt)
