@@ -53,12 +53,12 @@ def supply_demand_table(from_date, to_date, member):
     plans = ProductPlan.objects.all()
     cps = ProducerProduct.objects.filter(
         inventoried=False,
-        default_quantity__gt=0,
+        default_avail_qty__gt=0,
     )
     constants = {}
     for cp in cps:
         constants.setdefault(cp.product, Decimal("0"))
-        constants[cp.product] += cp.default_quantity
+        constants[cp.product] += cp.default_avail_qty
     pps = ProducerProduct.objects.filter(producer=member).values_list("product_id")
     pps = set(id[0] for id in pps)
     rows = {}    
