@@ -62,6 +62,7 @@ admin.site.register(ProductPlan, ProductPlanAdmin)
 
 class ProducerProductAdmin(admin.ModelAdmin):
     list_display = ('producer', 'product', 'default_quantity',
+                    'default_avail_qty',
                     'inventoried', 'planned', 'distributor')
     list_filter = ['inventoried', 'producer', 'product']
     

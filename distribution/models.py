@@ -231,11 +231,11 @@ class Party(models.Model):
             return False
 
         
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         #import pdb; pdb.set_trace()
         if not self.content_type:
             self.content_type = ContentType.objects.get_for_model(self.__class__)
-        self.save_base(force_insert=False, force_update=False)
+        self.save_base(*args, **kwargs)
         
 
 class PartyUser(models.Model):
@@ -720,10 +720,14 @@ class ProducerProduct(models.Model):
         related_name="producer_products", verbose_name=_('producer')) 
     product = models.ForeignKey(Product, 
         related_name="product_producers", verbose_name=_('product'))
+    #todo: maybe default_quantity shd be renamed qty_per_year
     default_quantity = models.DecimalField(max_digits=8, decimal_places=2,
         default=Decimal('0'), verbose_name=_('Qty per year'))
+    default_avail_qty = models.DecimalField(max_digits=8, decimal_places=2,
+        default=Decimal('0'), verbose_name=_('Default available qty'),
+        help_text = _("Used only if this producer-product is not inventoried"))
     inventoried = models.BooleanField(_('inventoried'), default=True,
-        help_text=_("If not inventoried, the default or planned qty per week will be used for ordering"))
+        help_text=_("If not inventoried, an Inventory Item using the default available qty will be created automatically every week "))
     planned = models.BooleanField(_('planned'), default=True,
         help_text=_('Should this product appear in Plan forms?'))
     distributor = models.ForeignKey(Party, related_name="producer_distributors", 
@@ -883,10 +887,11 @@ class InventoryItem(models.Model):
             self.remaining = max([Decimal("0"), remaining])
             self.save()
                 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         if not self.pk:
-            self.expiration_date = self.inventory_date + datetime.timedelta(days=self.product.expiration_days)
-        super(InventoryItem, self).save(force_insert, force_update)
+            if not self.expiration_date:
+                self.expiration_date = self.inventory_date + datetime.timedelta(days=self.product.expiration_days)
+        super(InventoryItem, self).save(*args, **kwargs)
 
 # EconomicEventType is not ripe
 #class EconomicEventType(models.Model):
@@ -946,10 +951,10 @@ class EconomicEvent(models.Model):
         else:
             return self
         
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         if not self.content_type:
             self.content_type = ContentType.objects.get_for_model(self.__class__)
-        self.save_base(force_insert=False, force_update=False)
+        self.save_base(*args, **kwargs)
 
     def payments(self):
         if isinstance(self.as_leaf_class(), Payment):
@@ -1083,10 +1088,10 @@ class Order(models.Model):
         date = self.delivery_date if self.delivery_date else self.order_date
         return ' '.join([date.strftime('%Y-%m-%d'), self.customer.short_name])
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         if self.paid:
             state_reset = self.set_paid_state()
-        self.save_base(force_insert=False, force_update=False)
+        self.save_base(*args, **kwargs)
     
     def delete(self):
         deliveries = InventoryTransaction.objects.filter(order_item__order=self) 
@@ -1564,7 +1569,7 @@ class InventoryTransaction(EconomicEvent):
             'Inventory Item:', str(self.inventory_item), 
             'Qty:', str(self.amount)])
         
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         initial_qty = Decimal("0")
         if self.pk:
             prev_state = InventoryTransaction.objects.get(pk=self.pk)
@@ -1574,7 +1579,7 @@ class InventoryTransaction(EconomicEvent):
                 self.unit_price = self.order_item.unit_price
             else:
                 self.unit_price = self.inventory_item.product.price
-        super(InventoryTransaction, self).save(force_insert, force_update)
+        super(InventoryTransaction, self).save(*args, **kwargs)
         qty_delta = self.amount - initial_qty
         if self.transaction_type=="Receipt" or self.transaction_type=="Production":
             self.inventory_item.update_from_transaction(qty_delta)
@@ -1753,11 +1758,11 @@ class TransportationTransaction(EconomicEvent):
             unicode(self.order),
             ])
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, *args, **kwargs):
         if not self.pk:
             tt, created = ServiceType.objects.get_or_create(name="Transportation")
             self.service_type = tt
-        super(TransportationTransaction, self).save(force_insert, force_update)
+        super(TransportationTransaction, self).save(*args, **kwargs)
 
     def should_be_paid(self):
         if self.is_paid():
