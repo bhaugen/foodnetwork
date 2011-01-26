@@ -262,13 +262,16 @@ def plans_for_dojo(member, products, from_date, to_date):
     plans = ProductPlan.objects.filter(member=member)
     rows = {}    
     for pp in products:
+        yearly = "0"
         try:
             product = pp.product
+            yearly = str(pp.default_quantity)
         except:
             product = pp
         wkdate = from_date
         row = {}
         row["product"] = product.long_name
+        row["yearly"] = yearly
         row["id"] = product.id
         row["member_id"] = member.id
         row["from_date"] = from_date.strftime('%Y-%m-%d')
@@ -292,8 +295,9 @@ def plans_for_dojo(member, products, from_date, to_date):
                 rows[product][":".join([wkdate.strftime('%Y-%m-%d'), "plan_id"])] = plan.id
             wkdate = wkdate + datetime.timedelta(days=7)
             week += 1
-    label = "Product"
-    columns = [label]
+    #label = "Product"
+    #columns = [label]
+    columns = []
     wkdate = from_date
     while wkdate <= to_date:
         columns.append(wkdate.strftime('%Y-%m-%d'))

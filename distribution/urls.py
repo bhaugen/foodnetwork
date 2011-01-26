@@ -74,9 +74,9 @@ urlpatterns = patterns('',
     url(r'^jsonproducts/(?P<product_id>\d+)$', json_products, name="json_products"),
     url(r'^dojoplanningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', 
         dojo_planning_table, name='dojo_planning_table'),
-    url(r'^josonplanningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', 
+    url(r'^jsonplanningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', 
         json_planning_table, name='json_planning_table'),
-    url(r'^josonplanningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/(?P<row_id>\d+)$', 
+    url(r'^jsonplanningtable/(?P<member_id>\d+)/(?P<list_type>\w{1})/(?P<from_date>\w{10})/(?P<to_date>\w{10})/(?P<row_id>\d+)$', 
         json_planning_table, name='json_planning_table'),
     
     # invoices

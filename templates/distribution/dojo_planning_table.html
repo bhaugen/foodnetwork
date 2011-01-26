@@ -128,12 +128,13 @@ dojo.require("dojo.window");
 	escapeHTMLInData="false" 
 	selectionMode="none">
 
-	<colgroup span="1" noscroll="true"></colgroup>
+	<colgroup span="2" noscroll="true"></colgroup>
 	<colgroup span="{{ column_count }}"></colgroup>
 
     <thead>
 	<tr>
-            <th field="product" width="16em" >Product</a></th>
+		<th field="product" width="16em" >Product</a></th>
+		<th field="yearly" width="3em" styles="text-align: right;" >Year</a></th>
             {% for column in columns %}
 	    <th field="{{ column }}" 
 		    width="3em" 

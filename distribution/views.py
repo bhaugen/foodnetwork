@@ -382,8 +382,10 @@ def dojo_planning_table(request, member_id, list_type, from_date, to_date):
 
     # all we need is columns here, shd have a separate view_helper method
     # and all we need is the weekly date columns
+    #import pdb; pdb.set_trace()
     plan_table = plans_for_dojo(member, products, from_date, to_date)
-    columns = plan_table.columns[1:]
+    #columns = plan_table.columns[1:]
+    columns = plan_table.columns
 
     return render_to_response('distribution/dojo_planning_table.html', 
         {
@@ -546,9 +548,21 @@ def json_planning_table(request, member_id, list_type, from_date, to_date, row_i
             list_type = "A"
         plan_table = plans_for_dojo(member, products, from_date, to_date)
         #import pdb; pdb.set_trace()
-        data = simplejson.dumps(plan_table.rows)
+        range = request.META["HTTP_RANGE"]
+        range = range.split("=")[1]
+        range = range.split("-")
+        range_start = int(range[0])
+        range_end = int(range[1])
+        rows = plan_table.rows
+        count = len(rows)
+        if count < range_end:
+            range_end = count
+        rows = rows[range_start:range_end + 1]
+        data = simplejson.dumps(rows)
         response = HttpResponse(data, mimetype="text/json-comment-filtered")
         response['Cache-Control'] = 'no-cache'
+        response['Content-Range'] = "".join(["items ", str(range_start),
+            "-", str(range_end), "/", str(count + 1)])
         return response
 
 @login_required
