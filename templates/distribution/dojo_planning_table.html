@@ -71,6 +71,12 @@ dojo.require("dojo.window");
 
 	}
 
+	function onTableBlur() 
+	{ 
+ 		if (this.edit.isEditing()) 
+			this.edit.apply(); 
+	} 
+
 
 	function init() 
 	{
@@ -121,7 +127,8 @@ dojo.require("dojo.window");
 <table 
 	id="grid" 
 	jsid="grid" 
-	store="jsonStore" 
+	store="jsonStore"
+	onBlur="onTableBlur"	
 	dojoType="dojox.grid.DataGrid" 
 	class="grid" 
 	singleClickEdit="true" 
