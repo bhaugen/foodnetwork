@@ -156,9 +156,7 @@ def supply_demand_rows(from_date, to_date, member=None):
     return rows
 
 def supply_demand_weekly_table(week_date):
-    # does plannable make sense here? how did it get planned in the first place?
     plans = ProductPlan.objects.filter(
-        product__plannable=True,
         from_date__lte=week_date,
         to_date__gte=week_date,
     ).order_by("-role", "member__short_name")
@@ -184,6 +182,42 @@ def supply_demand_weekly_table(week_date):
             rows[plan.product][len(columns)-1] -= plan.quantity
     rows = rows.values()
     rows.sort(lambda x, y: cmp(x[0].short_name, y[0].short_name))
+    sdtable = SupplyDemandTable(columns, rows)
+    return sdtable
+
+def dojo_supply_demand_weekly_table(week_date):
+    plans = ProductPlan.objects.filter(
+        from_date__lte=week_date,
+        to_date__gte=week_date,
+    ).order_by("-role", "member__short_name")
+    # for columns: product, member.short_name(s), balance
+    # but only members are needed here...product and balance can be added in
+    # template 
+    # for rows: dictionaries with the above keys
+    columns = []
+    rows = {}
+    for plan in plans:
+        if not plan.member.short_name in columns:
+            columns.append(plan.member.short_name)
+    #columns.insert(0, "Product\Member")
+    columns.append("Balance")
+    for plan in plans:
+        if not rows.get(plan.product):
+            row = {}
+            for column in columns:
+                row[column] = 0
+            row["product"] = plan.product.long_name
+            row["id"] = plan.product.id
+            row["Balance"] = 0
+            rows[plan.product] = row
+        if plan.role == "producer":
+            rows[plan.product][plan.member.short_name] += int(plan.quantity)
+            rows[plan.product]["Balance"] += int(plan.quantity)
+        else:
+            rows[plan.product][plan.member.short_name] -= int(plan.quantity)
+            rows[plan.product]["Balance"] -= int(plan.quantity)
+    rows = rows.values()
+    rows.sort(lambda x, y: cmp(x["product"], y["product"]))
     sdtable = SupplyDemandTable(columns, rows)
     return sdtable
 

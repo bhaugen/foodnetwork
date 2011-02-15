@@ -90,6 +90,10 @@ urlpatterns = patterns('',
         name='dojo_income'),
     url(r'^jsonincome/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', json_income,
         name='json_income'),
+    url(r'^dojosupplydemandweek/(?P<tabs>\w{1})/(?P<week_date>\w{10})/$',
+        dojo_supply_and_demand_week, name='dojo_supply_and_demand_week'),
+    url(r'^jsonsupplydemandweek/(?P<week_date>\w{10})/$',
+        json_supply_and_demand_week, name='json_supply_and_demand_week'),
 
     
     # invoices

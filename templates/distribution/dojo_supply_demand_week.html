@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load humanize %}
 
 {% block title %}
-     {% trans "Supply and Demand Table" %}
+     {% trans "Supply and Demand Week" %}
 {% endblock %}
 
 {% block extra_head %}
@@ -63,13 +64,12 @@ dojo.require("dojo.window");
 
 	{% include tabnav %}
 
-	<h2>{% blocktrans %}Weekly Supply minus Demand from {{ from_date }} to {{ to_date }}{% endblocktrans %}</h2>
+	<h2>{% blocktrans %}Supply minus Demand for week of {{ week_date }}{% endblocktrans %}</h2>
 
-	<p><i>You may drill down into any column</i></p>
 
 <div 
 	dojoType="dojox.data.JsonRestStore" 
-	target="{% url json_supply_demand from_date=from_datestring to_date=to_datestring  %}" 
+	target="{% url json_supply_and_demand_week week_date=week_date|date:'Y_m_d'  %}" 
 	idAttribute="id" 
 	jsId="jsonStore">
 </div>
@@ -78,8 +78,8 @@ dojo.require("dojo.window");
 	id="grid" 
 	jsid="grid" 
 	store="jsonStore"
-	dojoType="dojox.grid.DataGrid"
-        canSort="false"	
+	dojoType="dojox.grid.DataGrid" 
+	canSort="false"
 	class="grid" >
 	<colgroup span="1" noscroll="true"></colgroup>
 	<colgroup span="{{ column_count }}"></colgroup>
@@ -88,13 +88,15 @@ dojo.require("dojo.window");
 	<tr>
 		<th field="product" width="16em" >Product</th>
 
-            {% for column in columns %}
-	    <th field="{{ column }}" 
-		    width="4em" 
+            	{% for column in columns %}
+	    	<th field="{{ column }}" 
+		    width="6em" 
 		    styles="text-align: right;"  >
-			<a href="{% url dojo_supply_and_demand_week tabs=tabs week_date=column %}">{{ column|slice:"5:" }}</a>
-	    </th>
-	    {% endfor %}
+		    {{ column }}
+		</th>
+		{% endfor %}
+
+				
 
         </tr>
     </thead>
@@ -103,5 +105,7 @@ dojo.require("dojo.window");
 </div>
 
 {% endblock %}
+
+
 
 

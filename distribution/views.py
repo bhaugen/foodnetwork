@@ -1656,6 +1656,55 @@ def supply_and_demand_week(request, tabs, week_date):
             'tabnav': tabnav,
         }, context_instance=RequestContext(request))
 
+@login_required
+def dojo_supply_and_demand_week(request, tabs, week_date):
+    try:
+        week_date = datetime.datetime(*time.strptime(week_date, '%Y_%m_%d')[0:5]).date()
+    except ValueError:
+            raise Http404
+    sdtable = dojo_supply_demand_weekly_table(week_date)
+    columns = sdtable.columns
+    tabnav = "distribution/tabnav.html"
+    if tabs == "P":
+        tabnav = "producer/producer_tabnav.html"
+    return render_to_response('distribution/dojo_supply_demand_week.html', 
+        {
+            'week_date': week_date,
+            'columns': columns,
+            'column_count': len(columns),
+            'tabnav': tabnav,
+        }, context_instance=RequestContext(request))
+
+@login_required
+def json_supply_and_demand_week(request, week_date):
+    try:
+        week_date = datetime.datetime(*time.strptime(week_date, '%Y_%m_%d')[0:5]).date()
+    except ValueError:
+            raise Http404
+    tbl = dojo_supply_demand_weekly_table(week_date)
+    rows = tbl.rows
+    count = len(rows)
+    try:
+        range = request.META["HTTP_RANGE"]
+        range = range.split("=")[1]
+        range = range.split("-")
+        range_start = int(range[0])
+        range_end = int(range[1])
+    except KeyError:
+        range_start = 0
+        range_end = count
+    if count < range_end:
+        range_end = count
+    rows = rows[range_start:range_end + 1]
+    data = simplejson.dumps(rows)
+    response = HttpResponse(data, mimetype="text/json-comment-filtered")
+    response['Cache-Control'] = 'no-cache'
+    response['Content-Range'] = "".join(["items ", str(range_start),
+        "-", str(range_end), "/", str(count + 1)])
+    return response
+
+
+
 
 @login_required
 def produceravail(request, prod_id, year, month, day):

@@ -96,18 +96,18 @@ dojo.require("dojo.window");
 
     <thead>
 	<tr>
-		<th field="product" width="16em" >Product</a></th>
+		<th field="product" width="16em" >Product</th>
 
             	{% for column in columns %}
 	    	<th field="{{ column }}" 
 		    width="4em" 
 		    styles="text-align: right;"  >
-			<a href="{% url supply_and_demand_week tabs=tabs week_date=column %}">{{ column|slice:"5:" }}</a>
+			<a href="{% url dojo_supply_and_demand_week tabs=tabs week_date=column %}">{{ column|slice:"5:" }}</a>
 	    	</th>
 	    	{% endfor %}
 
-	    	<th field="total" width="4em" styles="text-align: right;" >Total</a></th>
-    		<th field="net" width="4em" styles="text-align: right;" >Net</a></th>
+	    	<th field="total" width="4em" styles="text-align: right;" >Total</th>
+    		<th field="net" width="4em" styles="text-align: right;" >Net</th>
 
         </tr>
     </thead>
