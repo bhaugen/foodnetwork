@@ -1481,6 +1481,7 @@ def dojo_income(request, from_date, to_date):
             'total_gross': total_gross,
             'columns': columns,
             'column_count': len(columns) + 2,
+            'tabnav': "distribution/tabnav.html",
             'tabs': 'D',
         }, context_instance=RequestContext(request))
 
