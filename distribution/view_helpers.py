@@ -13,6 +13,23 @@ def is_number(s):
     except ValueError:
         return False
 
+def plan_columns(from_date, to_date):
+    columns = []
+    wkdate = from_date
+    while wkdate <= to_date:
+        columns.append(wkdate.strftime('%Y-%m-%d'))
+        wkdate = wkdate + datetime.timedelta(days=7)
+    return columns
+
+def sd_columns(from_date, to_date):
+    columns = []
+    wkdate = from_date
+    while wkdate <= to_date:
+        columns.append(wkdate.strftime('%Y_%m_%d'))
+        wkdate = wkdate + datetime.timedelta(days=7)
+    return columns
+
+
 # shd plan_weeks go to the view and include headings?
 # somebody needs headings!
 def create_weekly_plan_forms(rows, data=None):
@@ -93,6 +110,50 @@ def supply_demand_table(from_date, to_date, member=None):
     rows.sort(lambda x, y: cmp(x[0].short_name, y[0].short_name))
     sdtable = SupplyDemandTable(columns, rows)
     return sdtable
+
+def supply_demand_rows(from_date, to_date, member=None):
+    plans = ProductPlan.objects.all()
+    cps = ProducerProduct.objects.filter(
+        inventoried=False,
+        default_avail_qty__gt=0,
+    )
+    constants = {}
+    for cp in cps:
+        constants.setdefault(cp.product, Decimal("0"))
+        constants[cp.product] += cp.default_avail_qty
+    if member:
+        plans = plans.filter(member=member)
+    rows = {}    
+    for plan in plans:
+        wkdate = from_date
+        product = plan.product.supply_demand_product()
+        constant = Decimal('0')
+        cp = constants.get(product)
+        if cp:
+            constant = cp
+        row = {}
+        while wkdate <= to_date:
+            row[wkdate.strftime('%Y_%m_%d')] = str(constant)
+            wkdate = wkdate + datetime.timedelta(days=7)
+        row["product"] =  product.long_name
+        row["id"] = product.id
+        rows.setdefault(product, row)
+        wkdate = from_date
+        week = 0
+        while wkdate <= to_date:
+            if plan.from_date <= wkdate and plan.to_date >= wkdate:
+                key = wkdate.strftime('%Y_%m_%d')
+                value = Decimal(rows[product][key])
+                if plan.role == "producer":
+                    value += plan.quantity
+                else:
+                    value -= plan.quantity
+                rows[product][key] = str(value)
+            wkdate = wkdate + datetime.timedelta(days=7)
+            week += 1
+    rows = rows.values()
+    rows.sort(lambda x, y: cmp(x["product"], y["product"]))
+    return rows
 
 def supply_demand_weekly_table(week_date):
     # does plannable make sense here? how did it get planned in the first place?
@@ -204,6 +265,68 @@ def suppliable_demand(from_date, to_date, member=None):
     sdtable = SupplyDemandTable(columns, income_rows)
     return sdtable
 
+def json_income_rows(from_date, to_date, member=None):
+    plans = ProductPlan.objects.all()
+    if member:
+        plans = plans.filter(member=member)
+    rows = {}    
+    for plan in plans:
+        wkdate = from_date
+        row = {}
+        while wkdate <= to_date:
+            row[wkdate.strftime('%Y_%m_%d')] = SuppliableDemandCell(Decimal("0"), Decimal("0"))
+            wkdate = wkdate + datetime.timedelta(days=7)
+        product = plan.product.supply_demand_product()
+        row["product"] =  product.long_name
+        row["id"] = product.id
+        row["price"] = product.price
+        rows.setdefault(product, row)
+        wkdate = from_date
+        while wkdate <= to_date:
+            key = wkdate.strftime('%Y_%m_%d')
+            if plan.from_date <= wkdate and plan.to_date >= wkdate:
+                if plan.role == "producer":
+                    rows[product][key].supply += plan.quantity
+                else:
+                    rows[product][key].demand += plan.quantity
+            wkdate = wkdate + datetime.timedelta(days=7)
+    rows = rows.values()
+    cust_fee = customer_fee()
+    #import pdb; pdb.set_trace()
+    for row in rows:
+        wkdate = from_date
+        while wkdate <= to_date:
+            key = wkdate.strftime('%Y_%m_%d')
+            sd = row[key].suppliable()
+            if sd > 0:
+                income = sd * row["price"]
+                row[key] = income
+            else:
+                row[key] = Decimal("0")
+            wkdate = wkdate + datetime.timedelta(days=7)
+    income_rows = []
+    for row in rows:
+        base = Decimal("0")
+        total = Decimal("0")
+        wkdate = from_date
+        while wkdate <= to_date:
+            key = wkdate.strftime('%Y_%m_%d')
+            cell = row[key]
+            base += cell
+            cell += cell * cust_fee
+            total += cell
+            row[key] = str(cell.quantize(Decimal('.1'), rounding=ROUND_UP))
+            wkdate = wkdate + datetime.timedelta(days=7)
+        if total:
+            net = base * cust_fee + (base * producer_fee())
+            net = net.quantize(Decimal('1.'), rounding=ROUND_UP)
+            total = total.quantize(Decimal('1.'), rounding=ROUND_UP)
+            row["total"] = str(total)
+            row["net"] = str(net)
+            row["price"] = str(row["price"])
+            income_rows.append(row)
+    income_rows.sort(lambda x, y: cmp(x["product"], y["product"]))
+    return income_rows
 
 
 class PlannedWeek(object):
@@ -278,7 +401,6 @@ def plans_for_dojo(member, products, from_date, to_date):
         row["to_date"] = to_date.strftime('%Y-%m-%d')
         while wkdate <= to_date:
             enddate = wkdate + datetime.timedelta(days=6)
-            #row.append(PlannedWeek(product, wkdate, enddate, Decimal("0")))
             row[wkdate.strftime('%Y-%m-%d')] = "0"
             wkdate = enddate + datetime.timedelta(days=1)
         rows.setdefault(product, row)
@@ -289,21 +411,11 @@ def plans_for_dojo(member, products, from_date, to_date):
         while wkdate <= to_date:
             enddate = wkdate + datetime.timedelta(days=6)
             if plan.from_date <= wkdate and plan.to_date >= wkdate:
-                #rows[product][week + 1].quantity = plan.quantity
-                #rows[product][week + 1].plan = plan
                 rows[product][wkdate.strftime('%Y-%m-%d')] = str(plan.quantity)
                 rows[product][":".join([wkdate.strftime('%Y-%m-%d'), "plan_id"])] = plan.id
             wkdate = wkdate + datetime.timedelta(days=7)
             week += 1
-    #label = "Product"
-    #columns = [label]
-    columns = []
-    wkdate = from_date
-    while wkdate <= to_date:
-        columns.append(wkdate.strftime('%Y-%m-%d'))
-        wkdate = wkdate + datetime.timedelta(days=7)
     rows = rows.values()
     rows.sort(lambda x, y: cmp(x["product"], y["product"]))
-    sdtable = SupplyDemandTable(columns, rows)
-    return sdtable
+    return rows
 

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Supply and Demand Table" %}
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/resources/dojo.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dijit/themes/tundra/tundra.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojox/grid/resources/Grid.css"/>
+  <link rel="stylesheet" type="text/css" href=
+  "http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojox/grid/resources/tundraGrid.css"/>
+
+  <style type="text/css">
+    .dojoxGrid {
+       height: 450px;
+    }
+  </style>
+
+
+  <script type="text/javascript"
+          src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"
+          baseUrl='./'
+          djConfig="parseOnLoad:true">
+  </script>
+{% endblock %}
+		
+{% block header %}
+<script type="text/javascript">
+dojo.require("dojox.data.JsonRestStore");
+dojo.require("dojox.grid.DataGrid");
+dojo.require("dojo.parser");
+dojo.require("dojo.window");
+</script>
+
+<script type="text/javascript">
+
+
+	function init() 
+	{
+		var vs = dojo.window.getBox();
+		var gridHeight = vs.h * .75;
+		var domNode = dojo.byId("grid");
+		dojo.contentBox(domNode, {h: gridHeight});
+	}
+
+	dojo.addOnLoad(init);
+
+</script>
+</head>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="plans">
+
+	{% include tabnav %}
+
+	<h2>{% blocktrans %}Weekly Supply minus Demand from {{ from_date }} to {{ to_date }}{% endblocktrans %}</h2>
+
+	<p><i>You may drill down into any column</i></p>
+
+<div 
+	dojoType="dojox.data.JsonRestStore" 
+	target="{% url json_supply_demand from_date=from_datestring to_date=to_datestring  %}" 
+	idAttribute="id" 
+	jsId="jsonStore">
+</div>
+
+<table 
+	id="grid" 
+	jsid="grid" 
+	store="jsonStore"
+	dojoType="dojox.grid.DataGrid" 
+	class="grid" >
+	<colgroup span="1" noscroll="true"></colgroup>
+	<colgroup span="{{ column_count }}"></colgroup>
+
+    <thead>
+	<tr>
+		<th field="product" width="16em" >Product</a></th>
+
+            {% for column in columns %}
+	    <th field="{{ column }}" 
+		    width="4em" 
+		    styles="text-align: right;"  >
+			<a href="{% url supply_and_demand_week tabs=tabs week_date=column %}">{{ column|slice:"5:" }}</a>
+	    </th>
+	    {% endfor %}
+
+        </tr>
+    </thead>
+
+</table> 
+</div>
+
+{% endblock %}
+
+

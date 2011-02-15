@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block title %}
-     {% trans "Planning Table" %}
+     {% trans "Member Plans Table" %}
 {% endblock %}
 
 {% block extra_head %}
@@ -21,8 +21,8 @@
     .dojoxGrid {
        height: 450px;
     }
-	.dijitOffScreen { display: none;}
   </style>
+
 
   <script type="text/javascript"
           src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"
@@ -33,54 +33,22 @@
 		
 {% block header %}
 <script type="text/javascript">
-dojo.require("dijit.dijit");
+//dojo.require("dijit.dijit");
 dojo.require("dojox.data.JsonRestStore");
 dojo.require("dojox.grid.DataGrid");
-dojo.require("dijit.form.Button");
-dojo.require("dijit.form.ValidationTextBox");
-dojo.require("dijit.form.NumberTextBox");
-dojo.require("dojox.grid.cells.dijit");
+//dojo.require("dijit.form.Button");
+//dojo.require("dijit.form.ValidationTextBox");
+//dojo.require("dijit.form.NumberTextBox");
+//dojo.require("dojox.grid.cells.dijit");
 dojo.require("dojo.parser");
 dojo.require("dojo.window");
 </script>
 
 <script type="text/javascript">
 
-		formatNumber = function(value){
-			return isNaN(value) ? value + ' is not a number' : value;
-
-		}
-
-	function saveFailed()
-	{
-		dojo.style("saveMessage", "color", "red");
-		dojo.byId("saveMessage").innerHTML = "Error";
-	}
-
-	function saveSucceeded()
-	{
-		dojo.style("saveMessage", "color", "green");
-		dojo.byId("saveMessage").innerHTML = "Changes saved";
-		dojo.fadeOut({ node:"saveMessage", duration:3000  }).play();
-		window.location = "{% url dojo_member_plans from_date=from_datestring to_date=to_datestring member_id=member.id %}";
-	}
-
-	function saveStore()
-	{
-		jsonStore.save({onComplete: saveSucceeded, onError: saveFailed});
-
-	}
-
-	function onTableBlur() 
-	{ 
- 		if (this.edit.isEditing()) 
-			this.edit.apply(); 
-	} 
-
 
 	function init() 
 	{
-		dojo.connect(saveButton, "onClick", "saveStore");
 		var vs = dojo.window.getBox();
 		var gridHeight = vs.h * .75;
 		var domNode = dojo.byId("grid");
@@ -100,26 +68,15 @@ dojo.require("dojo.window");
 
 	{% include tabnav %}
 
-	<h2 style="margin-bottom: 0; padding-top: 0; margin-top: 0; ">
-		{% blocktrans %}{{ plan_type }} Plan from {{ from_date }} to {{ to_date }}{% endblocktrans %}
+	<h2>
+		{% blocktrans with member.long_name as member_long_name %}
+		{{ member_long_name }} {{ plan_type }} Plans from {{ from_date }} to {{ to_date }}
+		{% endblocktrans %}
 	</h2>
-	<p style="margin-top: 0; font-style: italic; " >
-	{% ifequal list_type "A" %}
-		{% blocktrans %}Using All Products.  Planned products go onto the {{ member }} Product List.{% endblocktrans %}
-	{% else %}
-		{% blocktrans %}Using {{ member }} Product Lists{% endblocktrans %}
-	{% endifequal %}
-	</p>
-
-<button dojoType="dijit.form.Button" type="button" jsId="saveButton">
-    Submit changes
-</button>
-<span id="saveMessage" style="color: green;" ></span>
-
 
 <div 
 	dojoType="dojox.data.JsonRestStore" 
-	target="{% url json_planning_table member_id=member.id list_type=list_type from_date=from_datestring to_date=to_datestring %}" 
+	target="{% url json_member_plans from_date=from_datestring to_date=to_datestring member_id=member.id %}" 
 	idAttribute="id" 
 	jsId="jsonStore">
 </div>
@@ -128,13 +85,8 @@ dojo.require("dojo.window");
 	id="grid" 
 	jsid="grid" 
 	store="jsonStore"
-	onBlur="onTableBlur"	
 	dojoType="dojox.grid.DataGrid" 
-	class="grid" 
-	singleClickEdit="true" 
-	escapeHTMLInData="false" 
-	selectionMode="none">
-
+	class="grid" >
 	<colgroup span="2" noscroll="true"></colgroup>
 	<colgroup span="{{ column_count }}"></colgroup>
 
@@ -142,12 +94,11 @@ dojo.require("dojo.window");
 	<tr>
 		<th field="product" width="16em" >Product</a></th>
 		<th field="yearly" width="3em" styles="text-align: right;" >Year</a></th>
+
             {% for column in columns %}
 	    <th field="{{ column }}" 
 		    width="3em" 
-		    styles="text-align: right;" 
-		    editable="true" 
-		    formatter="formatNumber" >
+		    styles="text-align: right;"  >
 			{{ column|slice:"5:" }}
 	    </th>
 	    {% endfor %}
@@ -159,3 +110,4 @@ dojo.require("dojo.window");
 </div>
 
 {% endblock %}
+
