@@ -171,7 +171,7 @@ def plan_selection(request):
                 from_date = data['from_date'].strftime('%Y_%m_%d')
                 to_date = data['to_date'].strftime('%Y_%m_%d')
                 return HttpResponseRedirect('/%s/%s/%s/'
-                    % ('distribution/income', from_date, to_date))
+                    % ('distribution/dojoincome', from_date, to_date))
             else:
                 psform = PlanSelectionForm(initial=plan_init)
                 sdform = DateRangeSelectionForm(prefix='sd', initial=init)
