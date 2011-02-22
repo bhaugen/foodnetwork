@@ -416,6 +416,7 @@ def plan_weeks(member, products, from_date, to_date):
     return sdtable
 
 def plans_for_dojo(member, products, from_date, to_date):
+    #import pdb; pdb.set_trace()
     plans = ProductPlan.objects.filter(member=member)
     rows = {}    
     for pp in products:
@@ -438,6 +439,7 @@ def plans_for_dojo(member, products, from_date, to_date):
             row[wkdate.strftime('%Y-%m-%d')] = "0"
             wkdate = enddate + datetime.timedelta(days=1)
         rows.setdefault(product, row)
+    #import pdb; pdb.set_trace()
     for plan in plans:
         product = plan.product
         wkdate = from_date

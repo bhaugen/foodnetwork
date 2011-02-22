@@ -301,9 +301,9 @@ def planning_table(request, member_id, list_type, from_date, to_date):
                             if role == "producer":
                                 listed_product, created = ProducerProduct.objects.get_or_create(
                                     product=product, producer=member)
-                            #elif role == "consumer":
-                            #    listed_product, created = CustomerProduct.objects.get_or_create(
-                            #        product=product, customer=member)
+                            elif role == "consumer":
+                                listed_product, created = CustomerProduct.objects.get_or_create(
+                                    product=product, customer=member)
 
                     else:
                         if plan:
@@ -488,6 +488,9 @@ def json_planning_table(request, member_id, list_type, from_date, to_date, row_i
                             if role == "producer":
                                 listed_product, created = ProducerProduct.objects.get_or_create(
                                     product=product, producer=member)
+                            elif role == "consumer":
+                                listed_product, created = CustomerProduct.objects.get_or_create(
+                                    product=product, customer=member)
 
                     else:
                         if plan:
@@ -539,7 +542,7 @@ def json_planning_table(request, member_id, list_type, from_date, to_date, row_i
         if not products:
             products = Product.objects.filter(plannable=True)
             list_type = "A"
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         rows = plans_for_dojo(member, products, from_date, to_date)
         range = request.META["HTTP_RANGE"]
         range = range.split("=")[1]
