@@ -410,7 +410,7 @@ def json_planning_table(request, member_id, list_type, from_date, to_date, row_i
     #import pdb; pdb.set_trace()
     if row_id:
         if request.method == "GET":
-            import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
             response = HttpResponse(request.raw_post_data, mimetype="text/json-comment-filtered")
             response['Cache-Control'] = 'no-cache'
             return response
@@ -542,7 +542,7 @@ def json_planning_table(request, member_id, list_type, from_date, to_date, row_i
         if not products:
             products = Product.objects.filter(plannable=True)
             list_type = "A"
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         rows = plans_for_dojo(member, products, from_date, to_date)
         range = request.META["HTTP_RANGE"]
         range = range.split("=")[1]
