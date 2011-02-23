@@ -42,6 +42,23 @@ dojo.require("dojo.window");
 <script type="text/javascript">
 
 
+	formatNumber = function(value)
+	{
+		var nbr = parseFloat(value);
+		if (nbr > 0)
+		{
+			return "<span style='background: lightgreen'>" + value + "</span>";
+		}
+		else if (nbr < 0)
+		{
+			return "<span style='background: pink'>" + value + "</span>";
+		}
+		else
+		{
+			return value;
+		}
+	}
+
 	function init() 
 	{
 		var vs = dojo.window.getBox();
@@ -91,6 +108,7 @@ dojo.require("dojo.window");
             {% for column in columns %}
 	    <th field="{{ column }}" 
 		    width="4em" 
+		    formatter="formatNumber" 
 		    styles="text-align: right;"  >
 			<a href="{% url dojo_supply_and_demand_week tabs=tabs week_date=column %}">{{ column|slice:"5:" }}</a>
 	    </th>
