@@ -123,14 +123,21 @@ def supply_demand_rows(from_date, to_date, member=None):
         constants[cp.product] += cp.default_avail_qty
     if member:
         plans = plans.filter(member=member)
-    rows = {}    
+    rows = {}
+    #todo: 
+    #1: spread storage items over many weeks
+    # if plan.product expiration_days > 1 week:
+    # spread remainder over weeks until consumed or expired
+    #2: 0 in a cell shd mean supply - demand are balanced
+    # no supply or demand shd results in a blank cell
     for plan in plans:
         wkdate = from_date
         product = plan.product.supply_demand_product()
-        constant = Decimal('0')
+        #constant = Decimal('0')
+        constant = ""
         cp = constants.get(product)
         if cp:
-            constant = cp
+            constant = int(cp)
         row = {}
         while wkdate <= to_date:
             row[wkdate.strftime('%Y_%m_%d')] = str(constant)
@@ -139,18 +146,18 @@ def supply_demand_rows(from_date, to_date, member=None):
         row["id"] = product.id
         rows.setdefault(product, row)
         wkdate = from_date
-        week = 0
         while wkdate <= to_date:
             if plan.from_date <= wkdate and plan.to_date >= wkdate:
                 key = wkdate.strftime('%Y_%m_%d')
-                value = Decimal(rows[product][key])
+                value = rows[product][key]
+                if value == "":
+                    value = 0
                 if plan.role == "producer":
-                    value += plan.quantity
+                    value += int(plan.quantity)
                 else:
-                    value -= plan.quantity
-                rows[product][key] = str(value)
+                    value -= int(plan.quantity)
+                rows[product][key] = value
             wkdate = wkdate + datetime.timedelta(days=7)
-            week += 1
     rows = rows.values()
     rows.sort(lambda x, y: cmp(x["product"], y["product"]))
     return rows
