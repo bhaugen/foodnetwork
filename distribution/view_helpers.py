@@ -137,7 +137,7 @@ def supply_demand_rows(from_date, to_date, member=None):
         constant = ""
         cp = constants.get(product)
         if cp:
-            constant = int(cp)
+            constant = str(cp)
         row = {}
         while wkdate <= to_date:
             row[wkdate.strftime('%Y_%m_%d')] = str(constant)
@@ -151,12 +151,14 @@ def supply_demand_rows(from_date, to_date, member=None):
                 key = wkdate.strftime('%Y_%m_%d')
                 value = rows[product][key]
                 if value == "":
-                    value = 0
-                if plan.role == "producer":
-                    value += int(plan.quantity)
+                    value = Decimal("0")
                 else:
-                    value -= int(plan.quantity)
-                rows[product][key] = value
+                    value = Decimal(value)
+                if plan.role == "producer":
+                    value += plan.quantity
+                else:
+                    value -= plan.quantity
+                rows[product][key] = str(value)
             wkdate = wkdate + datetime.timedelta(days=7)
     rows = rows.values()
     rows.sort(lambda x, y: cmp(x["product"], y["product"]))
