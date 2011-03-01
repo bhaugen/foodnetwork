@@ -614,7 +614,7 @@ class Product(models.Model):
         answer = ''
         prod = self
         parents = []
-        while not prod.parent is None:
+        while prod.parent:
             parents.append(prod.parent.short_name)
             prod = prod.parent
         if len(parents) > 0:
@@ -625,7 +625,7 @@ class Product(models.Model):
     def supply_demand_product(self):
         answer = self
         prod = self
-        while not prod.parent is None:
+        while prod.parent:
             if prod.parent.plannable:
                 answer = prod.parent
                 break
