@@ -125,11 +125,11 @@ def supply_demand_rows(from_date, to_date, member=None):
         plans = plans.filter(member=member)
     rows = {}
     #todo: 
-    #1: spread storage items over many weeks
+    # spread storage items over many weeks
     # if plan.product expiration_days > 1 week:
-    # spread remainder over weeks until consumed or expired
-    #2: 0 in a cell shd mean supply - demand are balanced
-    # no supply or demand shd results in a blank cell
+    # spread remainder over weeks until consumed or expired.
+    # means plannable parents cd determine expiration.
+    # may require another pass thru storage plans...
     for plan in plans:
         wkdate = from_date
         product = plan.product.supply_demand_product()
