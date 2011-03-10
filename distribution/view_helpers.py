@@ -132,7 +132,9 @@ def supply_demand_rows(from_date, to_date, member=None):
     # may require another pass thru storage plans...
     for plan in plans:
         wkdate = from_date
-        product = plan.product.supply_demand_product()
+        #this is slow:
+        #product = plan.product.supply_demand_product()
+        product = plan.product
         #constant = Decimal('0')
         constant = ""
         cp = constants.get(product)
