@@ -112,7 +112,7 @@ def supply_demand_table(from_date, to_date, member=None):
     return sdtable
 
 def supply_demand_rows(from_date, to_date, member=None):
-    plans = ProductPlan.objects.all()
+    plans = ProductPlan.objects.select_related().all()
     cps = ProducerProduct.objects.filter(
         inventoried=False,
         default_avail_qty__gt=0,
