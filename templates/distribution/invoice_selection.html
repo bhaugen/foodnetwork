@@ -83,6 +83,25 @@
         <p>
             <input type="submit" value="{% trans 'Submit' %}" />
         </p>
-    </form>
+	</form>
+
+	{% if unpaid_invoices %}
+	<div style="padding-left: 1em;">
+		<h4>Unpaid Invoices:</h4>
+		<ul>
+		{% for order in unpaid_invoices %}
+
+			<li>
+				<a href="{% url invoices cust_id=order.customer.id year=order.delivery_date.year month=order.delivery_date.month day=order.delivery_date.day %}">
+					#{{ order.id }} {{ order.customer }} 
+					Ordered: {{ order.order_date }} Delivered: {{ order.delivery_date }} 
+					${{ order.grand_total }}	
+				</a>
+			</li>
+
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
 </div>
 {% endblock %}

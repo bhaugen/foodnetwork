@@ -2612,6 +2612,8 @@ def dojo_products(request):
 @login_required
 def invoice_selection(request):
     init = {"delivery_date": current_week(),}
+    unpaid_invoices = Order.objects.filter(
+        state="Delivered")
     if request.method == "POST":
         dsform = DeliverySelectionForm(request.POST)  
         if dsform.is_valid():
@@ -2623,7 +2625,9 @@ def invoice_selection(request):
     else:
         dsform = DeliverySelectionForm(initial=init)
     return render_to_response('distribution/invoice_selection.html', 
-        {'header_form': dsform}, context_instance=RequestContext(request))
+        {'header_form': dsform,
+         'unpaid_invoices': unpaid_invoices,
+        }, context_instance=RequestContext(request))
 
 @login_required
 def invoices(request, cust_id, year, month, day):
