@@ -608,8 +608,13 @@ def plan_update(request, prod_id):
 
 @login_required
 def inventory_selection(request):
+    try:
+        fn = food_network()
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
     this_week = current_week()
     init = {"avail_date": this_week,}
+    available = fn.all_avail_items(this_week)
     if request.method == "POST":
         ihform = InventorySelectionForm(request.POST)  
         if ihform.is_valid():
@@ -621,7 +626,9 @@ def inventory_selection(request):
     else:
         ihform = InventorySelectionForm(initial=init)
     return render_to_response('distribution/inventory_selection.html', {
-        'header_form': ihform}, context_instance=RequestContext(request))
+        'header_form': ihform,
+        'available': available,
+    }, context_instance=RequestContext(request))
 
 @login_required
 def inventory_update(request, prod_id, year, month, day):

@@ -55,6 +55,8 @@
 
 	{% include "distribution/tabnav.html" %}
 
+	<div style="float: left; border: 2px solid grey; float: left; width: 40%; padding-left: 1em; padding-top: 4px; ">
+
     <form action="." method="POST" >{% csrf_token %}
         <table>
             <tr>
@@ -87,8 +89,45 @@
             </tr>
         </table>
         <p>
-            <input type="submit" value="{% trans 'Submit' %}" />
+            <input type="submit" value='{% trans "Add or change whats available" %}' />
         </p>
-    </form>
+	</form>
+
+	</div>
+
+	{% if available %}
+
+	<div style="float: left; margin-top: 1em; " >
+	<h3>What's Available</h3>
+
+	<table class="ga-event-table" >
+		<tr>
+			<th>{% trans "Producer" %}</th>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Lot" %}</th>
+			<th>{% trans "Inventory Date" %}</th>
+			<th>{% trans "Expiration Date" %}</th>
+			<th>{% trans "Custodian" %}</th>		
+	        	<th>{% trans "Avail" %}</th>
+			<th>{% trans "Ordered" %}</th>
+			<th>{% trans "Buyers" %}</th>
+		</tr>
+		{% for lot in available %}
+		<tr>
+			<td>{{ lot.producer }}</td>
+			<td>{{ lot.product }}</td>
+			<td>{{ lot.lot_id }}</td>
+			<td>{{ lot.inventory_date }}</td>
+			<td>{{ lot.expiration_date }}</td>
+			<td>{{ lot.custodian }}</td>
+			<td style="text-align: right;" >{{ lot.avail_qty }}</td>
+			<td style="text-align: right;" >{{ lot.ordered_qty }}</td>
+			<td>{{ lot.customers }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+	</div>
+	<div style="clear: both; "></div>
+	{% endif %}
 </div>
 {% endblock %}
