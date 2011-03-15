@@ -814,7 +814,13 @@ class InventoryItem(models.Model):
                 self.producer.member_id,
                 self.producer.short_name,
                 self.product.short_name,
-                self.inventory_date.strftime('%Y-%m-%d')])        
+                self.inventory_date.strftime('%Y-%m-%d')])
+
+    def where(self):
+        if self.custodian:
+            return self.custodian
+        else:
+            return self.producer
     
     def avail_qty(self):
         if self.onhand:
