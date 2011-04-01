@@ -615,6 +615,8 @@ class Product(models.Model):
         prod = self
         parents = []
         while prod.parent:
+            if prod.parent.id == prod.id:
+                break
             parents.append(prod.parent.short_name)
             prod = prod.parent
         if len(parents) > 0:
