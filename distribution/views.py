@@ -637,8 +637,25 @@ def inventory_update(request, prod_id, year, month, day):
         producer = Party.objects.get(pk=prod_id)
     except Party.DoesNotExist:
         raise Http404
+    monday = availdate - datetime.timedelta(days=datetime.date.weekday(availdate))
+    saturday = monday + datetime.timedelta(days=5)
+    #import pdb; pdb.set_trace()
+    items = InventoryItem.objects.filter(
+        producer=producer, 
+        remaining__gt=0,
+        inventory_date__range=(monday, saturday))
+    plans = ProductPlan.objects.filter(
+        member=producer, 
+        from_date__lte=availdate, 
+        to_date__gte=saturday)
+    if plans:
+        planned = True
+    else:
+        planned = False
+        plans = producer.producer_products.all()
+    itemforms = create_inventory_item_forms(
+            producer, availdate, plans, items, data=request.POST or None)
     if request.method == "POST":
-        itemforms = create_inventory_item_forms(producer, availdate, request.POST)
         #import pdb; pdb.set_trace()
         if all([itemform.is_valid() for itemform in itemforms]):
             producer_id = request.POST['producer-id']
@@ -685,11 +702,10 @@ def inventory_update(request, prod_id, year, month, day):
                         item.save()
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                % ('distribution/produceravail', producer_id, year, month, day))
-    else:
-        itemforms = create_inventory_item_forms(producer, availdate)
     return render_to_response('distribution/inventory_update.html', {
         'avail_date': availdate, 
-        'producer': producer, 
+        'producer': producer,
+        'planned': planned,
         'item_forms': itemforms}, context_instance=RequestContext(request))
 
 @login_required

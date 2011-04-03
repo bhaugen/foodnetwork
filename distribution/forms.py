@@ -452,24 +452,10 @@ class InventoryItemForm(forms.ModelForm):
         self.fields['custodian'].choices = [('', '------------')] + [(prod.id, prod.short_name) for prod in Party.subclass_objects.possible_custodians()]
 
 
-def create_inventory_item_forms(producer, avail_date, data=None):
-    #todo: is this the proper date range for PBC?
-    monday = avail_date - datetime.timedelta(days=datetime.date.weekday(avail_date))
-    saturday = monday + datetime.timedelta(days=5)
-    #import pdb; pdb.set_trace()
-    items = InventoryItem.objects.filter(
-        producer=producer, 
-        remaining__gt=0,
-        inventory_date__range=(monday, saturday))
+def create_inventory_item_forms(producer, avail_date, plans, items, data=None):
     item_dict = {}
     for item in items:
         item_dict[item.product.id] = item
-    plans = ProductPlan.objects.filter(
-        member=producer, 
-        from_date__lte=avail_date, 
-        to_date__gte=saturday)
-    if not plans:
-        plans = producer.producer_products.all()
     form_list = []
     for plan in plans:
         custodian_id = ""
@@ -499,6 +485,10 @@ def create_inventory_item_forms(producer, avail_date, data=None):
                 'received': 0,
                 'notes': ''})
         the_form.description = plan.product.long_name
+        try:
+            the_form.plan_qty = plan.quantity
+        except:
+            the_form.plan_qty = 0
         form_list.append(the_form) 
     return form_list 
 

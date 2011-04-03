@@ -114,14 +114,17 @@
         </table>
 
         <table class="ga-event-table" >
-			<th>{% trans "Product" %}</th>
-			<th>{% trans "Lot Id" %}</th>
-            <th>{% trans "Field" %}</th>
-			<th>{% trans "Custodian" %}</th>
-			<th>{% trans "Date" %}</th>
-            <th>{% trans "Ready Qty" %}</th>
-            <th>{% trans "Received Qty" %}</th>
-			<th>{% trans "Notes" %}</th>
+		<th>{% trans "Product" %}</th>
+		<th>{% trans "Lot Id" %}</th>
+        	<th>{% trans "Field" %}</th>
+		<th>{% trans "Custodian" %}</th>
+		<th>{% trans "Date" %}</th>
+		{% if planned %}
+			<th>{% trans "Planned Qty" %}</th>
+		{% endif %}
+        	<th>{% trans "Ready Qty" %}</th>
+        	<th>{% trans "Received Qty" %}</th>
+		<th>{% trans "Notes" %}</th>
             </tr>
             {% for item_form in item_forms %}
                  <tr>
@@ -130,6 +133,9 @@
 			 <td> {{ item_form.field_id }} </td>
 			<td> {{ item_form.custodian }} </td>
 			<td> {{ item_form.inventory_date }} </td>
+			{% if planned %}
+				<td class="read-only-td" style="text-align: right;" > {{ item_form.plan_qty }} </td>
+			{% endif %}
 			<td> {{ item_form.planned }} </td>
 			<td> {{ item_form.received }} </td>
 			<td> {{ item_form.notes }} </td>

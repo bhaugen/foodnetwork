@@ -17,8 +17,74 @@ table thead
 
 </style>
 
-<script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"></script>
-    <script type="text/javascript" >
+
+{% endblock %}
+
+{% block content %}
+
+<div class="plans">
+
+	{% include tabnav %}
+
+	<h3 style="margin-bottom: 0; padding-top: 0; margin-top: 0; ">
+		{% blocktrans %}{{ plan_type }} Plan from {{ from_date }} to {{ to_date }}{% endblocktrans %}
+	</h3>
+	<p style="margin-top: 0; font-style: italic; " >
+	{% ifequal list_type "A" %}
+		{% blocktrans %}Using All Products.  Planned products go onto the {{ member }} Product List.{% endblocktrans %}
+	{% else %}
+		{% blocktrans %}Using {{ member }} Product Lists{% endblocktrans %}
+	{% endifequal %}
+	</p>
+
+	<form action="." method="POST" >{% csrf_token %}
+	<input style="margin-bottom: 4px;" type="submit" value="Submit" />
+	<table class="ga-event-table" style="font-size: 90%;" >
+		<thead>
+			<tr>
+				{% for column in plan_table.columns %}
+					{% if forloop.first %}
+						<th style="text-align: right; width: 104px; " >{{ column }}</th>
+					{% else %}
+					<th style="width: 4em; " >{{ column|date:"n-j" }}</th>
+					{% endif %}
+				{% endfor %}
+			</tr>
+		</thead>
+	</table>
+	<br />
+	<table class="ga-event-table" style="font-size: 90%;" >
+
+		<tbody>
+			{% for row in forms %}
+			<tr>
+				<th style="text-align: right; width: 107px; " >{{ row.product }}</th>
+				{{ row.formset.management_form }}
+				{% for cell in row.formset.forms %}
+					<td style="width: 4em; " >{{ cell.quantity }}</td>
+					{{ cell.from_date }}
+					{{ cell.to_date }}
+					{{ cell.plan_id }}
+					{{ cell.product_id }}
+				{% endfor %}			
+			</tr>
+			{% endfor %}
+		</tbody>
+
+	</table>
+	<input style="margin-top: 4px;" type="submit" value="{% trans 'Submit' %}" />
+	</form>
+
+</div>
+<div><p>.</p></div>
+
+  <script type="text/javascript"
+          src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"
+          baseUrl='./'
+          djConfig="parseOnLoad:true">
+  </script>
+
+<script type="text/javascript" >
 
 		function cleanNumericInput(value)
 		{
@@ -108,65 +174,6 @@ table thead
 		});
 	</script>
 
-{% endblock %}
-
-{% block content %}
-
-<div class="plans">
-
-	{% include tabnav %}
-
-	<h3 style="margin-bottom: 0; padding-top: 0; margin-top: 0; ">
-		{% blocktrans %}{{ plan_type }} Plan from {{ from_date }} to {{ to_date }}{% endblocktrans %}
-	</h3>
-	<p style="margin-top: 0; font-style: italic; " >
-	{% ifequal list_type "A" %}
-		{% blocktrans %}Using All Products.  Planned products go onto the {{ member }} Product List.{% endblocktrans %}
-	{% else %}
-		{% blocktrans %}Using {{ member }} Product Lists{% endblocktrans %}
-	{% endifequal %}
-	</p>
-
-	<form action="." method="POST" >{% csrf_token %}
-	<input style="margin-bottom: 4px;" type="submit" value="Submit" />
-	<table class="ga-event-table" style="font-size: 90%;" >
-		<thead>
-			<tr>
-				{% for column in plan_table.columns %}
-					{% if forloop.first %}
-						<th style="text-align: right; width: 104px; " >{{ column }}</th>
-					{% else %}
-					<th style="width: 4em; " >{{ column|date:"n-j" }}</th>
-					{% endif %}
-				{% endfor %}
-			</tr>
-		</thead>
-	</table>
-	<br />
-	<table class="ga-event-table" style="font-size: 90%;" >
-
-		<tbody>
-			{% for row in forms %}
-			<tr>
-				<th style="text-align: right; width: 107px; " >{{ row.product }}</th>
-				{{ row.formset.management_form }}
-				{% for cell in row.formset.forms %}
-					<td style="width: 4em; " >{{ cell.quantity }}</td>
-					{{ cell.from_date }}
-					{{ cell.to_date }}
-					{{ cell.plan_id }}
-					{{ cell.product_id }}
-				{% endfor %}			
-			</tr>
-			{% endfor %}
-		</tbody>
-
-	</table>
-	<input style="margin-top: 4px;" type="submit" value="{% trans 'Submit' %}" />
-	</form>
-
-</div>
-<div><p>.</p></div>
  
 {% endblock %} 
 
