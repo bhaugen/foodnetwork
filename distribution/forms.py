@@ -90,6 +90,18 @@ class PaymentUpdateSelectionForm(forms.Form):
         self.fields['producer'].choices = [('', '----------')] + [(prod.id, prod.short_name) for prod in Party.subclass_objects.payable_members()]
         self.fields['payment'].choices = [('', 'New')] + [(payment.id, payment) for payment in EconomicEvent.objects.payments_to_members()]
 
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        producer = cleaned_data.get("producer")
+        payment = cleaned_data.get("payment")
+
+        if not (producer or payment):
+            msg = u"Must select Producer or existing Payment."
+            self._errors["producer"] = self.error_class([msg])
+            del cleaned_data["producer"]
+            del cleaned_data["payment"]
+        return cleaned_data
+
 
 class CustomerPaymentSelectionForm(forms.Form):
     customer = forms.ChoiceField(required=False)
@@ -98,7 +110,7 @@ class CustomerPaymentSelectionForm(forms.Form):
         super(CustomerPaymentSelectionForm, self).__init__(*args, **kwargs)
         self.fields['customer'].choices = [('', '----------')] + [(cust.id, cust.short_name) for cust in Customer.objects.all()]
         self.fields['payment'].choices = [('', 'New')] + [
-            (payment.id, payment) for payment in CustomerPayment.objects.all()]
+            (payment.payment.id, payment) for payment in CustomerPayment.objects.all()]
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -106,9 +118,8 @@ class CustomerPaymentSelectionForm(forms.Form):
         payment = cleaned_data.get("payment")
 
         if not (customer or payment):
-            msg = u"Must select Customer or Payment."
+            msg = u"Must select Customer or existing Payment."
             self._errors["customer"] = self.error_class([msg])
-            self._errors["payment"] = self.error_class([msg])
             del cleaned_data["customer"]
             del cleaned_data["payment"]
         return cleaned_data

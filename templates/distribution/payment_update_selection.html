@@ -113,7 +113,12 @@
         	<table>
 	            <tr>
         	        <th style="text-align: right; " >{% trans "Member" %}:</th>
-                	<td>{{ member_selection_form.producer }}</td>
+			<td>{{ member_selection_form.producer }}</td>
+			{% if member_selection_form.producer.errors %}
+				<td style="color: red; " >
+					{{ member_selection_form.producer.errors }}
+				</td>
+			{% endif %}
 	            </tr>
         	    <tr>
                 	<th style="text-align: right; " >{% trans "Payment" %}:</th>
