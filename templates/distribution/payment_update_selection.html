@@ -134,11 +134,21 @@
         	<table>
 	            <tr>
         	        <th style="text-align: right; " >{% trans "Customer" %}:</th>
-                	<td>{{ customer_selection_form.customer }}</td>
+			<td>{{ customer_selection_form.customer }}</td>
+			{% if customer_selection_form.customer.errors %}
+				<td style="color: red; " >
+					{{ customer_selection_form.customer.errors }}
+				</td>
+			{% endif %}
 	            </tr>
         	    <tr>
                 	<th style="text-align: right; " >{% trans "Payment" %}:</th>
-	                <td>{{ customer_selection_form.payment }}</td>
+			<td>{{ customer_selection_form.payment }}</td>
+			{% if customer_selection_form.payment.errors %}
+				<td style="color: red; " >
+					{{ customer_selection_form.payment.errors }}
+				</td>
+			{% endif %}
         	    </tr>
 	        </table>
 

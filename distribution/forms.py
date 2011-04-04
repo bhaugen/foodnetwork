@@ -100,6 +100,19 @@ class CustomerPaymentSelectionForm(forms.Form):
         self.fields['payment'].choices = [('', 'New')] + [
             (payment.id, payment) for payment in CustomerPayment.objects.all()]
 
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        customer = cleaned_data.get("customer")
+        payment = cleaned_data.get("payment")
+
+        if not (customer or payment):
+            msg = u"Must select Customer or Payment."
+            self._errors["customer"] = self.error_class([msg])
+            self._errors["payment"] = self.error_class([msg])
+            del cleaned_data["customer"]
+            del cleaned_data["payment"]
+        return cleaned_data
+
 
 class PaymentTransactionForm(forms.Form):
     transaction_id = forms.CharField(widget=forms.HiddenInput)
