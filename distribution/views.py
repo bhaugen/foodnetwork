@@ -621,8 +621,13 @@ def inventory_selection(request):
             ihdata = ihform.cleaned_data
             producer_id = ihdata['producer']
             inv_date = ihdata['avail_date']
-            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-               % ('distribution/inventoryupdate', producer_id, inv_date.year, inv_date.month, inv_date.day))
+            #import pdb; pdb.set_trace()
+            if int(producer_id):
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                    % ('distribution/inventoryupdate', producer_id, inv_date.year, inv_date.month, inv_date.day))
+            else:
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('distribution/allinventoryupdate', inv_date.year, inv_date.month, inv_date.day))
     else:
         ihform = InventorySelectionForm(initial=init)
     return render_to_response('distribution/inventory_selection.html', {
@@ -707,6 +712,79 @@ def inventory_update(request, prod_id, year, month, day):
         'producer': producer,
         'planned': planned,
         'item_forms': itemforms}, context_instance=RequestContext(request))
+
+@login_required
+def all_inventory_update(request, year, month, day):
+    availdate = datetime.date(int(year), int(month), int(day))
+    monday = availdate - datetime.timedelta(days=datetime.date.weekday(availdate))
+    saturday = monday + datetime.timedelta(days=5)
+    #import pdb; pdb.set_trace()
+    items = InventoryItem.objects.select_related(depth=1).filter(
+        remaining__gt=0,
+        inventory_date__range=(monday, saturday))
+    plans = ProductPlan.objects.select_related(depth=1).filter(
+        role="producer",
+        from_date__lte=availdate, 
+        to_date__gte=saturday)
+    if plans:
+        planned = True
+    else:
+        planned = False
+        plans = ProducerProducts.objects.select_related(depth=1).all()
+    itemforms = create_all_inventory_item_forms(
+            availdate, plans, items, data=request.POST or None)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        if all([itemform.is_valid() for itemform in itemforms]):
+            inv_date = request.POST['avail-date']
+            for itemform in itemforms:
+                data = itemform.cleaned_data
+                producer_id = int(data['producer_id'])
+                producer = Producer.objects.get(pk=producer_id)
+                prod_id = int(data['product_id'])
+                item_id = int(data['item_id'])
+                custodian = data['custodian']
+                inventory_date = data['inventory_date']
+                planned = data['planned']
+                received = data['received']
+                notes = data['notes']
+                field_id = data['field_id']
+                freeform_lot_id = data['freeform_lot_id']
+                #import pdb; pdb.set_trace()
+                if item_id:
+                    item = InventoryItem.objects.get(pk=item_id)
+                    item.custodian = custodian
+                    item.inventory_date = inventory_date
+                    rem_change = planned - item.planned
+                    item.planned = planned
+                    item.remaining = item.remaining + rem_change
+                    oh_change = received - item.received                 
+                    item.received = received
+                    item.onhand = item.onhand + oh_change
+                    item.notes = notes
+                    item.field_id = field_id
+                    item.freeform_lot_id = freeform_lot_id
+                    item.save()
+                else:
+                    if planned + received > 0:
+                        #prod_id = data['product_id']
+                        product = Product.objects.get(pk=prod_id)
+                        item = itemform.save(commit=False)
+                        item.producer = producer
+                        #item.custodian = custodian
+                        #item.inventory_date = inventory_date
+                        item.product = product
+                        item.remaining = planned
+                        item.onhand = received
+                        #item.notes = notes
+                        item.save()
+            return HttpResponseRedirect('/%s/'
+               % ('distribution/inventoryselection',))
+    return render_to_response('distribution/all_inventory_update.html', {
+        'avail_date': availdate, 
+        'planned': planned,
+        'item_forms': itemforms}, context_instance=RequestContext(request))
+
 
 @login_required
 def order_selection(request):

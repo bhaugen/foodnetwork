@@ -1,5 +1,7 @@
 from decimal import *
 import datetime
+from operator import attrgetter
+
 
 from django.forms.formsets import formset_factory
 
@@ -112,7 +114,7 @@ def supply_demand_table(from_date, to_date, member=None):
     return sdtable
 
 def supply_demand_rows(from_date, to_date, member=None):
-    plans = ProductPlan.objects.select_related().all()
+    plans = ProductPlan.objects.select_related(depth=1).all()
     cps = ProducerProduct.objects.filter(
         inventoried=False,
         default_avail_qty__gt=0,
@@ -465,4 +467,58 @@ def plans_for_dojo(member, products, from_date, to_date):
     rows = rows.values()
     rows.sort(lambda x, y: cmp(x["product"], y["product"]))
     return rows
+
+def create_all_inventory_item_forms(avail_date, plans, items, data=None):
+    item_dict = {}
+    for item in items:
+        # This means one lot per producer per product per week
+        item_dict["-".join([str(item.product.id), str(item.producer.id)])] = item
+    form_list = []
+    for plan in plans:
+        #import pdb; pdb.set_trace()
+        custodian_id = ""
+        try:
+            item = item_dict["-".join([str(plan.product.id),
+                                       str(plan.member.id)])]
+            if item.custodian:
+                custodian_id = item.custodian.id
+        except KeyError:
+            item = False
+        try:
+            plan_qty = plan.quantity
+        except:
+            plan_qty = 0
+        #import pdb; pdb.set_trace()
+        if item:
+            pref = "-".join(["item", str(item.id)])
+            the_form = AllInventoryItemForm(data, prefix=pref, initial={
+                'item_id': item.id,
+                'product_id': item.product.id,
+                'producer_id': item.producer.id,
+                'freeform_lot_id': item.freeform_lot_id,
+                'field_id': item.field_id,
+                'custodian': custodian_id,
+                'inventory_date': item.inventory_date,
+                'planned': item.planned,
+                'received': item.received,
+                'notes': item.notes})
+        else:
+            pref = "-".join(["plan", str(plan.id)])
+            the_form = AllInventoryItemForm(data, prefix=pref, initial={
+                'item_id': 0,
+                'product_id': plan.product.id,
+                'producer_id': plan.member.id,
+                'inventory_date': avail_date,
+                'planned': plan_qty,
+                'received': 0,
+                'notes': ''})
+        the_form.description = plan.product.long_name
+        the_form.producer = plan.member.short_name
+        the_form.plan_qty = plan_qty
+        form_list.append(the_form)
+    #import pdb; pdb.set_trace()
+    #form_list.sort(lambda x, y: cmp(x.producer, y.producer))
+    form_list = sorted(form_list, key=attrgetter('producer', 'description'))
+    return form_list 
+
 

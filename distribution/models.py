@@ -396,7 +396,9 @@ class FoodNetwork(Party):
         items = InventoryItem.objects.filter(
             inventory_date__lte=expired_date,
             expiration_date__gte=expired_date)
-        items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
+        items = items.filter(Q(remaining__gt=0) |
+                             Q(onhand__gt=0)).order_by("producer__short_name",
+                                                       "product__short_name")
         return items
     
     def all_active_items(self, thisdate = None):

@@ -46,6 +46,8 @@ urlpatterns = patterns('',
     # avail
     (r'^inventoryselection/$', inventory_selection),
     url(r'^inventoryupdate/(?P<prod_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', inventory_update),
+    url(r'^allinventoryupdate/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
+        all_inventory_update),
     url(r'^produceravail/(?P<prod_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', produceravail),
 
     # payments
