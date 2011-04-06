@@ -545,7 +545,7 @@ def order(request, order_id):
     return render_to_response('customer/order.html', {
         'order': order,
         'paypal_form': paypal_form,
-    })
+    }, context_instance=RequestContext(request))
 
 
 @login_required
@@ -574,7 +574,7 @@ def invoice_selection(request):
     return render_to_response('customer/invoice_selection.html', {
         'date_range_form': drform,
         'unpaid_invoices': unpaid_invoices,
-    })
+    }, context_instance=RequestContext(request))
 
 
 @login_required
@@ -606,8 +606,9 @@ def invoices(request, cust_id, from_date, to_date):
     return render_to_response('distribution/invoices.html', {
         'orders': orders, 
         'network': fn,
+        'emails': False,
         'tabnav': "customer/customer_tabnav.html",
-    })
+    }, context_instance=RequestContext(request))
 
 def unpaid_invoice(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
@@ -624,7 +625,7 @@ def unpaid_invoice(request, order_id):
         'order': order,
         'network': fn,
         'paypal_form': paypal_form,
-    })
+    }, context_instance=RequestContext(request))
 
 
 @login_required
@@ -654,7 +655,7 @@ def history(request, cust_id, from_date, to_date):
         'to_date': to_date,
         'network': fn,
         'tabnav': "customer/customer_tabnav.html",
-    })
+    }, context_instance=RequestContext(request))
 
 @login_required
 def customer_plans(request, from_date, to_date, member_id):

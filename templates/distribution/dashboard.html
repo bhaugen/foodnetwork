@@ -40,7 +40,7 @@
 
 		<h2>{{ food_network_name }} {% trans "Distribution System" %}</h2>
 
-	{% comment %}	
+
 		{% if user.is_authenticated %}
 			<div style="margin-bottom: 1em; " >
 				<form style="display: inline; " action="{% url send_fresh_list %}" method="POST">{% csrf_token %}
@@ -61,7 +61,6 @@
 				</form>
 			</div>
 		{% endif %}
-	{% endcomment %}
 
 		<h4 style="margin-bottom: 4px;" >
 			Activity for week of 

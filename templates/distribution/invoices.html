@@ -14,6 +14,7 @@
 <div class="invoices">
 	
 	{% include tabnav %}
+	{% if emails %}
 	<div class="do-not-print">
 		<form style="display: inline; " 
 			action="{% url send_invoices cust_id=cust_id, year=year, month=month, day=day %}" 
@@ -22,6 +23,7 @@
 			<input type="hidden" name="next" value="{% url dashboard %}" />
 		</form>
 	</div>
+	{% endif %}
 
 	{% for order in orders %}
 	<div style="page-break-after: always; page-break-inside: avoid; width: 7in; " >

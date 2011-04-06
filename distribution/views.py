@@ -44,7 +44,11 @@ def send_fresh_list(request):
                 fresh_list = fn.fresh_list()
                 users = list(Customer.objects.all())
                 users.append(fn)
-                notification.send(users, "distribution_fresh_list", {"fresh_list": fresh_list, "week_of": week_of})
+                notification.send(users, "distribution_fresh_list", {
+                    "fresh_list": fresh_list, 
+                    "week_of": week_of,
+                    "food_network_name": food_network_name,
+                })
                 request.user.message_set.create(message="Fresh List emails have been sent")
         return HttpResponseRedirect(request.POST["next"])
     
@@ -730,7 +734,7 @@ def all_inventory_update(request, year, month, day):
         planned = True
     else:
         planned = False
-        plans = ProducerProducts.objects.select_related(depth=1).all()
+        plans = ProducerProduct.objects.select_related(depth=1).all()
     itemforms = create_all_inventory_item_forms(
             availdate, plans, items, data=request.POST or None)
     if request.method == "POST":
@@ -2757,6 +2761,7 @@ def invoices(request, cust_id, year, month, day):
         'year': year,
         'month': month,
         'day': day,
+        'emails': True,
         'tabnav': "distribution/tabnav.html",
     }, context_instance=RequestContext(request))
 

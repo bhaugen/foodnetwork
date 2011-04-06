@@ -478,8 +478,12 @@ def create_all_inventory_item_forms(avail_date, plans, items, data=None):
         #import pdb; pdb.set_trace()
         custodian_id = ""
         try:
+            member = plan.member
+        except:
+            member = plan.producer
+        try:
             item = item_dict["-".join([str(plan.product.id),
-                                       str(plan.member.id)])]
+                                       str(member.id)])]
             if item.custodian:
                 custodian_id = item.custodian.id
         except KeyError:
@@ -507,13 +511,13 @@ def create_all_inventory_item_forms(avail_date, plans, items, data=None):
             the_form = AllInventoryItemForm(data, prefix=pref, initial={
                 'item_id': 0,
                 'product_id': plan.product.id,
-                'producer_id': plan.member.id,
+                'producer_id': member.id,
                 'inventory_date': avail_date,
                 'planned': plan_qty,
                 'received': 0,
                 'notes': ''})
         the_form.description = plan.product.long_name
-        the_form.producer = plan.member.short_name
+        the_form.producer = member.short_name
         the_form.plan_qty = plan_qty
         form_list.append(the_form)
     #import pdb; pdb.set_trace()
