@@ -1,3 +1,8 @@
+import datetime
+import time
+import csv
+from operator import attrgetter
+
 from django.db.models import Q
 from django.http import Http404
 from django.views.generic import list_detail
@@ -6,19 +11,17 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.template import RequestContext
-import datetime
-import time
-from models import *
-from forms import *
-from view_helpers import *
-import csv
 from django.http import HttpResponse
 from django.core import serializers
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.mail import send_mail
-from utils import DojoDataJSONResponse, serialize
 from django.utils import simplejson
+
+from models import *
+from forms import *
+from view_helpers import *
+from utils import DojoDataJSONResponse, serialize
 
 try:
     from notification import models as notification
@@ -1888,34 +1891,17 @@ def dashboard(request):
     
     thisdate = ""
     week_form = ""
-    item_list = []
-    by_lot = False
+    plans = []
     if fn:
         thisdate = current_week()
         week_form = CurrentWeekForm(initial={"current_week": thisdate})
-        by_lot = ordering_by_lot()
-        if by_lot:
-            item_list = []
-            item_list = fn.all_active_items().order_by("custodian")
-        else:
-            prods = Product.objects.all()
-            product_dict = {}
-            for prod in prods:
-                totavail = prod.total_avail(thisdate)
-                totordered = prod.total_ordered(thisdate)
+        plans = weekly_production_plans(thisdate)
 
-                if totavail + totordered > 0:
-                    producers = prod.active_producers(thisdate)
-                    product_dict[prod.short_name] = [prod.parent_string(), 
-                        prod.long_name, prod.growing_method, producers, totavail, totordered, prod.total_delivered(thisdate)]
-            item_list = product_dict.values()
-            item_list.sort()
     return render_to_response('distribution/dashboard.html', 
-        {'item_list': item_list,
+        {'plans': plans,
          'delivery_date': thisdate,
          'week_form': week_form,
          'food_network_name': food_network_name, 
-         'by_lot': by_lot,
          }, context_instance=RequestContext(request))
 
 @login_required

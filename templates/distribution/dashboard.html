@@ -38,15 +38,16 @@
 
 	{% if food_network_name %}
 
-		<h2>{{ food_network_name }} {% trans "Distribution System" %}</h2>
+	<h2><strong>{{ food_network_name }} {% trans "Distribution System" %}</strong></h2>
 
-
+		
 		{% if user.is_authenticated %}
 			<div style="margin-bottom: 1em; " >
 				<form style="display: inline; " action="{% url send_fresh_list %}" method="POST">{% csrf_token %}
-					<input class="submit-btn" type="submit" value="{% trans 'Send Fresh List Emails' %}" />
+					<input class="submit-btn" type="submit" value="{% trans 'Send Availability Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
+				{% comment %}
 				<form style="display: inline; " action="{% url send_pickup_list %}" method="POST">{% csrf_token %}
 					<input class="submit-btn" type="submit" value="{% trans 'Send Pickup List Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
@@ -59,11 +60,12 @@
 					<input class="submit-btn" type="submit" value="{% trans 'Send Order Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
+				{% endcomment %}
 			</div>
 		{% endif %}
 
 		<h4 style="margin-bottom: 4px;" >
-			Activity for week of 
+			Week of 
 			{% if user.is_authenticated %}
 				<form style="display: inline;" action="{% url reset_week %}" method="POST">{% csrf_token %}
 					{{ week_form.current_week }}
@@ -73,57 +75,30 @@
 				{{ order_date }}
 			{% endif %}
 		</h4>
-
-		<table class="ga-event-table" >
-			{% if by_lot %}
-				<tr>
-				        <th>{% trans "Custodian" %}</th>
-				        <th>{% trans "Lot" %}</th>		
-			        	<th>{% trans "Avail" %}</th>
-				        <th>{% trans "Processed" %}</th>
-			        	<th>{% trans "Ordered" %}</th>
-					<!--<th>Delivered</th>-->
-						<th>{% trans "Buyers" %}</th>
-				    </tr>
-				    {% for item in item_list %}
-			        	<tr>
-						{% if item.custodian %}
-							<td>{{ item.custodian }}</td>
-						{% else %}
-							<td>&nbsp;</td>
-						{% endif %}
-						<td>{{ item.lot_id }}</td>
-						<td>{{ item.avail_qty }}</td>
-						<td>{{ item.issued_qty }}</td>
-						<td>{{ item.ordered_qty }}</td>
-						<!--<td>{{ item.delivered_qty }}</td>-->
-						<td>{{ item.customers }}</td>
-				        </tr>
-				{% endfor %}
-			{% else %}
+		{% if plans %}
+		<div style="float:left;">
+			<h4 style="margin-bottom: 0;" >Plans:</h4>
+			<table class="ga-event-table" style="font-size: 80%; margin-top: 0;" >
 				<tr>
 					<th>{% trans "Category" %}</th>
 					<th>{% trans "Product" %}</th>
-					<th>{% trans "Growing Method" %}</th>
-					<th>{% trans "Producers" %}</th>
-					<th>{% trans "Avail" %}</th>
-					<th>{% trans "Ordered" %}</th>
-					<th>{% trans "Delivered" %}</th>
+					<th>{% trans "Method" %}</th>
+					<th>{% trans "Producer" %}</th>
+					<th>{% trans "Qty" %}</th>
 				</tr>
-				{% for cells in item_list %}
-					<tr>
-						{% for cell in cells %}
-							{% if forloop.counter > 4 %}
-								<td style="text-align: right;" >{{ cell }}</td>
-							{% else %}
-								<td>{{ cell }}</td>
-							{% endif %}
-						{% endfor %}
-					</tr>
+				{% for plan in plans %}
+				<tr>
+					<td>{{ plan.category }}</td>
+					<td>{{ plan.product.long_name }}</td>
+					<td>{{ plan.product.growing_method }}</td>
+					<td>{{ plan.member }}</td>
+					<td style="text-align: right;">{{ plan.quantity }}</td>
+				</tr>
 				{% endfor %}
-			{% endif %}
 
-		</table>
+			</table>
+		</div>
+		{% endif %}
 
 	{% else %}
 
@@ -131,6 +106,7 @@
 	
 	{% endif %}
 	</div>
+	<div style="clear:both;"></div>
 
 </div>
 {% endblock %} 

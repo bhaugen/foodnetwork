@@ -48,6 +48,13 @@ def ordering_by_lot():
         answer = False
     return answer
 
+def use_plans_for_ordering():
+    try:
+        answer = food_network().use_plans_for_ordering
+    except FoodNetwork.DoesNotExist:
+        answer = False
+    return answer
+
 def customer_terms():
     return food_network().customer_terms
 
@@ -263,6 +270,8 @@ class FoodNetwork(Party):
         help_text=_('Current week for distribution availability and orders'))
     order_by_lot = models.BooleanField(_('order by lot'), default=False, 
         help_text=_('Assign lots when ordering, or assign them later'))
+    use_plans_for_ordering = models.BooleanField(_('use plans for ordering'), default=False, 
+        help_text=_('If checked, production plan quantities will be available for ordering instead of inventory items'))
 
 
     class Meta:
@@ -541,6 +550,16 @@ class Product(models.Model):
             expiration_date__gte=expired_date)
         items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
         return items
+
+    def production_plans(self, thisdate):
+        weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
+        weekend = weekstart + datetime.timedelta(days=5)
+        plans = ProductPlan.objects.select_related(depth=1).filter(
+            product=self,
+            role="producer",
+            from_date__lte=thisdate, 
+            to_date__gte=weekend)
+        return plans
     
     def current_items(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
@@ -561,7 +580,10 @@ class Product(models.Model):
         return items
     
     def total_avail(self, thisdate):
-        return sum(item.avail_qty() for item in self.avail_items(thisdate))
+        if use_plans_for_ordering():
+            return sum(plan.quantity for plan in self.production_plans(thisdate))
+        else:
+            return sum(item.avail_qty() for item in self.avail_items(thisdate))
     
     def avail_producers(self, thisdate):
         producers = []
@@ -591,7 +613,11 @@ class Product(models.Model):
         return sum(order.quantity for order in myorders)
 
     def avail_for_customer(self, thisdate):
-        return self.total_avail(thisdate) - self.total_ordered(thisdate)
+        if use_plans_for_ordering():
+            avail = sum(plan.quantity for plan in self.production_plans(thisdate))
+        else:
+            avail = self.total_avail(thisdate)
+        return avail - self.total_ordered(thisdate)
     
     def deliveries_this_week(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
@@ -717,6 +743,13 @@ class ProductPlan(models.Model):
         
     class Meta:
         ordering = ('product', 'member', 'from_date')
+
+    @property
+    def producer(self):
+        if self.role=="producer":
+            return self.member
+        else:
+            return None
 
 
 class ProducerProduct(models.Model):

@@ -15,6 +15,20 @@ def is_number(s):
     except ValueError:
         return False
 
+def weekly_production_plans(week_date):
+    monday = week_date - datetime.timedelta(days=datetime.date.weekday(week_date))
+    saturday = monday + datetime.timedelta(days=5)
+    plans = ProductPlan.objects.select_related(depth=1).filter(
+        role="producer",
+        from_date__lte=week_date, 
+        to_date__gte=saturday)
+    for plan in plans:
+        plan.category = plan.product.parent_string()
+        plan.product_name = plan.product.short_name
+    plans = sorted(plans, key=attrgetter('category',
+                                            'product_name'))
+    return plans
+
 def plan_columns(from_date, to_date):
     columns = []
     wkdate = from_date

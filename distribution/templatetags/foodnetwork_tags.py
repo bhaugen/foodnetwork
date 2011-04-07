@@ -5,7 +5,7 @@ from distribution.models import FoodNetwork
 class FoodNet(Node):
     def render(self, context):
         try:
-            answer = FoodNetwork.objects.get(pk=1)
+            answer = FoodNetwork.objects.all()[0]
         except FoodNetwork.DoesNotExist:
             answer = None
         context['food_network'] = answer
@@ -17,7 +17,5 @@ def do_get_food_network(parser, token):
 
 register = Library()     
 register.tag('food_network', do_get_food_network)
-
-
 
 

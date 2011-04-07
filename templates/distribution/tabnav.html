@@ -86,14 +86,16 @@ ul#tabnav a:hover
 </style>
 
 <div style="float: left;">
-
+	{% food_network %}
 	<ul id="tabnav" class="do-not-print" >
 		<li class="dashboard" ><a title="Home page" href="/distribution/dashboard">{% trans "Dashboard" %}</a> </li>
-		<li class="inventory-update" ><a title="Update inventory for one or all producers" href="/distribution/inventoryselection">{% trans "Avail" %}</a></li>
+		<li class="inventory-update" >
+			<a title="Update inventory for one or all producers" href="/distribution/inventoryselection">{% trans "Inventory" %}</a>
+		</li>
 		<li class="process" ><a title="Create or update processes" href="/distribution/processselection">{% trans "Process" %}</a></li>
 		<li class="order-update" ><a title="Update orders for one customer at a time" href="/distribution/orderselection">{% trans "Order" %}</a> </li>
 		<li class="order-table" ><a title="Show all orders for all customers for this week" href="/distribution/ordertableselection">{% trans "Orders" %}</a> </li>
-        	{% food_network %}{% if not food_network.order_by_lot %}
+        	{% if not food_network.order_by_lot %}
 			<li class="delivery-update" >
 				<a title="Update lots for all order items for this week" href="/distribution/deliveryselection">{% trans "Assign Lots" %}</a> 
 			</li>
