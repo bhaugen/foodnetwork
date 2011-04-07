@@ -53,9 +53,9 @@ def get_customer(request):
         if customer.is_customer():
             return customer
         else:
-            raise Http404
+            return None
     except:
-        raise Http404
+        return None
 
 
 @login_required
@@ -63,6 +63,8 @@ def customer_dashboard(request):
     fn = food_network()
     #todo: all uses of the next statement shd be changed
     customer = get_customer(request)
+    if not customer:
+        return render_to_response('account/no_permissions.html')
     cw = current_week()
     weekstart = cw - datetime.timedelta(days=datetime.date.weekday(cw))
     weekend = weekstart + datetime.timedelta(days=5)
@@ -79,6 +81,8 @@ def customer_dashboard(request):
 def order_selection(request):
     fn = food_network()
     customer = get_customer(request)
+    if not customer:
+        return render_to_response('account/no_permissions.html')
     selection_form = NewOrderSelectionForm(customer, data=request.POST or None)
     unsubmitted_orders = Order.objects.filter(
         customer=customer,
@@ -114,6 +118,8 @@ def order_selection(request):
 def list_selection(request):
     fn = food_network()
     customer = get_customer(request)
+    if not customer:
+        return render_to_response('account/no_permissions.html')
     product_lists = MemberProductList.objects.filter(member=customer)
     return render_to_response('customer/list_selection.html', 
         {'customer': customer,
@@ -125,6 +131,8 @@ def list_selection(request):
 def history_selection(request):
     fn = food_network()
     customer = get_customer(request)
+    if not customer:
+        return render_to_response('account/no_permissions.html')
     if request.method == "POST":
         drform = DateRangeSelectionForm(request.POST)  
         if drform.is_valid():
@@ -151,6 +159,8 @@ def history_selection(request):
 def plan_selection(request):
     fn = food_network()
     customer = get_customer(request)
+    if not customer:
+        return render_to_response('account/no_permissions.html')
     if request.method == "POST":
         psform = MemberPlanSelectionForm(request.POST)  
         if psform.is_valid():
@@ -587,6 +597,8 @@ def order(request, order_id):
 def invoice_selection(request):
     init = {"order_date": current_week(),}
     customer = get_customer(request)
+    if not customer:
+        return render_to_response('account/no_permissions.html')
     if request.method == "POST":
         drform = DateRangeSelectionForm(request.POST)  
         if drform.is_valid():
