@@ -31,10 +31,38 @@ except ImportError:
     notification = None
 
 
+def availability(request):
+    fn = food_network()
+    #todo: all uses of the next statement shd be changed
+    cw = current_week()
+    weekstart = cw - datetime.timedelta(days=datetime.date.weekday(cw))
+    weekend = weekstart + datetime.timedelta(days=5)
+    specials = Special.objects.filter(
+        from_date__lte=weekend,
+        to_date__gte=weekstart)
+    avail_rows = fn.customer_availability(cw)
+    return render_to_response('customer/availability.html', 
+        {'avail_rows': avail_rows,
+         'network': fn,
+         'specials': specials,
+         }, context_instance=RequestContext(request))
+
+def get_customer(request):
+    try:
+        customer = request.user.parties.all()[0].party
+        if customer.is_customer():
+            return customer
+        else:
+            raise Http404
+    except:
+        raise Http404
+
+
+@login_required
 def customer_dashboard(request):
     fn = food_network()
     #todo: all uses of the next statement shd be changed
-    customer = request.user.parties.all()[0].party
+    customer = get_customer(request)
     cw = current_week()
     weekstart = cw - datetime.timedelta(days=datetime.date.weekday(cw))
     weekend = weekstart + datetime.timedelta(days=5)
@@ -47,9 +75,10 @@ def customer_dashboard(request):
          'specials': specials,
          }, context_instance=RequestContext(request))
 
+@login_required
 def order_selection(request):
     fn = food_network()
-    customer = request.user.parties.all()[0].party
+    customer = get_customer(request)
     selection_form = NewOrderSelectionForm(customer, data=request.POST or None)
     unsubmitted_orders = Order.objects.filter(
         customer=customer,
@@ -81,9 +110,10 @@ def order_selection(request):
          'recent_orders': recent_orders,
          }, context_instance=RequestContext(request))
 
+@login_required
 def list_selection(request):
     fn = food_network()
-    customer = request.user.parties.all()[0].party
+    customer = get_customer(request)
     product_lists = MemberProductList.objects.filter(member=customer)
     return render_to_response('customer/list_selection.html', 
         {'customer': customer,
@@ -91,9 +121,10 @@ def list_selection(request):
          'product_lists': product_lists,
          }, context_instance=RequestContext(request))
 
+@login_required
 def history_selection(request):
     fn = food_network()
-    customer = request.user.parties.all()[0].party
+    customer = get_customer(request)
     if request.method == "POST":
         drform = DateRangeSelectionForm(request.POST)  
         if drform.is_valid():
@@ -116,9 +147,10 @@ def history_selection(request):
         'date_range_form': drform,
          }, context_instance=RequestContext(request))
 
+@login_required
 def plan_selection(request):
     fn = food_network()
-    customer = request.user.parties.all()[0].party
+    customer = get_customer(request)
     if request.method == "POST":
         psform = MemberPlanSelectionForm(request.POST)  
         if psform.is_valid():
@@ -507,6 +539,7 @@ def update_order(order, itemforms):
                 oi.save()
     return True
 
+@login_required
 def order_confirmation(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
     fn = food_network()
@@ -526,6 +559,7 @@ def order_confirmation(request, order_id):
         'food_network': fn,
     }, context_instance=RequestContext(request))
 
+@login_required
 def resave_short_adjusted_order(request, order_id):
     if request.method == "POST":
         order = get_object_or_404(Order, pk=order_id)
@@ -536,6 +570,7 @@ def resave_short_adjusted_order(request, order_id):
         return HttpResponseRedirect('/%s/%s/'
                % ('customer/orderconfirmation', order.id))
 
+@login_required
 def order(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
     if order.is_paid():
@@ -551,7 +586,7 @@ def order(request, order_id):
 @login_required
 def invoice_selection(request):
     init = {"order_date": current_week(),}
-    customer = request.user.parties.all()[0].party
+    customer = get_customer(request)
     if request.method == "POST":
         drform = DateRangeSelectionForm(request.POST)  
         if drform.is_valid():

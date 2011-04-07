@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+
+{% block title %}
+	{{ network.short_name }} Availability
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="availability">
+
+
+	{% include tabnav %}
+
+	<h2>What's available right now from {{ network.long_name }}</h2>
+
+	<p>If you have customer login credentials, you may 
+		<a href="{% url customer_dashboard %}">place an order</a>.
+	</p>
+	<p>If you want to become a customer, please <a href="mailto:orders@keewaydinorganics.com">send us an email</a></p>
+
+	<table class="ga-event-table" >
+		<thead>
+		<tr>
+			<th style="text-align: left; width: 13em;" >Product</th>
+			<th style="text-align: left; width: 13em;" >Growing Method</th>
+			<th style="text-align: right; width: 5em;" >Quantity</th>
+			<th style="text-align: right; width: 5em;" >Price</th>
+		</tr>
+		</thead>
+		<tbody>
+
+		{% for row in avail_rows %}
+			<tr>
+				<th style="text-align: left; width: 13em;" >{{ row.product }}</th>
+				<td style="text-align: left; width: 13em;" >{{ row.product.growing_method }}</td>
+				<td style="text-align: right; width: 5em; " >{{ row.qty|intcomma }}</td>
+				<td style="text-align: right; width: 5em; " >{{ row.product.formatted_unit_price }}</td>
+		
+			</tr>
+			{% endfor %}
+		</tbody>
+
+	</table>
+
+</div>
+<div><p>.</p></div>
+
+ 
+{% endblock %} 
+
+
+

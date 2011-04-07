@@ -45,7 +45,7 @@ class NoticeType(models.Model):
     default = models.IntegerField(_('default'))
 
     def __unicode__(self):
-        return self.label
+        return self.display
 
     class Meta:
         verbose_name = _("notice type")

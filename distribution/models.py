@@ -1,6 +1,7 @@
 import datetime
 from decimal import *
 import itertools
+from operator import attrgetter
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -10,6 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 
+from notification.models import NoticeType
 
 def food_network():
     try:
@@ -249,7 +251,11 @@ class PartyUser(models.Model):
     party = models.ForeignKey(Party, related_name="users", verbose_name=_('party'))
     user = models.ForeignKey(User, related_name="parties", verbose_name=_('user'))
 
-         
+
+class EmailIntro(models.Model):
+    message = models.TextField(_('message'))
+    notice_type = models.ForeignKey(NoticeType, related_name="email_intro",
+                                    verbose_name=_('email type'))
 
 class FoodNetwork(Party):
     billing_contact = models.CharField(_('billing contact'), max_length=64, blank=True)
@@ -295,8 +301,12 @@ class FoodNetwork(Party):
             #items = []
             #for item in item_chain:
             #    items.append(item)
-            items = prod.avail_items(thisdate)
-            avail_qty = sum(item.avail_qty() for item in items)
+            if self.use_plans_for_ordering:
+                items = prod.production_plans(thisdate)
+                avail_qty = sum(item.quantity for item in items)
+            else:
+                items = prod.avail_items(thisdate)
+                avail_qty = sum(item.avail_qty() for item in items)
             if avail_qty > 0:
                 price = prod.price.quantize(Decimal('.01'), rounding=ROUND_UP)
                 #producers = []
@@ -409,6 +419,36 @@ class FoodNetwork(Party):
                              Q(onhand__gt=0)).order_by("producer__short_name",
                                                        "product__short_name")
         return items
+
+    def customer_availability(self, thisdate=None):
+        if not thisdate:
+            thisdate = current_week()
+        monday = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
+        saturday = monday + datetime.timedelta(days=5)
+        avail = []
+        products = {}
+        if self.use_plans_for_ordering:
+            plans = ProductPlan.objects.filter(
+                role="producer",
+                from_date__lte=monday, 
+                to_date__gte=saturday)
+            for plan in plans:
+                if plan.product.id not in products:
+                    products[plan.product.id] = ProductQuantity(plan.product,
+                                                           Decimal("0"))
+                products[plan.product.id].qty += plan.quantity
+            for pq in products.values():
+                pq.qty -= pq.product.total_ordered(thisdate)
+                if pq.qty > 0:
+                    pq.category = plan.product.parent_string()
+                    pq.product_name = plan.product.short_name
+                    avail.append(pq)
+            avail = sorted(avail, key=attrgetter('category',
+                                            'product_name'))
+            return avail
+        else:
+            return self.all_avail_items(thisdate)
+
     
     def all_active_items(self, thisdate = None):
         # todo: this and dashboard need work
@@ -1817,4 +1857,5 @@ class TransportationTransaction(EconomicEvent):
 
     def due_to_member(self):
         return self.amount.quantize(Decimal('.01'), rounding=ROUND_UP)
+
 

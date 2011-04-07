@@ -170,3 +170,9 @@ class TransportationTransactionAdmin(admin.ModelAdmin):
   
 admin.site.register(TransportationTransaction, TransportationTransactionAdmin)
 
+
+class EmailIntroAdmin(admin.ModelAdmin):
+    list_display = ('notice_type', 'message')
+
+admin.site.register(EmailIntro, EmailIntroAdmin)
+

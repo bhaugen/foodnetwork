@@ -47,7 +47,10 @@ def send_fresh_list(request):
                 fresh_list = fn.fresh_list()
                 users = list(Customer.objects.all())
                 users.append(fn)
+                nt = NoticeType.objects.get(label='distribution_fresh_list')
+                intro = EmailIntro.objects.filter(notice_type=nt)[0]
                 notification.send(users, "distribution_fresh_list", {
+                    "intro": intro.message,
                     "fresh_list": fresh_list, 
                     "week_of": week_of,
                     "food_network_name": food_network_name,

@@ -47,8 +47,11 @@ urlpatterns = patterns('',
         name="customer_invoice_selection"),
     url(r'^invoices/(?P<cust_id>\d+)/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$',
         "customer.views.invoices", name="customer_invoices"),
-     url(r'^unpaidinvoice/(?P<order_id>\d+)/$', "customer.views.unpaid_invoice",
+    url(r'^unpaidinvoice/(?P<order_id>\d+)/$', "customer.views.unpaid_invoice",
          name="unpaid_invoice"),
 
+    #availability
+    url(r'^availability/$', "customer.views.availability",
+         name="availability"),
 )
 

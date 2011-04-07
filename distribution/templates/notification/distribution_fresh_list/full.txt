@@ -1,4 +1,9 @@
-The following products are available from {{ food_network_name }} this week:
+{{ intro }}
+
+When this email was sent, the products listed below were available from {{ food_network_name }}.
+
+To see what is available right now, and place an order, go to
+http://keewaydin.webfactional.com/customer/availability/
 {% for item in fresh_list %}
 {{ item.product }}, Quantity available: {{ item.qty }}, Price: ${{ item.price }}
 {% endfor %}
