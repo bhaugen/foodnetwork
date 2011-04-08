@@ -1895,13 +1895,22 @@ def dashboard(request):
     thisdate = ""
     week_form = ""
     plans = []
+    shorts = []
+    orders = []
     if fn:
         thisdate = current_week()
+        monday = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
+        saturday = monday + datetime.timedelta(days=5)
         week_form = CurrentWeekForm(initial={"current_week": thisdate})
         plans = weekly_production_plans(thisdate)
+        shorts = shorts_for_week()
+        orders = Order.objects.filter(
+            delivery_date__range=(thisdate, saturday)).exclude(state="Unsubmitted")
 
     return render_to_response('distribution/dashboard.html', 
         {'plans': plans,
+         'shorts': shorts,
+         'orders': orders,
          'delivery_date': thisdate,
          'week_form': week_form,
          'food_network_name': food_network_name, 

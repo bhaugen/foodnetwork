@@ -1326,6 +1326,27 @@ def shorts_for_date(delivery_date):
     return shorts
 
 
+def shorts_for_week():
+    cw = current_week()
+    monday = cw - datetime.timedelta(days=datetime.date.weekday(cw))
+    saturday = monday + datetime.timedelta(days=5)
+    shorts = []
+    maybes = {}
+    ois = OrderItem.objects.filter(order__delivery_date__range=(cw, saturday)).exclude(order__state="Unsubmitted")
+    for oi in ois:
+        if not oi.product in maybes:
+            maybes[oi.product] = ShortOrderItems(oi.product, 
+                oi.product.total_avail(oi.order.delivery_date), Decimal("0"), Decimal("0"), [])
+        maybes[oi.product].total_ordered += (oi.quantity -oi.delivered_quantity())    
+        maybes[oi.product].order_items.append(oi)
+    for maybe in maybes:
+        qty_short = maybes[maybe].total_ordered - maybes[maybe].total_avail
+        if qty_short > Decimal("0"):
+            maybes[maybe].quantity_short = qty_short
+            shorts.append(maybes[maybe])
+    return shorts
+
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, verbose_name=_('order'))
     product = models.ForeignKey(Product, verbose_name=_('product'))
