@@ -860,6 +860,8 @@ class InventoryItem(models.Model):
     producer = models.ForeignKey(Party, 
         related_name="inventory_items", verbose_name=_('producer'))
     field_id = models.CharField(_("Field"), max_length=12, blank=True)
+    #owner = models.ForeignKey(Party, blank=True, null=True, 
+    #    related_name="owned_items", verbose_name=_('owner'))
     custodian = models.ForeignKey(Party, blank=True, null=True, 
         related_name="custody_items", verbose_name=_('custodian'))
     product = models.ForeignKey(Product, 

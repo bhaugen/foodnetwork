@@ -527,7 +527,7 @@ def create_all_inventory_item_forms(avail_date, plans, items, data=None):
                 'product_id': plan.product.id,
                 'producer_id': member.id,
                 'inventory_date': avail_date,
-                'planned': plan_qty,
+                'planned': 0,
                 'received': 0,
                 'notes': ''})
         the_form.description = plan.product.long_name
