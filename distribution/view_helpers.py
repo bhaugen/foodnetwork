@@ -8,6 +8,11 @@ from django.forms.formsets import formset_factory
 from models import *
 from forms import *
 
+try:
+    from notification import models as notification
+except ImportError:
+    notification = None
+
 def is_number(s):
     try:
         float(s)
@@ -539,4 +544,46 @@ def create_all_inventory_item_forms(avail_date, plans, items, data=None):
     form_list = sorted(form_list, key=attrgetter('producer', 'description'))
     return form_list 
 
+def create_delivery_cycle_selection_forms(data=None):
+    dcs = DeliveryCycle.objects.all()
+    form_list = []
+    for dc in dcs:
+        form = DeliveryCycleSelectionForm(data, prefix=dc.id)
+        form.cycle = dc
+        form.delivery_date = dc.next_delivery_date()
+        form_list.append(form)
+    return form_list
 
+def create_avail_item_forms(avail_date, data=None):
+    fn = food_network()
+    items = fn.all_avail_items(avail_date)
+    form_list = []
+    for item in items:
+        pref = "-".join(["item", str(item.id)])
+        the_form = AvailableItemForm(data, prefix=pref, initial={
+            'item_id': item.id,
+            'expiration_date': item.expiration_date,
+            'quantity': item.avail_qty(),
+        })
+        the_form.description = item.product.long_name
+        the_form.producer = item.producer.short_name
+        form_list.append(the_form)
+    form_list = sorted(form_list, key=attrgetter('producer', 'description'))
+    return form_list
+
+def send_avail_emails(cycle):
+    fn = food_network()
+    food_network_name = fn.long_name
+
+    delivery_date = cycle.next_delivery_date()
+    fresh_list = fn.fresh_list(delivery_date)
+    users = list(cycle.customers.all())
+    users.append(fn)
+    nt = NoticeType.objects.get(label='distribution_fresh_list')
+    intro = EmailIntro.objects.filter(notice_type=nt)[0]
+    notification.send(users, "distribution_fresh_list", {
+        "intro": intro.message,
+        "fresh_list": fresh_list, 
+        "delivery_date": delivery_date,
+        "food_network_name": food_network_name,
+    })

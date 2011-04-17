@@ -110,6 +110,8 @@ urlpatterns = patterns('',
     url(r'^statements/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', statements),
 
     # emails
+    url(r'^emailselection/$', email_selection, name="email_selection"),
+    url(r'^availemailprep/(?P<cycles>\w+)/$', avail_email_prep, name="avail_email_prep"),
     url(r'^sendfreshlist/$', send_fresh_list, name="send_fresh_list"),
     url(r'^sendpickuplist/$', send_pickup_list, name="send_pickup_list"),
     url(r'^senddeliverylist/$', send_delivery_list, name="send_delivery_list"),

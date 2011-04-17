@@ -30,12 +30,18 @@ class DistributorAdmin(admin.ModelAdmin):
 admin.site.register(Distributor, DistributorAdmin)
 
 
+class CustomerDeliveryCycleInline(admin.TabularInline):
+    model = CustomerDeliveryCycle
+
+
 class CustomerAdmin(admin.ModelAdmin):
     form = CustomerForm
     list_display = ('short_name', 'member_id', 'long_name', 'contact', 'phone',
                     'customer_transportation_fee', 'apply_transportation_fee')
+    inlines = [ CustomerDeliveryCycleInline, ]
     
 admin.site.register(Customer, CustomerAdmin)
+
 
 class ProducerProductInline(admin.TabularInline):
     model = ProducerProduct
@@ -175,4 +181,15 @@ class EmailIntroAdmin(admin.ModelAdmin):
     list_display = ('notice_type', 'message')
 
 admin.site.register(EmailIntro, EmailIntroAdmin)
+
+
+class DeliveryCycleCustomerInline(admin.TabularInline):
+    model = CustomerDeliveryCycle
+    extra = 6
+
+class DeliveryCycleAdmin(admin.ModelAdmin):
+    list_display = ('delivery_day', 'route', 'customer_list')
+    inlines = [ DeliveryCycleCustomerInline, ]
+
+admin.site.register(DeliveryCycle, DeliveryCycleAdmin)
 

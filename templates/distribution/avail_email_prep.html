@@ -2,13 +2,25 @@
 {% load i18n %}
 
 {% block title %}
-     {% trans "Inventory Update" %}
+     {% trans "Availbility Email Preparation" %}
 {% endblock %}
 
-{% block header %}
+{% block extra_head %}
+{{ block.super }}
 
-    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"></script>
-    <script type="text/javascript" >
+  <script type="text/javascript"
+          src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"
+          baseUrl='./'
+          djConfig="parseOnLoad:true">
+  </script>
+{% endblock %}
+		
+{% block header %}
+<script type="text/javascript">
+dojo.require("dojo.parser");
+</script>
+
+<script type="text/javascript">
 
 		function cleanNumericInput(value)
 		{
@@ -81,71 +93,92 @@
 			}
 		});
 
-    </script>
+
+</script>
 
 {% endblock %}
 
 {% block content %}
 
-<div class="inventory-update">
+<div class="emails" style="font-size:80%;" >
 
 	{% include "distribution/tabnav.html" %}
 
-<form action="." method="POST" style="font-size: 80%;" >{% csrf_token %}
-	
-        <table>
-            <tr>
-                <th style="text-align: right; " >{% trans "Week of" %}:</th>
-                <td>{{ avail_date}}</td>
-            </tr>
-	</table>
+<div style="float: left; width: 40%; padding-left: 1em;"> 
 
-    	<p style="padding-bottom: 1em;" >
-            <input type="submit" value="{% trans 'Submit' %}" />
-        </p>
+	<h3>Selected Customers</h3>
+	{% for cycle in cycles %}
+	<h4>{{ cycle }} Delivery date: {{ cycle.next_delivery_date }}</h4>
+	<ul>
+		{% for customer in cycle.customers.all %}
+		<li>
+			{{ customer }} - 
+			{% if customer.email %}
+				{{ customer.email }}
+			{% else %}
+				<span style="color:red;">No email address</span>
+			{% endif %}
+		</li>
+		{% endfor %}
+	</ul>
+	{% endfor %}
 
-	<input name='avail-date' type='hidden' value='{{ avail_date }}' />
+</div>
 
+<form action="." method="POST" >{% csrf_token %}
+
+<div style="float: left; width: 40%; padding-left: 1em;">
+
+	<h3>Email message introduction</h3>
+
+
+		{{ intro_form.message }}
+
+</div>
+
+<div style="clear:both;" ></div>
+
+<p>
+	<input type="submit" value="{% trans 'Save and Send' %}" />
+</p>
+
+<div>
+	{% if item_forms %}
+	<h3>Available Items as of {{ avail_date }}</h3>
+	<p>Customers will see items where expiration date is on or after delivery date</p>
 	<table class="ga-event-table" >
 	    <tr>
 		<th>{% trans "Producer" %}</th>
 		<th>{% trans "Product" %}</th>
-		<th>{% trans "Lot Id" %}</th>
-        	<th>{% trans "Field" %}</th>
-		<th>{% trans "Custodian" %}</th>
-		<th>{% trans "Date" %}</th>
-		{% if planned %}
-			<th>{% trans "Planned Qty" %}</th>
-		{% endif %}
-        	<th>{% trans "Ready Qty" %}</th>
-        	<th>{% trans "Received Qty" %}</th>
-		<th>{% trans "Notes" %}</th>
+		<th>{% trans "Available Qty" %}</th>
+		<th>{% trans "Expiration Date" %}</th>
             </tr>
             {% for item_form in item_forms %}
 	    	<tr>
 		    	<td class="read-only-td" > {{ item_form.producer }} </td>
 			 <td class="read-only-td" > {{ item_form.description }} </td>
-			 <td> {{ item_form.freeform_lot_id }} </td>
-			 <td> {{ item_form.field_id }} </td>
-			<td> {{ item_form.custodian }} </td>
-			<td> {{ item_form.inventory_date }} </td>
-			{% if planned %}
-				<td class="read-only-td" style="text-align: right;" > {{ item_form.plan_qty }} </td>
-			{% endif %}
-			<td> {{ item_form.planned }} </td>
-			<td> {{ item_form.received }} </td>
-			<td> {{ item_form.notes }} </td>
+			 <td> {{ item_form.quantity }} </td>
+			 <td> {{ item_form.expiration_date }} </td>
 			{{ item_form.item_id }}
-			{{ item_form.product_id }}
-			{{ item_form.producer_id }}
                 </tr>
            {% endfor %} 
-        </table>
+	</table>
 
-        <p style="padding-bottom: 1em;" >
-            <input type="submit" value="{% trans 'Submit' %}" />
-        </p>
-    </form>
+	<p>
+		<input type="submit" value="{% trans 'Save and Send' %}" />
+	</p>
+
+
+	{% else %}
+		<p>No available items</p>
+	{% endif %}
+
 </div>
+
+</form>
+
+
+</div>
+
 {% endblock %}
 

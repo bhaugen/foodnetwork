@@ -502,6 +502,17 @@ class AllInventoryItemForm(forms.ModelForm):
         self.fields['custodian'].choices = [('', '------------')] + [(prod.id, prod.short_name) for prod in Party.subclass_objects.possible_custodians()]
 
 
+class AvailableItemForm(forms.Form):
+    expiration_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
+    quantity = forms.DecimalField(widget=forms.TextInput(attrs={'class':
+                                                               'quantity-field',
+                                                               'size': '6'}))
+    item_id = forms.CharField(required=False, widget=forms.HiddenInput)
+
+    class Meta:
+        model = InventoryItem
+        fields = ('expiration_date',)
+
 
 def create_inventory_item_forms(producer, avail_date, plans, items, data=None):
     item_dict = {}
@@ -958,5 +969,16 @@ class ProcessServiceForm(forms.ModelForm):
     class Meta:
         model = ServiceTransaction
         exclude = ('process', 'to_whom', 'transaction_date', 'payment', 'notes')
+
+
+class DeliveryCycleSelectionForm(forms.Form):
+    send_emails = forms.BooleanField(required=False)
+    
+
+class EmailIntroForm(forms.ModelForm):
+
+    class Meta:
+        model = EmailIntro
+        exclude = ('notice_type',)
 
 

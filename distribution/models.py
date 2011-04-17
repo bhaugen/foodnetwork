@@ -1882,3 +1882,50 @@ class TransportationTransaction(EconomicEvent):
         return self.amount.quantize(Decimal('.01'), rounding=ROUND_UP)
 
 
+DAY_CHOICES =  ( 
+    (1, _('Monday')),
+    (2, _('Tuesday')),
+    (3, _('Wednesday')),
+    (4, _('Thursday')),
+    (5, _('Friday')),
+    (6, _('Saturday')),
+    (7, _('Sunday')),
+)
+
+class DeliveryCycle(models.Model):
+    delivery_day = models.PositiveSmallIntegerField(_('delivery day'), max_length="1", choices=DAY_CHOICES)
+    route = models.CharField(_('route'), max_length=255)
+    order_closing_day = models.PositiveSmallIntegerField(_('order closing day'), max_length="1", choices=DAY_CHOICES)
+    order_closing_time = models.TimeField()
+    customers = models.ManyToManyField(Customer,
+        through="CustomerDeliveryCycle", verbose_name=_('customers'))
+
+    class Meta:
+        ordering = ('delivery_day',)
+
+    def __unicode__(self):
+        return " ".join([
+            self.get_delivery_day_display(),
+            self.route,
+        ])
+
+    def customer_list(self):
+        return ", ".join(c.short_name for c in self.customers.all())
+
+    def next_delivery_date(self):
+        date = datetime.date.today()
+        monday = date - datetime.timedelta(days=datetime.date.weekday(date))
+        dd = monday + datetime.timedelta(days=(self.delivery_day - 1))
+        if dd <= date:
+            dd = dd + datetime.timedelta(days=7)
+        return dd
+
+class CustomerDeliveryCycle(models.Model):
+    customer = models.ForeignKey(Customer, related_name="delivery_cycles",
+                                 verbose_name=_('customer'))
+    delivery_cycle = models.ForeignKey(DeliveryCycle,
+        related_name="delivery_customers", verbose_name=_('delivery cycle'))
+
+    class Meta:
+        unique_together = ("customer", "delivery_cycle")
+        

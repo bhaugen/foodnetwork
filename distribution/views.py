@@ -1797,6 +1797,7 @@ def json_supply_and_demand_week(request, week_date):
             raise Http404
     tbl = dojo_supply_demand_weekly_table(week_date)
     rows = tbl.rows
+    #import pdb; pdb.set_trace()
     count = len(rows)
     try:
         range = request.META["HTTP_RANGE"]
@@ -3256,4 +3257,75 @@ def delete_process(request, process_id):
         process.delete()
         #todo: retest, this might not work! 
         return HttpResponseRedirect(reverse("process_selection"))
+
+@login_required
+def email_selection(request):
+    try:
+        food_net = food_network()
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
+    #import pdb; pdb.set_trace()
+    forms = create_delivery_cycle_selection_forms(data=request.POST or None)
+    if request.method == "POST":
+        if request.POST.get('submit-availability'):
+            #import pdb; pdb.set_trace()
+            if all([form.is_valid() for form in forms]):
+                cycles = []
+                for form in forms:
+                    data = form.cleaned_data
+                    send_emails = data['send_emails']
+                    if send_emails:
+                        cycles.append(str(form.cycle.id))
+                cycles = "_".join(cycles)
+                return HttpResponseRedirect('/%s/%s/'
+                    % ('distribution/availemailprep', cycles))
+
+    return render_to_response('distribution/email_selection.html', {
+        'forms': forms,
+    }, context_instance=RequestContext(request))
+
+@login_required
+def avail_email_prep(request, cycles):
+    cycle_ids = cycles.split("_")
+    cycles = []
+    for id in cycle_ids:
+        cycles.append(DeliveryCycle.objects.get(id=int(id)))
+    avail_date = datetime.date.today() + datetime.timedelta(days=7)
+    for cycle in cycles:
+        if cycle.next_delivery_date() < avail_date:
+            avail_date = cycle.next_delivery_date()
+    intro = EmailIntro.objects.get(notice_type__label='distribution_fresh_list')
+    intro_form = EmailIntroForm(instance=intro, data=request.POST or None)
+    item_forms = create_avail_item_forms(avail_date, data=request.POST or None)
+    if request.method == "POST":
+        #import pdb; pdb.set_trace()
+        if intro_form.is_valid() and all([form.is_valid() for form in item_forms]):
+            #intro_data = intro_form.cleaned_data
+            intro_form.save()
+            for form in item_forms:
+                item_data = form.cleaned_data
+                ed = item_data['expiration_date']
+                qty = Decimal(item_data['quantity'])
+                id = int(item_data['item_id'])
+                item = InventoryItem.objects.get(id=id)
+                if ed != item.expiration_date or qty != item.avail_qty():
+                    item.expiration_date = ed
+                    if item.remaining:
+                        item.remaining = qty
+                    elif item.onhand:
+                        item.onhand = qty
+                    else:
+                        item.remaining = qty
+                    item.save()
+            for cycle in cycles:
+                send_avail_emails(cycle)
+            return HttpResponseRedirect(reverse("email_selection"))
+
+    return render_to_response('distribution/avail_email_prep.html', {
+        'cycles': cycles,
+        'intro_form': intro_form,
+        'item_forms': item_forms,
+        'avail_date': avail_date,
+    }, context_instance=RequestContext(request))
+
 

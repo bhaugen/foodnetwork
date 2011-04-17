@@ -1,1 +1,1 @@
-Availability for the week of {{ week_of }}
+Availability for delivery on {{ delivery_date }}

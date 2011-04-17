@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Email Selection" %}
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+
+  <script type="text/javascript"
+          src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js"
+          baseUrl='./'
+          djConfig="parseOnLoad:true">
+  </script>
+{% endblock %}
+		
+{% block header %}
+<script type="text/javascript">
+dojo.require("dojo.parser");
+</script>
+
+<script type="text/javascript">
+
+
+	function init() 
+	{
+	}
+
+	dojo.addOnLoad(init);
+
+</script>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="emails">
+
+	{% include "distribution/tabnav.html" %}
+
+<div style="border: 2px solid grey; float: left; width: 40%; padding-left: 1em;">
+
+	<h3>Availability Emails</h3>
+
+	<form action="." method="POST" style="font-size: 90%;" >{% csrf_token %}
+
+		<table cell-padding="1">
+			<tr>
+				<th>{% trans "Select" %}</th>
+				<th>{% trans "Delivery Cycle" %}</th>
+				<th>{% trans "Delivery Date" %}</th>
+			</tr>
+			{% for form in forms %}
+			<tr>
+				<td>{{ form.send_emails }}</td>
+				<td>{{ form.cycle }}</td>
+				<td style="text-align:right;" >{{ form.delivery_date }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		<p>
+			<input name="submit-availability" type="submit" value="{% trans 'Submit' %}" />
+		</p>
+	</form>
+
+</div>
+
+<div style="clear:both;"></div>
+
+</div>
+
+{% endblock %}
+
+

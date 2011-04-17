@@ -27,6 +27,7 @@ display: inline;
 }
 
 div.dashboard li.dashboard, 
+div.emails li.emails, 
 div.inventory-update li.inventory-update, 
 div.order-update li.order-update, 
 div.order-table li.order-table, 
@@ -45,6 +46,7 @@ div.process li.process
 }
 
 div.dashboard li.dashboard a, 
+div.emails li.emails a, 
 div.inventory-update li.inventory-update a, 
 div.order-update li.order-update a, 
 div.order-table li.order-table a, 
@@ -89,6 +91,7 @@ ul#tabnav a:hover
 	{% food_network %}
 	<ul id="tabnav" class="do-not-print" >
 		<li class="dashboard" ><a title="Home page" href="/distribution/dashboard">{% trans "Dashboard" %}</a> </li>
+		<li class="emails" ><a title="Send emails" href="/distribution/emailselection">{% trans "Emails" %}</a> </li>
 		<li class="inventory-update" >
 			<a title="Update inventory for one or all producers" href="/distribution/inventoryselection">{% trans "Inventory" %}</a>
 		</li>
