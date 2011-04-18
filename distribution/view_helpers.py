@@ -579,8 +579,7 @@ def send_avail_emails(cycle):
     fresh_list = fn.fresh_list(delivery_date)
     users = list(cycle.customers.all())
     users.append(fn)
-    nt = NoticeType.objects.get(label='distribution_fresh_list')
-    intro = EmailIntro.objects.filter(notice_type=nt)[0]
+    intro = avail_email_intro()
     notification.send(users, "distribution_fresh_list", {
         "intro": intro.message,
         "fresh_list": fresh_list, 

@@ -251,11 +251,19 @@ class PartyUser(models.Model):
     party = models.ForeignKey(Party, related_name="users", verbose_name=_('party'))
     user = models.ForeignKey(User, related_name="parties", verbose_name=_('user'))
 
-
 class EmailIntro(models.Model):
-    message = models.TextField(_('message'))
+    message = models.TextField(_('message'), blank=True)
     notice_type = models.ForeignKey(NoticeType, related_name="email_intro",
                                     verbose_name=_('email type'))
+
+def avail_email_intro():
+    nt = NoticeType.objects.get(label='distribution_fresh_list')
+    intro = EmailIntro.objects.filter(notice_type=nt)
+    if intro.count():
+        intro = intro[0]
+    else:
+        intro = EmailIntro(message="", notice_type=nt)
+    return intro
 
 class FoodNetwork(Party):
     billing_contact = models.CharField(_('billing contact'), max_length=64, blank=True)

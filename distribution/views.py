@@ -47,8 +47,7 @@ def send_fresh_list(request):
                 fresh_list = fn.fresh_list()
                 users = list(Customer.objects.all())
                 users.append(fn)
-                nt = NoticeType.objects.get(label='distribution_fresh_list')
-                intro = EmailIntro.objects.filter(notice_type=nt)[0]
+                intro = avail_email_intro()
                 notification.send(users, "distribution_fresh_list", {
                     "intro": intro.message,
                     "fresh_list": fresh_list, 
@@ -3306,7 +3305,7 @@ def avail_email_prep(request, cycles):
     for cycle in cycles:
         if cycle.next_delivery_date() < avail_date:
             avail_date = cycle.next_delivery_date()
-    intro = EmailIntro.objects.get(notice_type__label='distribution_fresh_list')
+    intro = avail_email_intro()
     intro_form = EmailIntroForm(instance=intro, data=request.POST or None)
     item_forms = create_avail_item_forms(avail_date, data=request.POST or None)
     if request.method == "POST":
