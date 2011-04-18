@@ -1903,14 +1903,26 @@ def dashboard(request):
         monday = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         saturday = monday + datetime.timedelta(days=5)
         week_form = CurrentWeekForm(initial={"current_week": thisdate})
-        plans = weekly_production_plans(thisdate)
+        items = fn.all_avail_items()
+        for item in items:
+            item.category = item.product.parent_string()
+            item.product_name = item.product.short_name
+        items = sorted(items, key=attrgetter('category',
+                                            'product_name'))
+        plans = []
         shorts = shorts_for_week()
+        shorts_label = "Shorts vs Inventory"
+        if use_plans_for_ordering():
+            plans = weekly_production_plans(thisdate)
+            shorts_label = "Shorts vs Plans"
         orders = Order.objects.filter(
             delivery_date__range=(thisdate, saturday)).exclude(state="Unsubmitted")
 
     return render_to_response('distribution/dashboard.html', 
         {'plans': plans,
+         'items': items,
          'shorts': shorts,
+         'shorts_label': shorts_label,
          'orders': orders,
          'delivery_date': thisdate,
          'week_form': week_form,

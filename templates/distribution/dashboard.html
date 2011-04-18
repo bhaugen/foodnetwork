@@ -40,14 +40,13 @@
 
 	<h2><strong>{{ food_network_name }} {% trans "Distribution System" %}</strong></h2>
 
-		
+		{% comment %}
 		{% if user.is_authenticated %}
 			<div style="margin-bottom: 1em; " >
 				<form style="display: inline; " action="{% url send_fresh_list %}" method="POST">{% csrf_token %}
 					<input class="submit-btn" type="submit" value="{% trans 'Send Availability Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
-				</form>
-				{% comment %}
+				</form>	
 				<form style="display: inline; " action="{% url send_pickup_list %}" method="POST">{% csrf_token %}
 					<input class="submit-btn" type="submit" value="{% trans 'Send Pickup List Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
@@ -60,9 +59,10 @@
 					<input class="submit-btn" type="submit" value="{% trans 'Send Order Emails' %}" />
 					<input type="hidden" name="next" value="{% url dashboard %}" />
 				</form>
-				{% endcomment %}
+				
 			</div>
 		{% endif %}
+		{% endcomment %}
 
 		<h4 style="margin-bottom: 4px;" >
 			Week of 
@@ -77,7 +77,7 @@
 		</h4>
 		{% if shorts %}
 		<div style="float:left; padding: 1em;">
-			<h4 style="margin-bottom: 0;" >Shorts:</h4>
+			<h4 style="margin-bottom: 0;" >{{ shorts_label }}:</h4>
 			<table class="ga-event-table" style="font-size: 80%; margin-top: 0;" >
 				<tr>
 					<th>{% trans "Product" %}</th>
@@ -131,9 +131,42 @@
 		</div>
 		{% endif %}
 
+		{% if shorts %}
+			{% if orders %}
+			<div style="clear:both;"></div>
+			{% endif %}
+		{% endif %}
+
+		{% if items %}
+		<div style="float:left; padding: 1em;">
+			<h4 style="margin-bottom: 0;" >Inventory:</h4>
+			<table class="ga-event-table" style="font-size: 80%; margin-top: 0;" >
+				<tr>
+					<th>{% trans "Category" %}</th>
+					<th>{% trans "Product" %}</th>
+					<th>{% trans "Method" %}</th>
+					<th>{% trans "Producer" %}</th>
+					<th>{% trans "Avail" %}</th>
+					<th>{% trans "Ordered" %}</th>
+				</tr>
+				{% for item in items %}
+				<tr>
+					<td>{{ item.category }}</td>
+					<td>{{ item.product.long_name }}</td>
+					<td>{{ item.product.growing_method }}</td>
+					<td>{{ item.producer }}</td>
+					<td style="text-align: right;">{{ item.avail_qty }}</td>
+					<td style="text-align: right;">{{ item.ordered_qty }}</td>
+				</tr>
+				{% endfor %}
+
+			</table>
+		</div>
+		{% endif %}
+
 		{% if plans %}
 		<div style="float:left; padding: 1em;">
-			<h4 style="margin-bottom: 0;" >Plans:</h4>
+			<h4 style="margin-bottom: 0;" >Production plans:</h4>
 			<table class="ga-event-table" style="font-size: 80%; margin-top: 0;" >
 				<tr>
 					<th>{% trans "Category" %}</th>
