@@ -554,9 +554,8 @@ def order_confirmation(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
     fn = food_network()
     if not order.state == "Unsubmitted":
-        if order.is_paid():
-            paypal_form = None
-        else:
+        paypal_form = None
+        if not order.is_paid():
             paypal_form = create_paypal_form(order, return_page='order')
         return render_to_response('customer/order.html', {
             'order': order,
@@ -583,9 +582,8 @@ def resave_short_adjusted_order(request, order_id):
 @login_required
 def order(request, order_id):
     order = get_object_or_404(Order, pk=order_id)
-    if order.is_paid():
-        paypal_form = None
-    else:
+    paypal_form = None
+    if not order.is_paid():
         paypal_form = create_paypal_form(order, return_page='order')
     return render_to_response('customer/order.html', {
         'order': order,
@@ -599,6 +597,10 @@ def invoice_selection(request):
     customer = get_customer(request)
     if not customer:
         return render_to_response('account/no_permissions.html')
+    pp_settings = PayPalSettings.objects.all()
+    pay_now = ""
+    if pp_settings.count():
+        pay_now = "- click here to pay now"
     if request.method == "POST":
         drform = DateRangeSelectionForm(request.POST)  
         if drform.is_valid():
@@ -663,10 +665,8 @@ def unpaid_invoice(request, order_id):
         fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
-
-    if order.is_paid():
-        paypal_form = None
-    else:
+    paypal_form = None
+    if not order.is_paid():
         paypal_form = create_paypal_form(order)
     return render_to_response('customer/unpaid_invoice.html', {
         'order': order,

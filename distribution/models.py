@@ -506,8 +506,12 @@ class Customer(Party):
     
     def distributor(self):
         #todo: revise when 5S distributor assignments are clear
-        # maybe add distributor field to Customer or some logic on FoodNetwork 
-        return Distributor.objects.all()[0]
+        # maybe add distributor field to Customer or some logic on FoodNetwork
+        ds = Distributor.objects.all()
+        if ds.count():
+            return Distributor.objects.all()[0]
+        else:
+            return None
 
     def transportation_fee(self):
         if self.apply_transportation_fee:

@@ -33,7 +33,7 @@
 			<li>
 				<a href="{% url unpaid_invoice order_id=order.id %}">
 					#{{ order.id }} {{ order.order_date }} ${{ order.grand_total }} 
-					- click here to pay now
+					{{ pay_now }}
 				</a>
 			</li>
 
@@ -43,7 +43,7 @@
 	{% endif %}
 
 	<div style="border: 2px solid grey; width: 30%; padding-left: 1em;">
-		<h4>Paid Invoices:</h4>
+		<h4>All Invoices:</h4>
 
 		<form action="." method="POST" >{% csrf_token %}
         		<table>

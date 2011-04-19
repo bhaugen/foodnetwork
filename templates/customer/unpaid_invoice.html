@@ -127,9 +127,11 @@
 						<td>{{ paypal_form.render }}</td>
 					{% endif %}
 				{% else %}
-					<td colspan="2" style=text-align: center;" > 
-						<b>Thank you for your payment!</b>
-					</td>
+					{% if order.is_paid %}
+						<td colspan="2" style="text-align: center;" > 
+							<b>Thank you for your payment!</b>
+						</td>
+					{% endif %}
 				{% endif %}
 
 			</tr>

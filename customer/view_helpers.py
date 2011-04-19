@@ -10,7 +10,11 @@ from distribution.view_helpers import SupplyDemandTable
 
 
 def create_paypal_form(order, return_page='unpaid_invoice'):
-    pp_settings = PayPalSettings.objects.get(pk=1)
+    pp_settings = PayPalSettings.objects.all()
+    if pp_settings.count():
+        pp_settings = pp_settings[0]
+    else:
+        return None
     domain = Site.objects.get_current().domain
     paypal_dict = {
         "business": pp_settings.business,
