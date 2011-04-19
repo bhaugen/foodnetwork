@@ -914,6 +914,9 @@ class InventoryItem(models.Model):
             return self.onhand
         else:
             return self.remaining
+
+    def qty(self):
+        return self.avail_qty()
         
     def ordered_qty(self):
         return self.delivered_qty()
