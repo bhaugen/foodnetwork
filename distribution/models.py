@@ -418,10 +418,12 @@ class FoodNetwork(Party):
     def all_avail_items(self, thisdate=None):
         if not thisdate:
             thisdate = current_week()
-        weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
-        expired_date = weekstart + datetime.timedelta(days=5)
+        #weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
+        #expired_date = weekstart + datetime.timedelta(days=5)
+        expired_date = thisdate
+        #import pdb; pdb.set_trace()
         items = InventoryItem.objects.filter(
-            inventory_date__lte=expired_date,
+            #inventory_date__lte=expired_date,
             expiration_date__gte=expired_date)
         items = items.filter(Q(remaining__gt=0) |
                              Q(onhand__gt=0)).order_by("producer__short_name",
