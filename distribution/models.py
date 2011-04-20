@@ -448,11 +448,11 @@ class FoodNetwork(Party):
             for pq in products.values():
                 pq.qty -= pq.product.total_ordered(thisdate)
                 if pq.qty > 0:
-                    pq.category = plan.product.parent_string()
-                    pq.product_name = plan.product.short_name
+                    pq.category = pq.product.parent_string()
+                    pq.product_name = pq.product.short_name
                     avail.append(pq)
-            avail = sorted(avail, key=attrgetter('category',
-                                            'product_name'))
+            #import pdb; pdb.set_trace()
+            avail = sorted(avail, key=attrgetter('product_name'))
             return avail
         else:
             return self.all_avail_items(thisdate)

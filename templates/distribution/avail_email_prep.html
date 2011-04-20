@@ -132,18 +132,26 @@ dojo.require("dojo.parser");
 	<h3>Email message introduction</h3>
 
 
-		{{ intro_form.message }}
+	{{ intro_form.message }}
+
+	{% if not item_forms %}
+		<p>
+			<input type="submit" value="{% trans 'Save and Send' %}" />
+		</p>
+	{% endif %}
 
 </div>
 
 <div style="clear:both;" ></div>
 
-<p>
-	<input type="submit" value="{% trans 'Save and Send' %}" />
-</p>
-
 <div>
 	{% if item_forms %}
+
+	<p>
+		<input type="submit" value="{% trans 'Save and Send' %}" />
+	</p>
+
+
 	<h3>Available Items as of {{ avail_date }}</h3>
 	<p>Customers will see items where expiration date is on or after delivery date</p>
 	<table class="ga-event-table" >
@@ -170,7 +178,31 @@ dojo.require("dojo.parser");
 
 
 	{% else %}
+		{% if plans %}
+			<h4 style="margin-bottom: 0;" >Production plans:</h4>
+			<table class="ga-event-table">
+				<tr>
+					<th>{% trans "Category" %}</th>
+					<th>{% trans "Product" %}</th>
+					<th>{% trans "Method" %}</th>
+					<th>{% trans "Producer" %}</th>
+					<th>{% trans "Qty" %}</th>
+				</tr>
+				{% for plan in plans %}
+				<tr>
+					<td>{{ plan.category }}</td>
+					<td>{{ plan.product.long_name }}</td>
+					<td>{{ plan.product.growing_method }}</td>
+					<td>{{ plan.member }}</td>
+					<td style="text-align: right;">{{ plan.quantity }}</td>
+				</tr>
+				{% endfor %}
+
+			</table>
+
+		{% else %}
 		<p>No available items</p>
+		{% endif %}
 	{% endif %}
 
 </div>

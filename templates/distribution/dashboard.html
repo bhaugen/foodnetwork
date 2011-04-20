@@ -147,7 +147,6 @@
 					<th>{% trans "Method" %}</th>
 					<th>{% trans "Producer" %}</th>
 					<th>{% trans "Avail" %}</th>
-					<th>{% trans "Ordered" %}</th>
 				</tr>
 				{% for item in items %}
 				<tr>
@@ -156,7 +155,6 @@
 					<td>{{ item.product.growing_method }}</td>
 					<td>{{ item.producer }}</td>
 					<td style="text-align: right;">{{ item.avail_qty }}</td>
-					<td style="text-align: right;">{{ item.ordered_qty }}</td>
 				</tr>
 				{% endfor %}
 

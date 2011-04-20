@@ -3307,7 +3307,12 @@ def avail_email_prep(request, cycles):
             avail_date = cycle.next_delivery_date()
     intro = avail_email_intro()
     intro_form = EmailIntroForm(instance=intro, data=request.POST or None)
-    item_forms = create_avail_item_forms(avail_date, data=request.POST or None)
+    item_forms = []
+    plans = []
+    if use_plans_for_ordering():
+        plans = weekly_production_plans(avail_date) 
+    else:
+        item_forms = create_avail_item_forms(avail_date, data=request.POST or None)
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         if intro_form.is_valid() and all([form.is_valid() for form in item_forms]):
@@ -3336,6 +3341,7 @@ def avail_email_prep(request, cycles):
         'cycles': cycles,
         'intro_form': intro_form,
         'item_forms': item_forms,
+        'plans': plans,
         'avail_date': avail_date,
     }, context_instance=RequestContext(request))
 
