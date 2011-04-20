@@ -447,18 +447,30 @@ class FoodNetwork(Party):
                     products[plan.product.id] = ProductQuantity(plan.product,
                                                            Decimal("0"))
                 products[plan.product.id].qty += plan.quantity
-            for pq in products.values():
-                pq.qty -= pq.product.total_ordered(thisdate)
-                if pq.qty > 0:
-                    pq.category = pq.product.parent_string()
-                    pq.product_name = pq.product.short_name
-                    avail.append(pq)
+            #for pq in products.values():
+            #    pq.qty -= pq.product.total_ordered(thisdate)
+            #    if pq.qty > 0:
+            #        pq.category = pq.product.parent_string()
+            #        pq.product_name = pq.product.short_name
+            #        avail.append(pq)
             #import pdb; pdb.set_trace()
-            avail = sorted(avail, key=attrgetter('product_name'))
-            return avail
+            #avail = sorted(avail, key=attrgetter('product_name'))
+            #return avail
         else:
-            return self.all_avail_items(thisdate)
-
+            items = self.all_avail_items(thisdate)
+            for item in items:
+                if item.product.id not in products:
+                    products[item.product.id] = ProductQuantity(item.product,
+                                                           Decimal("0"))
+                products[item.product.id].qty += item.avail_qty()
+        for pq in products.values():
+            pq.qty -= pq.product.total_ordered(thisdate)
+            if pq.qty > 0:
+                pq.category = pq.product.parent_string()
+                pq.product_name = pq.product.short_name
+                avail.append(pq)
+        avail = sorted(avail, key=attrgetter('product_name'))
+        return avail
     
     def all_active_items(self, thisdate = None):
         # todo: this and dashboard need work
