@@ -174,6 +174,7 @@ class PartyManager(models.Manager):
         for party in parties:
             if isinstance(party.as_leaf_class(), Processor) or isinstance(party.as_leaf_class(), Distributor):
                 pcs.append(party)
+        pcs.append(food_network())
         return pcs
 
     def producers_and_processors(self):

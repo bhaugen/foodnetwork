@@ -681,6 +681,7 @@ def inventory_update(request, prod_id, year, month, day):
                 item_id = data['item_id']
                 custodian = data['custodian']
                 inventory_date = data['inventory_date']
+                expiration_date = data['expiration_date']
                 planned = data['planned']
                 received = data['received']
                 notes = data['notes']
@@ -691,6 +692,7 @@ def inventory_update(request, prod_id, year, month, day):
                     item = InventoryItem.objects.get(pk=item_id)
                     item.custodian = custodian
                     item.inventory_date = inventory_date
+                    item.expiration_date = expiration_date
                     rem_change = planned - item.planned
                     item.planned = planned
                     item.remaining = item.remaining + rem_change
@@ -707,12 +709,9 @@ def inventory_update(request, prod_id, year, month, day):
                         product = Product.objects.get(pk=prod_id)
                         item = itemform.save(commit=False)
                         item.producer = producer
-                        #item.custodian = custodian
-                        #item.inventory_date = inventory_date
                         item.product = product
                         item.remaining = planned
                         item.onhand = received
-                        #item.notes = notes
                         item.save()
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                % ('distribution/produceravail', producer_id, year, month, day))
@@ -754,6 +753,7 @@ def all_inventory_update(request, year, month, day):
                 item_id = int(data['item_id'])
                 custodian = data['custodian']
                 inventory_date = data['inventory_date']
+                expiration_date = data['expiration_date']
                 planned = data['planned']
                 received = data['received']
                 notes = data['notes']
@@ -764,6 +764,7 @@ def all_inventory_update(request, year, month, day):
                     item = InventoryItem.objects.get(pk=item_id)
                     item.custodian = custodian
                     item.inventory_date = inventory_date
+                    item.expiration_date = expiration_date
                     rem_change = planned - item.planned
                     item.planned = planned
                     item.remaining = item.remaining + rem_change
@@ -776,16 +777,12 @@ def all_inventory_update(request, year, month, day):
                     item.save()
                 else:
                     if planned + received > 0:
-                        #prod_id = data['product_id']
                         product = Product.objects.get(pk=prod_id)
                         item = itemform.save(commit=False)
                         item.producer = producer
-                        #item.custodian = custodian
-                        #item.inventory_date = inventory_date
                         item.product = product
                         item.remaining = planned
                         item.onhand = received
-                        #item.notes = notes
                         item.save()
             return HttpResponseRedirect('/%s/'
                % ('distribution/inventoryselection',))

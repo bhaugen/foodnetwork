@@ -113,7 +113,8 @@
 		<th>{% trans "Lot Id" %}</th>
         	<th>{% trans "Field" %}</th>
 		<th>{% trans "Custodian" %}</th>
-		<th>{% trans "Date" %}</th>
+		<th>{% trans "Inventory Date" %}</th>
+		<th>{% trans "Expiration Date" %}</th>
 		{% if planned %}
 			<th>{% trans "Planned Qty" %}</th>
 		{% endif %}
@@ -129,6 +130,7 @@
 			 <td> {{ item_form.field_id }} </td>
 			<td> {{ item_form.custodian }} </td>
 			<td> {{ item_form.inventory_date }} </td>
+			<td> {{ item_form.expiration_date }} </td>
 			{% if planned %}
 				<td class="read-only-td" style="text-align: right;" > {{ item_form.plan_qty }} </td>
 			{% endif %}

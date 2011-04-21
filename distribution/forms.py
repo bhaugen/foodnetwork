@@ -458,6 +458,7 @@ class InventoryItemForm(forms.ModelForm):
     field_id = forms.CharField(required=False,
                                widget=forms.TextInput(attrs={'size': '5', 'value': ''}))
     inventory_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
+    expiration_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
     planned = forms.DecimalField(widget=forms.TextInput(attrs={'class':
                                                                'quantity-field',
                                                                'size': '6'}))
@@ -469,7 +470,7 @@ class InventoryItemForm(forms.ModelForm):
 
     class Meta:
         model = InventoryItem
-        exclude = ('producer', 'product', 'onhand', 'remaining', 'expiration_date')
+        exclude = ('producer', 'product', 'onhand', 'remaining')
         
     def __init__(self, *args, **kwargs):
         super(InventoryItemForm, self).__init__(*args, **kwargs)
@@ -484,6 +485,7 @@ class AllInventoryItemForm(forms.ModelForm):
     field_id = forms.CharField(required=False,
                                widget=forms.TextInput(attrs={'size': '5', 'value': ''}))
     inventory_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
+    expiration_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
     planned = forms.DecimalField(widget=forms.TextInput(attrs={'class':
                                                                'quantity-field',
                                                                'size': '6'}))
@@ -495,7 +497,7 @@ class AllInventoryItemForm(forms.ModelForm):
 
     class Meta:
         model = InventoryItem
-        exclude = ('producer', 'product', 'onhand', 'remaining', 'expiration_date')
+        exclude = ('producer', 'product', 'onhand', 'remaining')
         
     def __init__(self, *args, **kwargs):
         super(AllInventoryItemForm, self).__init__(*args, **kwargs)
@@ -536,13 +538,16 @@ def create_inventory_item_forms(producer, avail_date, plans, items, data=None):
                 'field_id': item.field_id,
                 'custodian': custodian_id,
                 'inventory_date': item.inventory_date,
+                'expiration_date': item.expiration_date,
                 'planned': item.planned,
                 'received': item.received,
                 'notes': item.notes})
         else:
+            expiration_date = avail_date + datetime.timedelta(days=plan.product.expiration_days)
             the_form = InventoryItemForm(data, prefix=plan.product.id, initial={
                 'prod_id': plan.product.id, 
                 'inventory_date': avail_date,
+                'expiration_date': expiration_date,
                 'planned': 0,
                 'received': 0,
                 'notes': ''})
