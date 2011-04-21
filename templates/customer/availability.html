@@ -17,7 +17,8 @@
 
 	{% include tabnav %}
 
-	<h2>What's available right now from {{ network.long_name }}</h2>
+	<h2>What's available for delivery on {{ delivery_date|date:"l, F n" }} </br>
+		from {{ network.long_name }}</h2>
 
 	<p>If you have customer login credentials, you may 
 		<a href="{% url customer_dashboard %}">place an order</a>.

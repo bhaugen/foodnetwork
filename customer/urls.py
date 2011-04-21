@@ -51,7 +51,7 @@ urlpatterns = patterns('',
          name="unpaid_invoice"),
 
     #availability
-    url(r'^availability/$', "customer.views.availability",
-         name="availability"),
+    url(r'^availability/(?P<cycle_id>\d+)/$', "customer.views.availability",
+         name="customer_availability"),
 )
 

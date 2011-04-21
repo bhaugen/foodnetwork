@@ -4,6 +4,7 @@ from operator import attrgetter
 
 
 from django.forms.formsets import formset_factory
+from django.contrib.sites.models import Site
 
 from models import *
 from forms import *
@@ -580,9 +581,12 @@ def send_avail_emails(cycle):
     users = list(cycle.customers.all())
     users.append(fn)
     intro = avail_email_intro()
+    current_site = Site.objects.get_current()
     notification.send(users, "distribution_fresh_list", {
         "intro": intro.message,
         "fresh_list": fresh_list, 
         "delivery_date": delivery_date,
         "food_network_name": food_network_name,
+        "cycle": cycle,
+        "current_site": current_site,
     })

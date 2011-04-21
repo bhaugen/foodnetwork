@@ -31,8 +31,9 @@ except ImportError:
     notification = None
 
 
-def availability(request):
+def availability(request, cycle_id):
     fn = food_network()
+    cycle = DeliveryCycle.objects.get(pk=int(cycle_id))
     #todo: all uses of the next statement shd be changed
     cw = current_week()
     weekstart = cw - datetime.timedelta(days=datetime.date.weekday(cw))
@@ -40,9 +41,11 @@ def availability(request):
     specials = Special.objects.filter(
         from_date__lte=weekend,
         to_date__gte=weekstart)
-    avail_rows = fn.customer_availability(cw)
+    delivery_date = cycle.next_delivery_date()
+    avail_rows = fn.customer_availability(delivery_date)
     return render_to_response('customer/availability.html', 
         {'avail_rows': avail_rows,
+         'delivery_date': delivery_date,
          'network': fn,
          'specials': specials,
          }, context_instance=RequestContext(request))
