@@ -313,7 +313,7 @@ class FoodNetwork(Party):
                 items = prod.production_plans(thisdate)
                 avail_qty = sum(item.quantity for item in items)
             else:
-                items = prod.avail_items(thisdate)
+                items = prod.avail_items_today(thisdate)
                 avail_qty = sum(item.avail_qty() for item in items)
             if avail_qty > 0:
                 price = prod.price.quantize(Decimal('.01'), rounding=ROUND_UP)
@@ -614,6 +614,12 @@ class Product(models.Model):
             # shd just depend on expiration
             #inventory_date__lte=thisdate,
             expiration_date__gte=expired_date)
+        items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
+        return items
+
+    def avail_items_today(self, thisdate):
+        items = InventoryItem.objects.filter(product=self,
+            expiration_date__gte=thisdate)
         items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
         return items
 
