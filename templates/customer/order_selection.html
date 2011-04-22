@@ -6,8 +6,9 @@
 
 {% block extra_head %}
 {{ block.super }}
-    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
-        djConfig="parseOnLoad: true"></script>
+
+{% include "dojo_include.html" %}
+
     <script type="text/javascript">
         dojo.require("dojo.parser");
         dojo.require("dijit.form.DateTextBox");

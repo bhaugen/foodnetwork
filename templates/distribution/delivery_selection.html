@@ -7,8 +7,9 @@
 
 {% block extra_head %}
 {{ block.super }}
-    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.4/dojo/dojo.xd.js"
-        djConfig="parseOnLoad: true"></script>
+
+{% include "dojo_include.html" %}
+
     <script type="text/javascript">
         dojo.require("dojo.parser");
         dojo.require("dijit.form.DateTextBox");
@@ -17,24 +18,7 @@
 {% endblock %}
 
 {% block header %}
-    <!--<script djConfig="isDebug: true" type="text/javascript" src="http://o.aolcdn.com/dojo/1.0.0/dojo/dojo.xd.js"></script>-->
-<!--
-	<style type="text/css" >
-		.read-only-td
-		{
-			background-color: #E8E8E8; !important;
-		}
 
-		.read-only-input
-		{
-			background-color: #E8E8E8; !important;
-			border-style: solid; 
-			border-width: 1px; 
-			border-color: #E8E8E8; 
-		}
-	</style>
-    <script type="text/javascript" src="http://o.aolcdn.com/dojo/1.0.0/dojo/dojo.xd.js"></script>
--->
 
     <script type="text/javascript" >
 
