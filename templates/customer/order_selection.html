@@ -31,7 +31,9 @@
 		<form action="." method="POST" >{% csrf_token %}
         		<table>
 			<tr>
-                		<th style="text-align: right; " >Delivery Date:</th>
+				<th style="text-align: right; " >Delivery Date:</th>
+				<th>{{ delivery_date|date:"l, F j" }}</th>
+				{% comment %}
                 		<td>
 					{{ selection_form.order_date }}
 				</td>
@@ -40,6 +42,7 @@
 						{{selection_form.order_date.errors }}
 					</td>
 				{% endif %}
+				{% endcomment %}
 			</tr>
 			<tr>
 				<th style="text-align: right; " >Product List:</th>

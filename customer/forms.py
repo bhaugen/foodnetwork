@@ -7,8 +7,8 @@ from distribution.models import *
 
 
 class NewOrderSelectionForm(forms.Form):
-    order_date = forms.DateField(
-        widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
+    #order_date = forms.DateField(
+    #    widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
     product_list = forms.ChoiceField()
 
     def __init__(self, customer, *args, **kwargs):

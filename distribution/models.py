@@ -537,6 +537,29 @@ class Customer(Party):
         else:
             return Decimal("0")
 
+    def next_delivery_date(self, date_and_time=None):
+        if not date_and_time:
+            date_and_time = datetime.datetime.now()
+        cycles = self.delivery_cycles.all()
+        dd = None
+        if cycles.count() == 1:
+            cycle = cycles[0].delivery_cycle
+            dd = cycle.next_delivery_date()
+            if date_and_time > cycle.order_closing(dd):
+                dd = dd + datetime.timedelta(days=1)
+                dd = cycle.next_delivery_date(dd)
+        elif cycles:
+            for c in cycles:
+                cycle = c.delivery_cycle
+                dd = cycle.next_delivery_date()
+                if cycle.order_closing(dd) > date_and_time:
+                    break
+        return dd
+
+
+        
+
+
     @property
     def email(self):
         return self.email_address
@@ -678,19 +701,27 @@ class Product(models.Model):
         producers = list(set(producers))
         producer_string = ", ".join(producers)
         return producer_string
-    
-    def total_ordered(self, thisdate):
+
+    def current_orders(self, thisdate):
+        #todo: this date range shd be changed
+        # maybe something based on DeliveryCycle?
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
-        myorders = OrderItem.objects.filter(product=self, order__delivery_date__range=(weekstart, weekend))
-        return sum(order.quantity for order in myorders)
+        return OrderItem.objects.filter(product=self, order__delivery_date__range=(weekstart, weekend))
+    
+    def total_ordered(self, thisdate):
+        return sum(order.quantity for order in self.current_orders(thisdate))
+
+    def total_unfilled(self, thisdate):
+        myorders = self.current_orders(thisdate)
+        return sum(order.unfilled_quantity() for order in myorders)
 
     def avail_for_customer(self, thisdate):
         if use_plans_for_ordering():
             avail = sum(plan.quantity for plan in self.production_plans(thisdate))
         else:
             avail = self.total_avail(thisdate)
-        return avail - self.total_ordered(thisdate)
+        return avail - self.total_unfilled(thisdate)
     
     def deliveries_this_week(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
@@ -1492,6 +1523,9 @@ class OrderItem(models.Model):
     
     def delivered_quantity(self):
         return sum(tx.amount for tx in self.inventorytransaction_set.all())
+
+    def unfilled_quantity(self):
+        return self.quantity - self.delivered_quantity()
         
     def producer_fee(self):
         return producer_fee()
@@ -1948,13 +1982,20 @@ class DeliveryCycle(models.Model):
     def customer_list(self):
         return ", ".join(c.short_name for c in self.customers.all())
 
-    def next_delivery_date(self):
-        date = datetime.date.today()
+    def next_delivery_date(self, date=None):
+        if not date:
+            date = datetime.date.today()
         monday = date - datetime.timedelta(days=datetime.date.weekday(date))
         dd = monday + datetime.timedelta(days=(self.delivery_day - 1))
         if dd <= date:
             dd = dd + datetime.timedelta(days=7)
         return dd
+
+    def order_closing(self, delivery_date):
+        offset = abs(self.delivery_day - self.order_closing_day)
+        closing_date = delivery_date - datetime.timedelta(days=offset)
+        return datetime.datetime.combine(closing_date, self.order_closing_time)
+
 
 class CustomerDeliveryCycle(models.Model):
     customer = models.ForeignKey(Customer, related_name="delivery_cycles",

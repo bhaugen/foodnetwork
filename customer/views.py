@@ -54,7 +54,7 @@ def get_customer(request):
     try:
         customer = request.user.parties.all()[0].party
         if customer.is_customer():
-            return customer
+            return customer.as_leaf_class()
         else:
             return None
     except:
@@ -86,6 +86,7 @@ def order_selection(request):
     customer = get_customer(request)
     if not customer:
         return render_to_response('account/no_permissions.html')
+    delivery_date = customer.next_delivery_date()
     selection_form = NewOrderSelectionForm(customer, data=request.POST or None)
     unsubmitted_orders = Order.objects.filter(
         customer=customer,
@@ -103,13 +104,14 @@ def order_selection(request):
         if selection_form.is_valid():
             sf_data = selection_form.cleaned_data
             product_list = sf_data['product_list']
-            ord_date = sf_data['order_date']
+            #ord_date = sf_data['order_date']
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/%s/'
-               % ('customer/neworder', customer.id, ord_date.year,
-                  ord_date.month, ord_date.day, product_list))
+               % ('customer/neworder', customer.id, delivery_date.year,
+                  delivery_date.month, delivery_date.day, product_list))
 
     return render_to_response('customer/order_selection.html', 
         {'customer': customer,
+         'delivery_date': delivery_date,
          'food_network': fn,
          'selection_form': selection_form,
          'unsubmitted_orders': unsubmitted_orders,
