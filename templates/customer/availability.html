@@ -20,7 +20,9 @@
 	<h2>What's available for delivery on {{ delivery_date|date:"l, F j" }} </br>
 		from {{ network.long_name }}</h2>
 
-	<p>If you have customer login credentials, you may 
+	<p>
+		Order closing: {{ order_closing|date:"l, F j, f A" }}.&nbsp;&nbsp;
+		If you have customer login credentials, you may 
 		<a href="{% url customer_dashboard %}">place an order</a>.
 	</p>
 	<p>If you want to become a customer, please <a href="mailto:orders@keewaydinorganics.com">send us an email</a></p>

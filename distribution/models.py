@@ -510,6 +510,15 @@ class Distributor(Party):
     pass
 
 
+class NextDeliveryCycle(object):
+    def __init__(self, cycle, delivery_date):
+        self.cycle = cycle
+        self.delivery_date = delivery_date
+    
+    def order_closing(self):
+        return self.cycle.order_closing(self.delivery_date)
+
+
 class Customer(Party):
     customer_transportation_fee = models.DecimalField(_('customer transportation fee'), max_digits=8, decimal_places=2, default=Decimal("0"),
         help_text=_('Any value but 0 in this field will override the default fee from the Food Network'))
@@ -556,6 +565,28 @@ class Customer(Party):
                     break
         return dd
 
+    def next_delivery_cycle(self,  date_and_time=None):
+        if not date_and_time:
+            date_and_time = datetime.datetime.now()
+        cycles = self.delivery_cycles.all()
+        answer = None
+        if cycles.count() == 1:
+            cycle = cycles[0].delivery_cycle
+            dd = cycle.next_delivery_date()
+            oc = cycle.order_closing(dd)
+            answer = NextDeliveryCycle(cycle, dd)
+            if date_and_time > oc:
+                dd = dd + datetime.timedelta(days=1)
+                dd = cycle.next_delivery_date(dd)
+                answer = NextDeliveryCycle(cycle, dd)
+        elif cycles:
+            for c in cycles:
+                cycle = c.delivery_cycle
+                dd = cycle.next_delivery_date()
+                if cycle.order_closing(dd) > date_and_time:
+                    answer = NextDeliveryCycle(cycle, dd)
+                    break
+        return answer
 
         
 

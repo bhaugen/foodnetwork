@@ -42,10 +42,12 @@ def availability(request, cycle_id):
         from_date__lte=weekend,
         to_date__gte=weekstart)
     delivery_date = cycle.next_delivery_date()
+    order_closing = cycle.order_closing(delivery_date)
     avail_rows = fn.customer_availability(delivery_date)
     return render_to_response('customer/availability.html', 
         {'avail_rows': avail_rows,
          'delivery_date': delivery_date,
+         'order_closing': order_closing,
          'network': fn,
          'specials': specials,
          }, context_instance=RequestContext(request))
@@ -74,10 +76,12 @@ def customer_dashboard(request):
     specials = Special.objects.filter(
         from_date__lte=weekend,
         to_date__gte=weekstart)
+    cycle = customer.next_delivery_cycle()
     return render_to_response('customer/customer_dashboard.html', 
         {'customer': customer,
          'food_network': fn,
          'specials': specials,
+         'cycle': cycle,
          }, context_instance=RequestContext(request))
 
 @login_required
@@ -86,6 +90,8 @@ def order_selection(request):
     customer = get_customer(request)
     if not customer:
         return render_to_response('account/no_permissions.html')
+    #todo: must check if delivery_date exists, 
+    #else use form with delivery date
     delivery_date = customer.next_delivery_date()
     selection_form = NewOrderSelectionForm(customer, data=request.POST or None)
     unsubmitted_orders = Order.objects.filter(
