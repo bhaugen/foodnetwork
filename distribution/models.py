@@ -85,6 +85,22 @@ class ProductQuantity(object):
          self.product = product
          self.qty = qty
 
+class CustomerProductAvailability(object):
+     def __init__(self, product, price, qty, inventory_date, expiration_date):
+         self.product = product
+         self.price = price
+         self.qty = qty
+         self.inventory_date = inventory_date
+         self.expiration_date = expiration_date
+
+
+class StaffProductOrderingStats(object):
+     def __init__(self, avail, ordered, inventory_date, expiration_date):
+         self.avail = avail
+         self.ordered = ordered
+         self.inventory_date = inventory_date
+         self.expiration_date = expiration_date
+
 
 class PickupCustodian(object):
      def __init__(self, custodian, address, products):
@@ -300,16 +316,16 @@ class FoodNetwork(Party):
     def email(self):
         return self.email_address
     
+    # deprecated
     def fresh_list(self, thisdate = None):
         if not thisdate:
             thisdate = current_week()
+        # todo: no need to go thru all products,
+        # shd just use InventoryItems or ProductPlans (not by product)
+        # see avail_items_for_customer
         prods = Product.objects.all()
         item_list = []
         for prod in prods:
-            #item_chain = prod.avail_items(thisdate)
-            #items = []
-            #for item in item_chain:
-            #    items.append(item)
             if self.use_plans_for_ordering:
                 items = prod.production_plans(thisdate)
                 avail_qty = sum(item.quantity for item in items)
@@ -326,7 +342,27 @@ class FoodNetwork(Party):
                 #item_list.append(ProductAndProducers(prod.long_name, avail_qty, price, producers))
                 item_list.append(ProductAndLots(prod.long_name, avail_qty, price, items))
         return item_list
+
+    # deprecated
+    def avail_list(self, delivery_date):
+        # todo: no need to go thru all products,
+        # shd just use InventoryItems or ProductPlans (not by product)
+        # see avail_items_for_customer
+        prods = Product.objects.all()
+        item_list = []
+        for prod in prods:
+            if self.use_plans_for_ordering:
+                items = prod.production_plans(thisdate)
+                avail_qty = sum(item.quantity for item in items)
+            else:
+                items = prod.avail_items_today(thisdate)
+                avail_qty = sum(item.avail_qty() for item in items)
+            if avail_qty > 0:
+                price = prod.price.quantize(Decimal('.01'), rounding=ROUND_UP)
+                item_list.append(ProductAndLots(prod.long_name, avail_qty, price, items))
+        return item_list
     
+    # deprecated
     def pickup_list(self, thisdate = None):
         if not thisdate:
             thisdate = current_week()
@@ -403,19 +439,8 @@ class FoodNetwork(Party):
                 otbd = dd.customers[cust]
                 otbd.products = otbd.products.values()
         return distributors
-                
-        #    customer = item.order.customer.long_name
-        #    product = item.product.id
-        #    if not product in product_producers:
-        #            product_producers[product] = item.product.avail_producers(thisdate)
-        #    producers = product_producers[product]             
-        #    if not customer in customers:
-        #        customers[customer] = OrderToBeDelivered(customer, item.order.customer.address, [])
-        #    customers[customer].products.append(ProductAndProducers(item.product.long_name, item.quantity, item.product.price, producers))
-        #item_list = customers.values()
-        #item_list.sort(lambda x, y: cmp(x.customer, y.customer))   
-        #return item_list
-    
+
+    # deprecated but used
     def all_avail_items(self, thisdate=None):
         if not thisdate:
             thisdate = current_week()
@@ -424,55 +449,59 @@ class FoodNetwork(Party):
         expired_date = thisdate
         #import pdb; pdb.set_trace()
         items = InventoryItem.objects.filter(
-            #inventory_date__lte=expired_date,
-            expiration_date__gte=expired_date)
+            inventory_date__lte=expired_date,
+            expiration_date__gt=expired_date)
         items = items.filter(Q(remaining__gt=0) |
                              Q(onhand__gt=0)).order_by("producer__short_name",
                                                        "product__short_name")
         return items
 
-    def customer_availability(self, thisdate=None):
-        if not thisdate:
-            thisdate = current_week()
-        monday = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
-        saturday = monday + datetime.timedelta(days=5)
+    def avail_items_for_customer(self, delivery_date):
+        items = InventoryItem.objects.filter(
+            inventory_date__lte=delivery_date,
+            expiration_date__gt=delivery_date)
+        items = items.filter(Q(remaining__gt=0) |
+                             Q(onhand__gt=0)).order_by("producer__short_name",
+                                                       "product__short_name")
+        return items
+
+    def customer_availability(self, delivery_date):
         avail = []
         products = {}
         if self.use_plans_for_ordering:
             plans = ProductPlan.objects.filter(
                 role="producer",
-                from_date__lte=monday, 
-                to_date__gte=saturday)
+                from_date__lte=delivery_date, 
+                to_date__gte=delivery_date)
             for plan in plans:
                 if plan.product.id not in products:
-                    products[plan.product.id] = ProductQuantity(plan.product,
-                                                           Decimal("0"))
+                    products[plan.product.id] = CustomerProductAvailability(plan.product,
+                        Decimal("0"), Decimal("0"), plan.from_date, plan.to_date)
                 products[plan.product.id].qty += plan.quantity
-            #for pq in products.values():
-            #    pq.qty -= pq.product.total_ordered(thisdate)
-            #    if pq.qty > 0:
-            #        pq.category = pq.product.parent_string()
-            #        pq.product_name = pq.product.short_name
-            #        avail.append(pq)
-            #import pdb; pdb.set_trace()
-            #avail = sorted(avail, key=attrgetter('product_name'))
-            #return avail
         else:
-            items = self.all_avail_items(thisdate)
+            items = self.avail_items_for_customer(delivery_date)
             for item in items:
                 if item.product.id not in products:
-                    products[item.product.id] = ProductQuantity(item.product,
-                                                           Decimal("0"))
-                products[item.product.id].qty += item.avail_qty()
-        for pq in products.values():
-            pq.qty -= pq.product.total_ordered(thisdate)
-            if pq.qty > 0:
-                pq.category = pq.product.parent_string()
-                pq.product_name = pq.product.short_name
-                avail.append(pq)
+                    products[item.product.id] = CustomerProductAvailability(item.product,
+                         Decimal("0"), Decimal("0"), item.inventory_date, item.expiration_date)
+                pa = products[item.product.id]
+                pa.qty += item.avail_qty()
+                if pa.inventory_date < item.inventory_date:
+                    pa.inventory_date = item.inventory_date
+                if pa.expiration_date > item.expiration_date:
+                    pa.expiration_date = item.expiration_date
+        for pa in products.values():
+            pa.qty -= pa.product.total_ordered_for_timespan(
+                pa.inventory_date, pa.expiration_date)
+            if pa.qty > 0:
+                pa.category = pa.product.parent_string()
+                pa.product_name = pa.product.short_name
+                pa.price = pa.product.price.quantize(Decimal('.01'), rounding=ROUND_UP)
+                avail.append(pa)
         avail = sorted(avail, key=attrgetter('product_name'))
         return avail
-    
+
+    # deprecated
     def all_active_items(self, thisdate = None):
         # todo: this and dashboard need work
         # e.g. shows steers with no avail or orders, but some were consumed
@@ -483,7 +512,7 @@ class FoodNetwork(Party):
         weekend = weekstart + datetime.timedelta(days=5)
         return InventoryItem.objects.filter(
             inventory_date__lte=weekend,
-            expiration_date__gte=weekend)
+            expiration_date__gt=weekend)
           
 
 class ProducerManager(models.Manager):
@@ -659,22 +688,29 @@ class Product(models.Model):
             up = special.price
         return up
 
+    # suspect but used
+    #shd be based on delivery cycle
+    #changed temporarily to dup avail_items_today
     def avail_items(self, thisdate):
-        # todo: looks all wrong, shd just be thisdate
         #import pdb; pdb.set_trace()
-        weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
-        weekend = weekstart + datetime.timedelta(days=5)
-        expired_date = weekstart + datetime.timedelta(days=5)
-        items = InventoryItem.objects.filter(product=self,
-            # shd just depend on expiration
-            #inventory_date__lte=thisdate,
-            expiration_date__gte=expired_date)
-        items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
-        return items
+        #weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
+        #weekend = weekstart + datetime.timedelta(days=5)
+        #expired_date = weekstart + datetime.timedelta(days=5)
+        #items = InventoryItem.objects.filter(product=self,
+        #    inventory_date__lte=thisdate,
+        #    expiration_date__gt=expired_date)
+        #items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
+        #return items
+        return self.avail_items_today(thisdate)
 
+    # ok
     def avail_items_today(self, thisdate):
+        """
+        means all available inventory items not reduced by orders
+        """
         items = InventoryItem.objects.filter(product=self,
-            expiration_date__gte=thisdate)
+            inventory_date__lte=thisdate,
+            expiration_date__gt=thisdate)
         items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
         return items
 
@@ -687,17 +723,19 @@ class Product(models.Model):
             from_date__lte=thisdate, 
             to_date__gte=weekend)
         return plans
-    
+
+    #suspect - probably obsolete
     def current_items(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
         expired_date = weekstart + datetime.timedelta(days=5)
         items = InventoryItem.objects.filter(product=self, 
             inventory_date__lte=weekend,
-            expiration_date__gte=expired_date)
+            expiration_date__gt=expired_date)
         #items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
         return items
-    
+
+    # suspect - used once
     def ready_items(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
@@ -705,25 +743,73 @@ class Product(models.Model):
             inventory_date__range=(weekstart, weekend),
             planned__gt=0, onhand__exact=0,  received__exact=0)
         return items
-    
+
+    #suspect - used a lot - ok if meaning is correct for use
     def total_avail(self, thisdate):
+        """
+        means quantity available on this date, not reduced by orders
+        """
         if use_plans_for_ordering():
             return sum(plan.quantity for plan in self.production_plans(thisdate))
         else:
             return sum(item.avail_qty() for item in self.avail_items(thisdate))
-    
+
+    # dup of total_avail? no, because it uses avail_items_today
+    def total_avail_today(self, thisdate):
+        """
+        means quantity available on this date, not reduced by orders
+        """
+        if use_plans_for_ordering():
+            return sum(plan.quantity for plan in self.production_plans(thisdate))
+        else:
+            return sum(item.avail_qty() for item in self.avail_items_today(thisdate))
+
+    def staff_ordering_stats(self, delivery_date):
+        stats = None
+        if use_plans_for_ordering():
+            plans = ProductPlan.objects.filter(
+                product=self,
+                role="producer",
+                from_date__lte=delivery_date, 
+                to_date__gte=delivery_date)
+            for plan in plans:
+                if not stats:
+                    stats = StaffProductOrderingStats(
+                        Decimal("0"), Decimal("0"), plan.from_date, plan.to_date)
+                stats.avail += plan.quantity
+        else:
+            items = self.avail_items_today(delivery_date)
+            for item in items:
+                if not stats:
+                    stats = StaffProductOrderingStats(
+                        Decimal("0"), Decimal("0"), item.inventory_date, item.expiration_date)
+                stats.avail += item.avail_qty()
+                if stats.inventory_date < item.inventory_date:
+                    stats.inventory_date = item.inventory_date
+                if stats.expiration_date > item.expiration_date:
+                    stats.expiration_date = item.expiration_date
+        if stats:
+            stats.ordered = self.total_ordered_for_timespan(
+                stats.inventory_date, stats.expiration_date)
+        else:
+            stats = StaffProductOrderingStats(
+                Decimal("0"), Decimal("0"), delivery_date, delivery_date)
+        return stats
+            
+    #suspect    
     def avail_producers(self, thisdate):
         producers = []
-        myavails = self.avail_items(thisdate)
+        myavails = self.avail_items_today(thisdate)
         for av in myavails:
             producers.append(av.producer.short_name)
         producers = list(set(producers))
         producer_string = ", ".join(producers)
         return producer_string
-    
+
+    #suspect
     def active_producers(self, thisdate):
         producers = []
-        myavails = self.avail_items(thisdate)
+        myavails = self.avail_items_today(thisdate)
         for av in myavails:
             producers.append(av.producer.short_name)
         deliveries = self.deliveries_this_week(thisdate)
@@ -733,34 +819,52 @@ class Product(models.Model):
         producer_string = ", ".join(producers)
         return producer_string
 
+    def current_orders_for_timespan(self, from_date, to_date):
+        return OrderItem.objects.filter(product=self,
+            order__delivery_date__range=(from_date, to_date))
+    
+    def total_ordered_for_timespan(self, from_date, to_date):
+        return sum(order.unfilled_quantity() for order in
+            self.current_orders_for_timespan(from_date, to_date))
+
+    # deprecated - used a little
     def current_orders(self, thisdate):
         #todo: this date range shd be changed
         # maybe something based on DeliveryCycle?
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
         return OrderItem.objects.filter(product=self, order__delivery_date__range=(weekstart, weekend))
-    
-    def total_ordered(self, thisdate):
-        return sum(order.quantity for order in self.current_orders(thisdate))
 
+    #dup - used alot
+    #shd differentiate, one shd be all ordered including filled and unfilled?
+    def total_ordered(self, thisdate):
+        return sum(order.unfilled_quantity() for order in self.current_orders(thisdate))
+
+    #dup - used once below
     def total_unfilled(self, thisdate):
         myorders = self.current_orders(thisdate)
         return sum(order.unfilled_quantity() for order in myorders)
 
+    # ok
     def avail_for_customer(self, thisdate):
+        """
+        means quantity available for this date, reduced by quantity ordered
+        """
         if use_plans_for_ordering():
             avail = sum(plan.quantity for plan in self.production_plans(thisdate))
         else:
-            avail = self.total_avail(thisdate)
+            avail = self.total_avail_today(thisdate)
         return avail - self.total_unfilled(thisdate)
-    
+
+    #suspect - used twice
     def deliveries_this_week(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
         deliveries = InventoryTransaction.objects.filter(transaction_type="Delivery")
         return deliveries.filter(
             order_item__product=self, transaction_date__range=(weekstart, weekend))
-    
+
+    #suspect - not used
     def total_delivered(self, thisdate):
         deliveries = self.deliveries_this_week(thisdate)
         return sum(delivery.amount for delivery in deliveries)
@@ -1407,7 +1511,9 @@ class ShortOrderItems(object):
          self.quantity_short = quantity_short
          self.order_items = order_items
 
-
+#todo: check this out
+# shorts shd use total_avail meaning all remaining, not reduced by ordered
+# total_ordered shd mean unfilled within avail date range
 def shorts_for_date(delivery_date):
     shorts = []
     maybes = {}
@@ -1425,7 +1531,9 @@ def shorts_for_date(delivery_date):
             shorts.append(maybes[maybe])
     return shorts
 
-
+#todo: check this out
+#see above shorts_for_date
+#plus, shorts for week shd probly be shorts_for_delivery_cycle
 def shorts_for_week():
     cw = current_week()
     monday = cw - datetime.timedelta(days=datetime.date.weekday(cw))
@@ -1468,13 +1576,26 @@ class OrderItem(models.Model):
         for delivery in deliveries:
             delivery.delete()
         super(OrderItem, self).delete()
-    
+
+    #todo: check this out
     def total_avail(self):
+        """
+        means quantity available on delivery_date, not reduced by orders
+        """
         return self.product.total_avail(self.order.delivery_date)
-    
+
+    #todo: check this out
     def total_ordered(self):
         return self.product.total_ordered(self.order.delivery_date)
 
+    #todo: check this out
+    # shorts shd use total_avail meaning all remaining, not reduced by ordered
+    # total_ordered shd mean unfilled within avail date range
+    #but where is this used?
+    #does it mean qty_short per product, or for this orderItem?
+    #(in order_confirmation, looks like it means for this orderItem)
+    #if per product, shd not be here...
+    #note: see short_adjusted_qty below
     def qty_short(self):
         avail = self.total_avail()
         ordered = self.total_ordered()
@@ -1483,6 +1604,9 @@ class OrderItem(models.Model):
         else:
             return Decimal("0")
 
+    #todo: check this out
+    #seems wrong, because qty_short looks like per product, not this orderItem
+    #but maybe it's ok as used in order_confirmation?
     def short_adjusted_qty(self):
         return self.quantity - self.qty_short()
 

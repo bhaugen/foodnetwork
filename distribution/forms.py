@@ -505,6 +505,7 @@ class AllInventoryItemForm(forms.ModelForm):
 
 
 class AvailableItemForm(forms.Form):
+    inventory_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
     expiration_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
     quantity = forms.DecimalField(widget=forms.TextInput(attrs={'class':
                                                                'quantity-field',
@@ -513,7 +514,7 @@ class AvailableItemForm(forms.Form):
 
     class Meta:
         model = InventoryItem
-        fields = ('expiration_date',)
+        fields = ('inventory_date', 'expiration_date',)
 
 
 def create_inventory_item_forms(producer, avail_date, plans, items, data=None):
@@ -820,7 +821,7 @@ class OrderItemForm(forms.ModelForm):
          exclude = ('order', 'product', 'fee', 'orig_qty')
 
 
-def create_order_item_forms(order, availdate, orderdate, data=None):
+def create_order_item_forms(order, delivery_date, data=None):
     form_list = []
     item_dict = {}
     if order:
@@ -832,14 +833,15 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
         prod.parents = prod.parent_string()
     prods.sort(lambda x, y: cmp(x.parents, y.parents))
     for prod in prods:
-        totavail = prod.total_avail(availdate)
-        totordered = prod.total_ordered(orderdate)
+        stats = prod.staff_ordering_stats(delivery_date)
+        totavail = stats.avail
+        totordered = stats.ordered
         try:
             item = item_dict[prod.id]
         except KeyError:
             item = False
         if item:
-            producers = prod.avail_producers(availdate)
+            producers = prod.avail_producers(delivery_date)
             initial_data = {
                 'prod_id': prod.id,
                 'avail': totavail,
@@ -856,13 +858,13 @@ def create_order_item_forms(order, availdate, orderdate, data=None):
         else:
             #fee = prod.decide_fee()
             if totavail > 0:
-                producers = prod.avail_producers(availdate)
+                producers = prod.avail_producers(delivery_date)
                 oiform = OrderItemForm(data, prefix=prod.short_name, initial={
                     'prod_id': prod.id, 
                     'description': prod.long_name, 
                     'avail': totavail, 
                     'ordered': totordered, 
-                    'unit_price': prod.unit_price_for_date(availdate), 
+                    'unit_price': prod.unit_price_for_date(delivery_date), 
                     #'fee': fee,  
                     'quantity': 0})
                 oiform.description = prod.long_name

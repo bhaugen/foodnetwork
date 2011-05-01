@@ -868,7 +868,7 @@ def order_update(request, cust_id, year, month, day):
                 'transportation_fee': fn.transportation_fee,
                 })
         #import pdb; pdb.set_trace()
-        itemforms = create_order_item_forms(order, availdate, delivery_date, request.POST)
+        itemforms = create_order_item_forms(order, delivery_date, request.POST)
         #import pdb; pdb.set_trace()
         if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
             if order:
@@ -935,7 +935,7 @@ def order_update(request, cust_id, year, month, day):
                 'delivery_date': delivery_date,
                 'transportation_fee': fn.transportation_fee,
             })
-        itemforms = create_order_item_forms(order, availdate, delivery_date)
+        itemforms = create_order_item_forms(order, delivery_date)
     return render_to_response('distribution/order_update.html', 
         {'customer': customer, 
          'order': order, 
@@ -3072,7 +3072,7 @@ def new_process(request, process_type_id):
         input_lots = InventoryItem.objects.filter(
             product__in=input_types, 
             inventory_date__lte=weekend,
-            expiration_date__gte=expired_date,
+            expiration_date__gt=expired_date,
             remaining__gt=Decimal("0"))
         initial_data = {"quantity": Decimal("0")}
 
@@ -3294,6 +3294,10 @@ def email_selection(request):
 
 @login_required
 def avail_email_prep(request, cycles):
+    try:
+        fn = food_network()
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
     cycle_ids = cycles.split("_")
     cycles = []
     for id in cycle_ids:
@@ -3310,6 +3314,7 @@ def avail_email_prep(request, cycles):
         plans = weekly_production_plans(avail_date) 
     else:
         item_forms = create_avail_item_forms(avail_date, data=request.POST or None)
+    products = fn.customer_availability(avail_date)
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         if intro_form.is_valid() and all([form.is_valid() for form in item_forms]):
@@ -3317,11 +3322,13 @@ def avail_email_prep(request, cycles):
             intro_form.save()
             for form in item_forms:
                 item_data = form.cleaned_data
+                ivd = item_data['inventory_date']
                 ed = item_data['expiration_date']
                 qty = Decimal(item_data['quantity'])
                 id = int(item_data['item_id'])
                 item = InventoryItem.objects.get(id=id)
-                if ed != item.expiration_date or qty != item.avail_qty():
+                if ivd != item.inventory_date or ed != item.expiration_date or qty != item.avail_qty():
+                    item.inventory_date = ivd
                     item.expiration_date = ed
                     if item.remaining:
                         item.remaining = qty
@@ -3339,6 +3346,7 @@ def avail_email_prep(request, cycles):
         'intro_form': intro_form,
         'item_forms': item_forms,
         'plans': plans,
+        'products': products,
         'avail_date': avail_date,
     }, context_instance=RequestContext(request))
 

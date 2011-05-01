@@ -466,7 +466,7 @@ def new_order(request, cust_id, year, month, day, list_id=None):
 def edit_order(request, order_id):
     order = get_object_or_404(Order, id=int(order_id))
     orderdate = order.order_date
-    availdate = orderdate
+    availdate = order.delivery_date
 
     customer = order.customer
     product_list = order.product_list

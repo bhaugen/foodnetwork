@@ -153,24 +153,54 @@ dojo.require("dojo.parser");
 
 
 	<h3>Available Items as of {{ avail_date }}</h3>
-	<p>Customers will see items where expiration date is on or after delivery date</p>
+	<div style="float: left;">
+	<p>
+	Customers see the sum of item quantities where inventory date is on or before delivery date
+	</br>and expiration date is after delivery date, reduced by the quantity already ordered.
+	</br>The quantity ordered is by product, and will only be shown once.
+	</p>
+
 	<table class="ga-event-table" >
 	    <tr>
-		<th>{% trans "Producer" %}</th>
 		<th>{% trans "Product" %}</th>
-		<th>{% trans "Available Qty" %}</th>
+		<th>{% trans "Producer" %}</th>
+		<th>{% trans "Ordered" %}</th>
+		<th>{% trans "Quantity" %}</th>
+		<th>{% trans "Inventory Date" %}</th>
 		<th>{% trans "Expiration Date" %}</th>
             </tr>
             {% for item_form in item_forms %}
 	    	<tr>
-		    	<td class="read-only-td" > {{ item_form.producer }} </td>
-			 <td class="read-only-td" > {{ item_form.description }} </td>
-			 <td> {{ item_form.quantity }} </td>
-			 <td> {{ item_form.expiration_date }} </td>
+		    	<td class="read-only-td" > {{ item_form.description }} </td>
+			<td class="read-only-td" > {{ item_form.producer }} </td>
+			<td class="read-only-td" style="text-align:right;" >
+				{% ifchanged item_form.ordered %} {{ item_form.ordered }} {% endifchanged %} 
+			</td>
+			<td> {{ item_form.quantity }} </td>
+			<td> {{ item_form.inventory_date }} </td>
+			<td> {{ item_form.expiration_date }} </td>
 			{{ item_form.item_id }}
                 </tr>
            {% endfor %} 
 	</table>
+	</div>
+	<div class="ga-event-table" style="float: left; margin-left: 1em; padding-top: 5em; border: none;">
+		<h3>What customers will see</h3>
+		<table>
+			<tr>
+				<th>{% trans "Product" %}</th>
+				<th>{% trans "Available" %}</th>
+			</tr>
+			{% for product in products %}
+			<tr>
+				<td>{{ product.product }}</td>
+				<td style="text-align: right;" >{{ product.qty }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+
+	</div>
+	<div style="clear: both;"></div>
 
 	<p>
 		<input type="submit" value="{% trans 'Save and Send' %}" />
