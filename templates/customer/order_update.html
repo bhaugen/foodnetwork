@@ -116,19 +116,15 @@
 		function finishQuantityChange(evt)
 		{
 			var row = evt.target.id.split('-')[0];
-			//changeTotalOrdered(row);
+			checkTotalOrdered(row);
 			extendPriceForRow(row);
 		}
 
 
-		var orderedTotals = {};
 		var thisOrderQty = {};
 
 		function checkTotalOrdered(row)
 		{
-			// *** This function does not work! ***
-			// avail must be rethought!
-			var totOrd = parseFloat(orderedTotals[row + '-ordered']);
 			var qtyFieldName = row + '-quantity';
 			var qtyField = dojo.byId(qtyFieldName);
 			qtyField.style.color = "black";
@@ -137,7 +133,7 @@
 			var prevQty = parseFloat(thisOrderQty[qtyFieldName]);
 			if (qty > prevQty)
 			{
-				if (totOrd == avail)
+				if (prevQty == avail)
 				{
 					qtyField.value = prevQty;
 					qtyField.style.color = "red";
@@ -145,50 +141,20 @@
 				}
 			}
 		
-			var qtyDelta = qty - prevQty;
-			var newTotal = totOrd + qtyDelta;
-			if (newTotal > avail)
+			if (qty > avail)
 			{
-				qty = avail - totOrd + prevQty;
+				qty = avail;
 				qtyField.value = qty;
 				qtyField.style.color = "red";
 			}
-			var qtyDelta = qty - prevQty;
-			var newTotal = totOrd + qtyDelta;
-			var totOrdField = dojo.byId(row + '-ordered').value = newTotal;
 			thisOrderQty[qtyFieldName] = qty;
-			orderedTotals[row + '-ordered'] = newTotal;
-		}
-
-		function changeTotalOrdered(row)
-		{
-			var totOrd = parseFloat(orderedTotals[row + '-ordered']);
-			var qtyFieldName = row + '-quantity';
-			var qty = parseFloat(dojo.byId(qtyFieldName).value);
-			var prevQty = parseFloat(thisOrderQty[qtyFieldName]);
-			var qtyDelta = qty - prevQty;
-			var newTotal = totOrd + qtyDelta;
-			var totOrdField = dojo.byId(row + '-ordered').value = newTotal;
-			thisOrderQty[qtyFieldName] = qty;
-			orderedTotals[row + '-ordered'] = newTotal;
 		}
 
 		function quantityChanged(evt)
 		{
-			//alert(evt.target.id + " changed: " + evt.target.value);
 			validateNumber(evt, finishQuantityChange);
-
 		}
 
-		function priceChanged(evt)
-		{
-			validateNumber(evt, extendPriceForEvt);
-		}
-
-		function feeChanged(evt)
-		{
-			validateNumber(evt);
-		}
 
 		dojo.addOnLoad(function()
 		{
@@ -201,24 +167,6 @@
 				extendPriceForRow(row);
 				thisOrderQty[node.id] = node.value;
 			}
-			/*
-			var queryNodes = dojo.query(".unit-price-field");
-			for(var i=0;i<queryNodes.length;i++)
-			{
-				dojo.connect(queryNodes[i], "onblur", "priceChanged");
-			}
-			var queryNodes = dojo.query(".fee-field");
-			for(var i=0;i<queryNodes.length;i++)
-			{
-				dojo.connect(queryNodes[i], "onblur", "feeChanged");
-			}
-			var queryNodes = dojo.query(".total-ordered");
-			for(var i=0;i<queryNodes.length;i++)
-			{
-				var thisNode = queryNodes[i];
-				orderedTotals[thisNode.id] = thisNode.value;
-			}
-			*/
 		});
 
     </script>
@@ -276,7 +224,6 @@
                 <th>Growing Method</th>
                 <th>Producers</th>
                 <th>Available</th>
-		<!--<th>Ordered</th>-->
                 <th>Unit Price</th>
                 <th>Order Qty</th>
                 <th>Extended</th>
@@ -289,7 +236,6 @@
 					<td class="read-only-td" > {{ item_form.growing_method }} </td>
 					<td class="read-only-td" > {{ item_form.producers }} </td>
 					<td class="read-only-td" > {{ item_form.avail }} </td>
-					<!--<td class="read-only-td" > {{ item_form.ordered }} </td>-->
 					<td class="read-only-td" > {{ item_form.unit_price }} </td>
 					<td> {{ item_form.quantity }} </td>
 					<td id="id_{{ item_form.prefix }}-ext_price" class="read-only-td ext-price" style="text-align: right" ></td>
