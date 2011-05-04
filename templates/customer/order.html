@@ -23,7 +23,13 @@
         </tr>
         <tr>
             <th style="text-align: right; " >{% trans "Customer" %}: </th>
-            <td>{{order.customer.short_name}} {{order.customer.long_name}}</td>
+	    <td>
+		    {% if order.customer.long_name %}
+		    {{order.customer.long_name}}
+		    {% else %}
+		    {{order.customer.short_name}} 
+		    {% endif %}
+	    </td>
         </tr>
         <tr>
 		<th style="text-align: right; " >{% trans "Purchase Order" %}: </th>
@@ -37,11 +43,6 @@
             <th style="text-align: right; " >{% trans "Delivery Date" %}: </th>
             <td>{{order.delivery_date}}</td>
         </tr>
-	<tr>
-            <th style="text-align: right; " >{% trans "Distributor" %}: </th>
-            <td>{{order.distributor}}</td>
-        </tr>
-
         <tr>
             <th style="text-align: right; " >{% trans "State" %}:</th>
             <td>{{order.get_state_display}}</td>
@@ -80,11 +81,12 @@
 				<td style="text-align: right;" >${{ order.display_transportation_fee }}</td>
 			</tr>
 		{% endif %}
-		<tr>
-			<th style="text-align: right;" >Co-op Fee:</th>
-			<td style="text-align: right;" >${{ order.coop_fee }}</td>
-		</tr>
-
+		{% if order.coop_fee %}
+			<tr>
+				<th style="text-align: right;" >{{ order.customer_fee_label }}:</th>
+				<td style="text-align: right;" >${{ order.coop_fee }}</td>
+			</tr>
+		{% endif %}
 		<tr>
 			<th style="text-align: right;" >Grand Total:</th>
 			<td style="text-align: right; font-weight: bold;" >${{ order.grand_total }}</td>

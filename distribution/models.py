@@ -20,19 +20,17 @@ def food_network():
         raise FoodNetwork.DoesNotExist()
 
 def customer_fee():
-    answer = 0
     try:
         answer = food_network().customer_fee
     except FoodNetwork.DoesNotExist:
-        answer = 0
+        answer = Decimal("0")
     return answer
 
 def producer_fee():
-    answer = 0
     try:
         answer = food_network().producer_fee
     except FoodNetwork.DoesNotExist:
-        answer = 0
+        answer = Decimal("0")
     return answer
 
 def current_week():
@@ -1469,9 +1467,9 @@ class Order(models.Model):
     def display_transportation_fee(self):
         return self.transportation_fee().quantize(Decimal('.01'), rounding=ROUND_UP)
     
-    def coop_fee_label(self):
+    def customer_fee_label(self):
         fee = int(customer_fee() * 100)
-        return "".join([str(fee), "% Co-op Fee"])
+        return "".join([str(fee), "% Administration Fee"])
 
     def short_items(self):
         shorts = []

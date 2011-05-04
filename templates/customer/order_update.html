@@ -193,13 +193,24 @@
             {% endif %}
             <tr>
                 <th style="text-align: right; " >Customer:</th>
-		<td>{{ customer.short_name }} {{ customer.long_name }}</td>
+		    <td>
+			    {% if customer.long_name %}
+			    {{customer.long_name}}
+			    {% else %}
+			    {{customer.short_name}} 
+			    {% endif %}
+		    </td>
 	    </tr>
  	    <tr>
                 <th style="text-align: right; " >Buyer:</th>
-		<td>{{ user }} {{ user.get_full_name }} </td>
+		    <td>
+			    {% if user.get_full_name %}
+			    {{ user.get_full_name }}
+			    {% else %}
+			    {{ user }} 
+			    {% endif %}
+		    </td>
             </tr>
-
             <tr>
 		    <th style="text-align: right; " >{% trans "Purchase Order" %}:</th>
                 <td>{{ order_form.purchase_order }}</td>
