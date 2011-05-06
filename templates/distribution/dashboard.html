@@ -22,7 +22,7 @@
 <script type="text/javascript" >
 	dojo.addOnLoad(function()
 	{
-		dojo.byId("id_current_week").focus();
+		dojo.byId("id_next_delivery_date").focus();
 	});
 
 </script>
@@ -41,41 +41,70 @@
 
 	<h2><strong>{{ food_network_name }} {% trans "Distribution System" %}</strong></h2>
 
-		{% comment %}
-		{% if user.is_authenticated %}
-			<div style="margin-bottom: 1em; " >
-				<form style="display: inline; " action="{% url send_fresh_list %}" method="POST">{% csrf_token %}
-					<input class="submit-btn" type="submit" value="{% trans 'Send Availability Emails' %}" />
-					<input type="hidden" name="next" value="{% url dashboard %}" />
-				</form>	
-				<form style="display: inline; " action="{% url send_pickup_list %}" method="POST">{% csrf_token %}
-					<input class="submit-btn" type="submit" value="{% trans 'Send Pickup List Emails' %}" />
-					<input type="hidden" name="next" value="{% url dashboard %}" />
-				</form>
-				<form style="display: inline; " action="{% url send_delivery_list %}" method="POST">{% csrf_token %}
-					<input class="submit-btn" type="submit" value="{% trans 'Send Delivery List Emails' %}" />
-					<input type="hidden" name="next" value="{% url dashboard %}" />
-				</form>
-				<form style="display: inline; " action="{% url send_order_notices %}" method="POST">{% csrf_token %}
-					<input class="submit-btn" type="submit" value="{% trans 'Send Order Emails' %}" />
-					<input type="hidden" name="next" value="{% url dashboard %}" />
-				</form>
-				
-			</div>
-		{% endif %}
-		{% endcomment %}
 
 		<h4 style="margin-bottom: 4px;" >
-			Week of 
+			Next Delivery Date: 
 			{% if user.is_authenticated %}
-				<form style="display: inline;" action="{% url reset_week %}" method="POST">{% csrf_token %}
-					{{ week_form.current_week }}
+				<form style="display: inline;" action="{% url reset_date %}" method="POST">{% csrf_token %}
+					{{ date_form.next_delivery_date }}
 					<input class="submit-btn" type="submit" value="{% trans 'Reset' %}" />
 				</form>
 			{% else %}
-				{{ order_date }}
+				{{ delivery_date }}
 			{% endif %}
 		</h4>
+
+		{% if order_changes %}
+		<div style="float:left; padding: 1em;">
+			<h4 style="margin-bottom: 0;" >Customer Order Changes:</h4>
+			<table class="ga-event-table" style="font-size: 80%; margin-top: 0;" >
+				<tr>
+					<th>{% trans "Customer" %}</th>
+					<th>{% trans "Order" %}</th>
+					<th>{% trans "Changes" %}</th>
+				</tr>
+				{% for oic in order_changes %}
+				<tr>
+					<td>
+						{% ifchanged oic.order.customer %}
+						{{ oic.order.customer }}
+						{% else %}&nbsp;
+						{% endifchanged %}
+					</td>
+					<td>
+						{% ifchanged oic.order.id %}
+						{{ oic.order.id }}
+						{% else %}&nbsp;
+						{% endifchanged %}
+					</td>
+					<td>
+						{% if oic.action == 1 %}
+							Added {{ oic.product }} qty {{ oic.new_qty }}
+						{% endif %}
+						{% if oic.action == 2 %}
+							{% if oic.prev_qty != oic.new_qty %}
+								{{ oic.product }} qty changed from {{ oic.prev_qty }} to {{ oic.new_qty }}
+								{% if oic.prev_notes != oic.new_notes %}
+								<br/>notes changed from {{ oic.prev_notes }} to {{ oic.new_notes }}
+								{% endif %}
+							{% else %}
+								{% if oic.prev_notes != oic.new_notes %}
+								{{ oic.product }} notes changed from {{ oic.prev_notes }} to {{ oic.new_notes }}
+								{% endif %}
+							{% endif %}
+						{% endif %}
+						{% if oic.action == 3 %}
+							Deleted {{ oic.product }} qty {{ oic.prev_qty }}
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+		{% endif %}
+
+
+
 		{% if shorts %}
 		<div style="float:left; padding: 1em;">
 			<h4 style="margin-bottom: 0;" >{{ shorts_label }}:</h4>
@@ -131,12 +160,13 @@
 			</table>
 		</div>
 		{% endif %}
-
+		{% comment %}
 		{% if shorts %}
 			{% if orders %}
 			<div style="clear:both;"></div>
 			{% endif %}
 		{% endif %}
+		{% endcomment %}
 
 		{% if items %}
 		<div style="float:left; padding: 1em;">

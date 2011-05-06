@@ -78,8 +78,8 @@ class ProducerForm(forms.ModelForm):
         return member_id
 
 
-class CurrentWeekForm(forms.Form):
-    current_week = forms.DateField(widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}" }))
+class DeliveryDateForm(forms.Form):
+    next_delivery_date = forms.DateField(widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}" }))
 
 
 class PaymentUpdateSelectionForm(forms.Form):

@@ -33,10 +33,10 @@ def producer_fee():
         answer = Decimal("0")
     return answer
 
-def current_week():
+def next_delivery_date():
     answer = datetime.date.today()
     try:
-        answer = food_network().current_week
+        answer = food_network().next_delivery_date
     except FoodNetwork.DoesNotExist:
         answer = datetime.date.today()
     return answer
@@ -295,12 +295,17 @@ class FoodNetwork(Party):
         help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
     transportation_fee = models.DecimalField(_('transportation fee'), max_digits=8, decimal_places=2, default=Decimal("0"),
         help_text=_('This fee will be added to all orders unless overridden on the Customer'))
-    current_week = models.DateField(_('current week'), default=datetime.date.today, 
-        help_text=_('Current week for distribution availability and orders'))
+    #current_week = models.DateField(_('current week'), default=datetime.date.today, 
+    #    null=True, blank=True,
+    #    help_text=_('You may use Current week or Next delivery date'))
+    next_delivery_date = models.DateField(_('next delivery date'), default=datetime.date.today, 
+        help_text=_('Next delivery date for availability and orders'))
     order_by_lot = models.BooleanField(_('order by lot'), default=False, 
         help_text=_('Assign lots when ordering, or assign them later'))
     use_plans_for_ordering = models.BooleanField(_('use plans for ordering'), default=False, 
         help_text=_('If checked, production plan quantities will be available for ordering instead of inventory items'))
+    default_product_expiration_days = models.IntegerField(_('expiration days'), default=6,
+        help_text=_('This will be the default expiration days for new Products'))
 
 
     class Meta:
@@ -317,7 +322,7 @@ class FoodNetwork(Party):
     # deprecated
     def fresh_list(self, thisdate = None):
         if not thisdate:
-            thisdate = current_week()
+            thisdate = next_delivery_date()
         # todo: no need to go thru all products,
         # shd just use InventoryItems or ProductPlans (not by product)
         # see avail_items_for_customer
@@ -363,7 +368,7 @@ class FoodNetwork(Party):
     # deprecated
     def pickup_list(self, thisdate = None):
         if not thisdate:
-            thisdate = current_week()
+            thisdate = next_delivery_date()
         prods = Product.objects.all()
         distributors = {}
         network = self
@@ -395,7 +400,7 @@ class FoodNetwork(Party):
         
     def delivery_list(self, thisdate = None):
         if not thisdate:
-            thisdate = current_week()
+            thisdate = next_delivery_date()
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
         ois = OrderItem.objects.filter(order__delivery_date__range=(weekstart, weekend))
@@ -441,7 +446,7 @@ class FoodNetwork(Party):
     # deprecated but used
     def all_avail_items(self, thisdate=None):
         if not thisdate:
-            thisdate = current_week()
+            thisdate = next_delivery_date()
         #weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         #expired_date = weekstart + datetime.timedelta(days=5)
         expired_date = thisdate
@@ -494,7 +499,7 @@ class FoodNetwork(Party):
             if pa.qty > 0:
                 pa.category = pa.product.parent_string()
                 pa.product_name = pa.product.short_name
-                pa.price = pa.product.price.quantize(Decimal('.01'), rounding=ROUND_UP)
+                pa.price = pa.product.unit_price_for_date(delivery_date).quantize(Decimal('.01'), rounding=ROUND_UP)
                 avail.append(pa)
         avail = sorted(avail, key=attrgetter('product_name'))
         return avail
@@ -505,7 +510,7 @@ class FoodNetwork(Party):
         # e.g. shows steers with no avail or orders, but some were consumed
         # delivery column commented out because order-by-lot delivers at same time as ordered
         if not thisdate:
-            thisdate = current_week()
+            thisdate = next_delivery_date()
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         weekend = weekstart + datetime.timedelta(days=5)
         return InventoryItem.objects.filter(
@@ -1533,7 +1538,7 @@ def shorts_for_date(delivery_date):
 #see above shorts_for_date
 #plus, shorts for week shd probly be shorts_for_delivery_cycle
 def shorts_for_week():
-    cw = current_week()
+    cw = next_delivery_date()
     monday = cw - datetime.timedelta(days=datetime.date.weekday(cw))
     saturday = monday + datetime.timedelta(days=5)
     shorts = []
@@ -1696,6 +1701,31 @@ class OrderItem(models.Model):
     class Meta:
         ordering = ('order', 'product',)
 
+
+ACTION_CHOICES = (
+    (1, _('Add')),
+    (2, _('Change')),
+    (4, _('Delete')),
+)
+
+class OrderItemChange(models.Model):
+    action = models.PositiveSmallIntegerField(_('action'), max_length="1",
+        choices=ACTION_CHOICES)
+    when_changed = models.DateTimeField(_('when changed'), auto_now_add=True)
+    changed_by = models.ForeignKey(User, verbose_name=_('changed by'),
+        related_name='order_items_changed', blank=True, null=True)
+    order = models.ForeignKey(Order, verbose_name=_('order'),
+        related_name="order_changes")
+    order_item = models.ForeignKey(OrderItem, verbose_name=_('order_item'),
+        related_name="order_item_changes", blank=True, null=True)
+    product = models.ForeignKey(Product, verbose_name=_('product'),
+        related_name="order_item_changes")
+    prev_qty = models.DecimalField(_('prev qty'), max_digits=8,
+        decimal_places=2, default=Decimal('0'))
+    new_qty = models.DecimalField(_('new qty'), max_digits=8, 
+        decimal_places=2, default=Decimal('0'))
+    prev_notes = models.CharField(_('prev notes'), max_length=64, blank=True)
+    new_notes = models.CharField(_('new notes'), max_length=64, blank=True)
 
 
 class ServiceType(models.Model):
@@ -2144,8 +2174,22 @@ class DeliveryCycle(models.Model):
             dd = dd + datetime.timedelta(days=7)
         return dd
 
+    def next_delivery_date_using_closing(self, date_and_time=None):
+        if not date_and_time:
+            date_and_time = datetime.datetime.now()
+        #import pdb; pdb.set_trace()
+        dd = self.next_delivery_date(date_and_time.date())
+        while date_and_time > self.order_closing(dd):
+            dd = dd + datetime.timedelta(days=1)
+            dd = self.next_delivery_date(dd)
+        return dd
+
     def order_closing(self, delivery_date):
-        offset = abs(self.delivery_day - self.order_closing_day)
+        dd = self.delivery_day
+        ocd = self.order_closing_day
+        if dd < ocd:
+            dd = dd + 7
+        offset = dd - ocd
         closing_date = delivery_date - datetime.timedelta(days=offset)
         return datetime.datetime.combine(closing_date, self.order_closing_time)
 

@@ -554,7 +554,7 @@ def create_delivery_cycle_selection_forms(data=None):
     for dc in dcs:
         form = DeliveryCycleSelectionForm(data, prefix=dc.id)
         form.cycle = dc
-        form.delivery_date = dc.next_delivery_date()
+        form.delivery_date = dc.next_delivery_date_using_closing()
         form_list.append(form)
     return form_list
 
@@ -581,13 +581,15 @@ def create_avail_item_forms(avail_date, data=None):
 def send_avail_emails(cycle):
     fn = food_network()
     food_network_name = fn.long_name
-    delivery_date = cycle.next_delivery_date()
+    delivery_date = cycle.next_delivery_date_using_closing()
     fresh_list = fn.customer_availability(delivery_date)
     users = list(cycle.customers.all())
     users.append(fn)
     intro = avail_email_intro()
+    domain = Site.objects.get_current().domain
     notification.send(users, "distribution_fresh_list", {
         "intro": intro.message,
+        "domain": domain,
         "fresh_list": fresh_list, 
         "delivery_date": delivery_date,
         "food_network_name": food_network_name,

@@ -34,16 +34,12 @@ except ImportError:
 def availability(request, cycle_id):
     fn = food_network()
     cycle = DeliveryCycle.objects.get(pk=int(cycle_id))
-    #todo: all uses of the next statement shd be changed
-    cw = current_week()
-    weekstart = cw - datetime.timedelta(days=datetime.date.weekday(cw))
-    weekend = weekstart + datetime.timedelta(days=5)
-    specials = Special.objects.filter(
-        from_date__lte=weekend,
-        to_date__gte=weekstart)
-    delivery_date = cycle.next_delivery_date()
+    delivery_date = cycle.next_delivery_date_using_closing()
     order_closing = cycle.order_closing(delivery_date)
     avail_rows = fn.customer_availability(delivery_date)
+    specials = Special.objects.filter(
+        from_date__lte=delivery_date,
+        to_date__gte=delivery_date)
     return render_to_response('customer/availability.html', 
         {'avail_rows': avail_rows,
          'delivery_date': delivery_date,
@@ -70,13 +66,11 @@ def customer_dashboard(request):
     customer = get_customer(request)
     if not customer:
         return render_to_response('account/no_permissions.html')
-    cw = current_week()
-    weekstart = cw - datetime.timedelta(days=datetime.date.weekday(cw))
-    weekend = weekstart + datetime.timedelta(days=5)
-    specials = Special.objects.filter(
-        from_date__lte=weekend,
-        to_date__gte=weekstart)
     cycle = customer.next_delivery_cycle()
+    dd = customer.next_delivery_date()
+    specials = Special.objects.filter(
+        from_date__lte=dd,
+        to_date__gte=dd)
     return render_to_response('customer/customer_dashboard.html', 
         {'customer': customer,
          'food_network': fn,
@@ -442,8 +436,8 @@ def new_order(request, cust_id, year, month, day, list_id=None):
             the_order.state = "Unsubmitted"
             the_order.created_by = request.user
             the_order.save()
-
-            update_order(the_order, itemforms)
+            is_change = False
+            update_order(the_order, itemforms, is_change)
             return HttpResponseRedirect('/%s/%s/'
                % ('customer/orderconfirmation', the_order.id))
     else:
@@ -478,7 +472,8 @@ def edit_order(request, order_id):
         if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
             order.changed_by = request.user
             order.save()
-            update_order(order, itemforms)
+            is_change = True
+            update_order(order, itemforms, is_change)
             return HttpResponseRedirect('/%s/%s/'
                % ('customer/orderconfirmation', order.id))
     else:
@@ -519,7 +514,7 @@ def submit_order(request, order_id):
     return HttpResponseRedirect('/%s/%s/'
         % ('customer/orderconfirmation', order.id))
 
-def update_order(order, itemforms):
+def update_order(order, itemforms, is_change):
     transportation_fee = order.transportation_fee()
     distributor = order.distributor
     customer = order.customer
@@ -544,20 +539,79 @@ def update_order(order, itemforms):
 
     for itemform in itemforms:
         data = itemform.cleaned_data
-        qty = data['quantity'] 
-        if itemform.instance.id:
-            if qty > 0:
-                itemform.save()
+        qty = data['quantity']
+        notes = data['notes']
+        #import pdb; pdb.set_trace()
+        if is_change and order.state == "Submitted":
+            if itemform.instance.id:
+                item = OrderItem.objects.get(id=itemform.instance.id)
+                if qty > 0:
+                    if qty != item.quantity or notes != item.notes:
+                        oic = OrderItemChange(
+                            action=2,
+                            when_changed=datetime.datetime.now(),
+                            changed_by=order.changed_by,
+                            order=order,
+                            order_item=item,
+                            product=item.product,
+                            prev_qty=item.quantity,
+                            new_qty=qty,
+                            prev_notes=item.notes,
+                            new_notes=notes,
+                        )
+                        oic.save()
+                        itemform.save()
+                else:
+                    oic = OrderItemChange(
+                        action=3,
+                        when_changed=datetime.datetime.now(),
+                        changed_by=order.changed_by,
+                        order=order,
+                        order_item=None,
+                        product=item.product,
+                        prev_qty=item.quantity,
+                        new_qty=qty,
+                        prev_notes=item.notes,
+                        new_notes=notes,
+                    )
+                    oic.save()
+                    itemform.instance.delete()
             else:
-                itemform.instance.delete()
-        else:                    
-            if qty > 0:
-                prod_id = data['prod_id']
-                product = Product.objects.get(id=prod_id)
-                oi = itemform.save(commit=False)
-                oi.order = order
-                oi.product = product
-                oi.save()
+                # added
+                if qty > 0:
+                    prod_id = data['prod_id']
+                    product = Product.objects.get(id=prod_id)
+                    oi = itemform.save(commit=False)
+                    oi.order = order
+                    oi.product = product
+                    oi.save()
+                    oic = OrderItemChange(
+                        action=1,
+                        when_changed=datetime.datetime.now(),
+                        changed_by=order.changed_by,
+                        order=order,
+                        order_item=oi,
+                        product=product,
+                        prev_qty=Decimal("0"),
+                        new_qty=qty,
+                        prev_notes="",
+                        new_notes=notes,
+                    )
+                    oic.save()
+        else:
+            if itemform.instance.id:
+                if qty > 0:
+                    itemform.save()
+                else:
+                    itemform.instance.delete()
+            else:
+                if qty > 0:
+                    prod_id = data['prod_id']
+                    product = Product.objects.get(id=prod_id)
+                    oi = itemform.save(commit=False)
+                    oi.order = order
+                    oi.product = product
+                    oi.save()
     return True
 
 @login_required
@@ -604,7 +658,7 @@ def order(request, order_id):
 
 @login_required
 def invoice_selection(request):
-    init = {"order_date": current_week(),}
+    init = {"order_date": next_delivery_date(),}
     customer = get_customer(request)
     if not customer:
         return render_to_response('account/no_permissions.html')

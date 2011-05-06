@@ -118,7 +118,7 @@ urlpatterns = patterns('',
     url(r'^sendordernotices/$', send_order_notices, name="send_order_notices"),
     url(r'^sendshortchangenotices/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', send_short_change_notices, name="send_short_change_notices"),
     
-    url(r'^resetweek/$', reset_week, name='reset_week'),
+    url(r'^resetdate/$', reset_date, name='reset_date'),
     (r'^notices/', include('notification.urls')),
 
 

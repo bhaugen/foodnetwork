@@ -43,7 +43,7 @@ def send_fresh_list(request):
                 return render_to_response('distribution/network_error.html')
 
             if fn:
-                week_of = current_week()
+                week_of = next_delivery_date()
                 fresh_list = fn.fresh_list()
                 users = list(Customer.objects.all())
                 users.append(fn)
@@ -68,7 +68,7 @@ def send_pickup_list(request):
                 return render_to_response('distribution/network_error.html')
 
             if fn:
-                pickup_date = current_week()
+                pickup_date = next_delivery_date()
                 pickup_list = fn.pickup_list()
                 for pickup in pickup_list:
                     dist = pickup_list[pickup]
@@ -93,7 +93,7 @@ def send_delivery_list(request):
                 return render_to_response('distribution/network_error.html')
 
             if fn:
-                delivery_date = current_week()
+                delivery_date = next_delivery_date()
                 delivery_list = fn.delivery_list()
                 for distributor in delivery_list:
                     dist = delivery_list[distributor]
@@ -118,7 +118,7 @@ def send_order_notices(request):
                 return render_to_response('distribution/network_error.html')
 
             if fn:
-                thisdate = current_week()
+                thisdate = next_delivery_date()
                 weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
                 weekend = weekstart + datetime.timedelta(days=5)
                 order_list = Order.objects.filter(delivery_date__range=(weekstart, weekend))
@@ -621,7 +621,7 @@ def inventory_selection(request):
         fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
-    this_week = current_week()
+    this_week = next_delivery_date()
     init = {"avail_date": this_week,}
     available = fn.all_avail_items(this_week)
     if request.method == "POST":
@@ -815,7 +815,7 @@ def order_selection(request):
          'unpaid_orders': unpaid_orders}, context_instance=RequestContext(request))
 
 
-    #init = {"delivery_date": current_week(),}
+    #init = {"delivery_date": next_delivery_date(),}
     #if request.method == "POST":
     #    ihform = OrderSelectionForm(request.POST)  
     #    if ihform.is_valid():
@@ -1138,7 +1138,7 @@ def order_by_lot(request, cust_id, year, month, day):
 
 @login_required
 def delivery_selection(request):
-    init = {"delivery_date": current_week(),}
+    init = {"delivery_date": next_delivery_date(),}
     if request.method == "POST":
         dsform = DeliverySelectionForm(request.POST)  
         if dsform.is_valid():
@@ -1293,7 +1293,7 @@ def order_item_rows(thisdate):
 
 @login_required
 def order_table_selection(request):
-    init = {"selected_date": current_week(),}
+    init = {"selected_date": next_delivery_date(),}
     if request.method == "POST":
         dsform = DateSelectionForm(request.POST)  
         if dsform.is_valid():
@@ -1355,7 +1355,6 @@ def order_csv(request, delivery_date):
     thisdate = datetime.datetime(*time.strptime(delivery_date, '%Y_%m_%d')[0:5]).date()
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=ordersheet.csv'
-    #thisdate = current_week()
     writer = csv.writer(response)
     writer.writerow(ORDER_HEADINGS)
     for item in OrderItem.objects.filter(order__delivery_date=thisdate):
@@ -1890,15 +1889,15 @@ def dashboard(request):
         food_network_name = ""
     
     thisdate = ""
-    week_form = ""
+    date_form = ""
     plans = []
     shorts = []
     orders = []
     if fn:
-        thisdate = current_week()
+        thisdate = next_delivery_date()
         monday = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
         saturday = monday + datetime.timedelta(days=5)
-        week_form = CurrentWeekForm(initial={"current_week": thisdate})
+        date_form = DeliveryDateForm(initial={"next_delivery_date": thisdate})
         items = fn.all_avail_items()
         for item in items:
             item.category = item.product.parent_string()
@@ -1912,7 +1911,9 @@ def dashboard(request):
             plans = weekly_production_plans(thisdate)
             shorts_label = "Shorts vs Plans"
         orders = Order.objects.filter(
-            delivery_date__range=(thisdate, saturday)).exclude(state="Unsubmitted")
+            delivery_date=thisdate).exclude(state="Unsubmitted")
+        order_changes = OrderItemChange.objects.filter(
+            order__delivery_date=thisdate)
 
     return render_to_response('distribution/dashboard.html', 
         {'plans': plans,
@@ -1921,20 +1922,21 @@ def dashboard(request):
          'shorts_label': shorts_label,
          'orders': orders,
          'delivery_date': thisdate,
-         'week_form': week_form,
-         'food_network_name': food_network_name, 
+         'date_form': date_form,
+         'food_network_name': food_network_name,
+         'order_changes': order_changes,
          }, context_instance=RequestContext(request))
 
 @login_required
-def reset_week(request):
+def reset_date(request):
     if request.method == "POST":
         try:
             fn = food_network()
             food_network_name = fn.long_name
-            form = CurrentWeekForm(request.POST)
+            form = DeliveryDateForm(request.POST)
             if form.is_valid():
-                current_week = form.cleaned_data['current_week']
-                fn.current_week = current_week
+                next_delivery_date = form.cleaned_data['next_delivery_date']
+                fn.next_delivery_date = next_delivery_date
                 fn.save()
                 #todo: nips shd be rethought with delivery skeds
                 #import pdb; pdb.set_trace()
@@ -1946,7 +1948,7 @@ def reset_week(request):
                     item, created = InventoryItem.objects.get_or_create(
                         product=nip.product,
                         producer=nip.producer,
-                        inventory_date=current_week,
+                        inventory_date=next_delivery_date,
                         planned=nip.default_avail_qty)
                     if created:
                         item.remaining = nip.default_avail_qty
@@ -1982,7 +1984,7 @@ def orders_with_deliveries(request, year, month, day):
 
 @login_required
 def payment_selection(request):
-    thisdate = current_week()
+    thisdate = next_delivery_date()
     init = {
         'from_date': thisdate - datetime.timedelta(days=7),
         'to_date': thisdate + datetime.timedelta(days=5),
@@ -2716,7 +2718,7 @@ def dojo_products(request):
 
 @login_required
 def invoice_selection(request):
-    init = {"delivery_date": current_week(),}
+    init = {"delivery_date": next_delivery_date(),}
     unpaid_invoices = Order.objects.filter(
         state="Delivered")
     if request.method == "POST":
@@ -3034,7 +3036,7 @@ def meat_update(request, prod_id, year, month, day):
 
 @login_required
 def process_selection(request):
-    process_date = current_week()
+    process_date = next_delivery_date()
     monday = process_date - datetime.timedelta(days=datetime.date.weekday(process_date))
     saturday = monday + datetime.timedelta(days=5)
     #initial_data = {"process_date": process_date}
@@ -3059,7 +3061,7 @@ def new_process(request, process_type_id):
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
 
-    weekstart = current_week()
+    weekstart = next_delivery_date()
     weekend = weekstart + datetime.timedelta(days=5)
     expired_date = weekstart + datetime.timedelta(days=5)
     pt = get_object_or_404(ProcessType, id=process_type_id)
@@ -3302,10 +3304,10 @@ def avail_email_prep(request, cycles):
     cycles = []
     for id in cycle_ids:
         cycles.append(DeliveryCycle.objects.get(id=int(id)))
-    avail_date = datetime.date.today() + datetime.timedelta(days=7)
+    avail_date = datetime.date.today() + datetime.timedelta(days=14)
     for cycle in cycles:
-        if cycle.next_delivery_date() < avail_date:
-            avail_date = cycle.next_delivery_date()
+        if cycle.next_delivery_date_using_closing() < avail_date:
+            avail_date = cycle.next_delivery_date_using_closing()
     intro = avail_email_intro()
     intro_form = EmailIntroForm(instance=intro, data=request.POST or None)
     item_forms = []

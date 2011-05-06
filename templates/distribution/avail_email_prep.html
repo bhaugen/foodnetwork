@@ -108,7 +108,7 @@ dojo.require("dojo.parser");
 
 	<h3>Selected Customers</h3>
 	{% for cycle in cycles %}
-	<h4>{{ cycle }} Delivery date: {{ cycle.next_delivery_date }}</h4>
+	<h4>{{ cycle }} Delivery date: {{ cycle.next_delivery_date_using_closing }}</h4>
 	<ul>
 		{% for customer in cycle.customers.all %}
 		<li>
@@ -190,11 +190,13 @@ dojo.require("dojo.parser");
 			<tr>
 				<th>{% trans "Product" %}</th>
 				<th>{% trans "Available" %}</th>
+				<th>{% trans "Price" %}</th>
 			</tr>
 			{% for product in products %}
 			<tr>
 				<td>{{ product.product }}</td>
 				<td style="text-align: right;" >{{ product.qty }}</td>
+				<td style="text-align: right;" >{{ product.price }}</td>
 			</tr>
 			{% endfor %}
 		</table>

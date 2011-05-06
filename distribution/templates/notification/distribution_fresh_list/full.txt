@@ -3,7 +3,7 @@
 When this email was sent, the products listed below were available from {{ food_network_name }}.
 
 To see what is available right now, and place an order, go to
-http://{{ current_site.domain }}{% url customer_availability cycle_id=cycle.id %}
+http://{{ domain }}{% url customer_availability cycle_id=cycle.id %}
 {% for item in fresh_list %}
 {{ item.product }}, Quantity available: {{ item.qty }}, Price: ${{ item.price }}
 {% endfor %}

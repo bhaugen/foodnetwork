@@ -59,10 +59,10 @@
         <table>
             <tr>
                 <th style="text-align: right; " >{% trans "Week of" %}:</th>
-                <td>{{ form.current_week}}</td>
-				{% if form.current_week.errors %}
+                <td>{{ form.next_delivery_date}}</td>
+				{% if form.next_delivery_date.errors %}
 					<td style="color: red; " >
-						{{ form.current_week.errors }}
+						{{ form.next_delivery_date.errors }}
 					</td>
 				{% endif %}
             </tr>

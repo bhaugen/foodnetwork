@@ -23,7 +23,7 @@ from django.contrib.sites.models import Site
 from distribution.models import *
 from producer.forms import *
 from producer.view_helpers import *
-from distribution.forms import DateRangeSelectionForm, CurrentWeekForm
+from distribution.forms import DateRangeSelectionForm, DeliveryDateForm
 from distribution.view_helpers import plan_weeks, create_weekly_plan_forms, SupplyDemandTable
 
 try:
@@ -43,13 +43,13 @@ def producer_dashboard(request):
 
 @login_required
 def inventory_selection(request):
-    init = {"current_week": current_week(),}
+    init = {"next_delivery_date": next_delivery_date(),}
     producer = request.user.parties.all()[0].party
-    form = CurrentWeekForm(data=request.POST or None, initial=init)
+    form = DeliveryDateForm(data=request.POST or None, initial=init)
     if request.method == "POST":
         if form.is_valid():
             data = form.cleaned_data
-            inv_date = data['current_week']
+            inv_date = data['next_delivery_date']
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
                % ('producer/inventoryupdate', producer.id, inv_date.year, inv_date.month, inv_date.day))
     return render_to_response('producer/inventory_selection.html', {
@@ -134,7 +134,7 @@ def produceravail(request, prod_id, year, month, day):
 
 @login_required
 def process_selection(request):
-    process_date = current_week()
+    process_date = next_delivery_date()
     monday = process_date - datetime.timedelta(days=datetime.date.weekday(process_date))
     saturday = monday + datetime.timedelta(days=5)
     initial_data = {"process_date": process_date}
@@ -162,7 +162,7 @@ def new_process(request, process_type_id):
         return render_to_response('distribution/network_error.html')
     process_manager = request.user.parties.all()[0].party
 
-    weekstart = current_week()
+    weekstart = next_delivery_date()
     weekend = weekstart + datetime.timedelta(days=5)
     expired_date = weekstart + datetime.timedelta(days=5)
     pt = get_object_or_404(ProcessType, id=process_type_id)
