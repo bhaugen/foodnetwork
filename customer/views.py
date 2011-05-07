@@ -84,18 +84,19 @@ def order_selection(request):
     customer = get_customer(request)
     if not customer:
         return render_to_response('account/no_permissions.html')
-    #todo: must check if delivery_date exists, 
-    #else use form with delivery date
     delivery_date = customer.next_delivery_date()
     selection_form = NewOrderSelectionForm(customer, data=request.POST or None)
     unsubmitted_orders = Order.objects.filter(
         customer=customer,
         state="Unsubmitted")
 
-    #todo: changeable orders might have more rules
-    changeable_orders = Order.objects.filter(
+    maybe_changeable_orders = Order.objects.filter(
         Q(customer=customer) & 
         (Q(state="Unsubmitted") | Q(state="Submitted"))).order_by('-order_date')
+    changeable_orders = []
+    for order in maybe_changeable_orders:
+        if order.is_changeable():
+            changeable_orders.append(order)
 
     recent_orders = Order.objects.filter(
         customer=customer).exclude(state="Unsubmitted").order_by('-order_date')[0:4]

@@ -93,16 +93,16 @@ class ProductListForm(forms.ModelForm):
 
 class CustomerProductForm(forms.ModelForm):
     prod_id = forms.CharField(widget=forms.HiddenInput)
-    default_quantity = forms.DecimalField(required=False, widget=forms.TextInput(attrs={
-        'class': 'quantity-field', 
-        'size': '5',
-        'value': 0,
-     }))
+    #default_quantity = forms.DecimalField(required=False, widget=forms.TextInput(attrs={
+    #    'class': 'quantity-field', 
+    #    'size': '5',
+    #    'value': 0,
+    #}))
     added = forms.BooleanField(widget=forms.CheckboxInput(attrs={'class': 'added',}))
 
     class Meta:
         model = CustomerProduct
-        exclude = ('customer', 'product', 'product_list', 'planned')
+        exclude = ('customer', 'product', 'product_list', 'default_qty', 'planned')
 
 
 class InlineCustomerProductForm(forms.ModelForm):

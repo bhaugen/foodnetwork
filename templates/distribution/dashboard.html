@@ -80,16 +80,27 @@
 					<td>
 						{% if oic.action == 1 %}
 							Added {{ oic.product }} qty {{ oic.new_qty }}
+							{% if oic.new_notes %}
+							<br/>{{ oic.new_notes }}
+							{% endif %}
 						{% endif %}
 						{% if oic.action == 2 %}
 							{% if oic.prev_qty != oic.new_qty %}
-								{{ oic.product }} qty changed from {{ oic.prev_qty }} to {{ oic.new_qty }}
+								{{ oic.product }} qty changed from: {{ oic.prev_qty }} to: {{ oic.new_qty }}
 								{% if oic.prev_notes != oic.new_notes %}
-								<br/>notes changed from {{ oic.prev_notes }} to {{ oic.new_notes }}
+									{% if oic.prev_notes %}
+									<br/>notes changed from: {{ oic.prev_notes }} to: {{ oic.new_notes }}
+									{% else %}
+									<br/>{{ oic.new_notes }}
+									{% endif %}
 								{% endif %}
 							{% else %}
 								{% if oic.prev_notes != oic.new_notes %}
-								{{ oic.product }} notes changed from {{ oic.prev_notes }} to {{ oic.new_notes }}
+									{% if oic.prev_notes %}
+									{{ oic.product }} notes changed from: {{ oic.prev_notes }} to: {{ oic.new_notes }}
+									{% else %}
+									{{ oic.product }} notes: {{ oic.new_notes }}
+									{% endif %}
 								{% endif %}
 							{% endif %}
 						{% endif %}

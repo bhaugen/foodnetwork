@@ -1396,6 +1396,13 @@ class Order(models.Model):
         if self.state == "Paid" or self.state == "Paid-Delivered" or self.state == "Delivered-Paid":
             return True
         return False
+
+    def is_changeable(self):
+        answer = False
+        if self.state == "Unsubmitted" or self.state == "Submitted":
+            if self.delivery_date == self.customer.next_delivery_date():
+                answer = True
+        return answer
     
     def delete_payments(self):
         for cp in self.customer_payments.all():
