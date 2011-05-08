@@ -102,7 +102,7 @@ class CustomerProductForm(forms.ModelForm):
 
     class Meta:
         model = CustomerProduct
-        exclude = ('customer', 'product', 'product_list', 'default_qty', 'planned')
+        exclude = ('customer', 'product', 'product_list', 'default_quantity', 'planned')
 
 
 class InlineCustomerProductForm(forms.ModelForm):
@@ -115,7 +115,7 @@ class InlineCustomerProductForm(forms.ModelForm):
     
     class Meta:
         model = CustomerProduct
-        exclude = ('customer', 'product_list', 'planned')
+        exclude = ('customer', 'product_list', 'default_quantity', 'planned')
 
 
 
