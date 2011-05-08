@@ -678,7 +678,7 @@ def invoice_selection(request):
     else:
         unpaid_invoices = Order.objects.filter(
             customer=customer,
-            state="Delivered")
+            state="Filled")
         to_date = datetime.date.today()
         from_date = to_date - datetime.timedelta(weeks=16)
         init = {
@@ -716,7 +716,7 @@ def invoices(request, cust_id, from_date, to_date):
     orders = Order.objects.filter(
         customer=customer, 
         order_date__range=(from_date, to_date),
-        state__contains="Delivered"
+        state__contains="Filled"
     )
     return render_to_response('distribution/invoices.html', {
         'orders': orders, 

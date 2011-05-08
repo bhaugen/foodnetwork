@@ -2720,7 +2720,7 @@ def dojo_products(request):
 def invoice_selection(request):
     init = {"delivery_date": next_delivery_date(),}
     unpaid_invoices = Order.objects.filter(
-        state="Delivered")
+        state="Filled")
     if request.method == "POST":
         dsform = DeliverySelectionForm(request.POST)  
         if dsform.is_valid():
@@ -2756,12 +2756,12 @@ def invoices(request, cust_id, year, month, day):
         orders = Order.objects.filter(
             customer=customer, 
             delivery_date=thisdate,
-            state__contains="Delivered"
+            state__contains="Filled"
         )
     else:
         orders = Order.objects.filter(
             delivery_date=thisdate,
-            state__contains="Delivered"
+            state__contains="Filled"
         )
     return render_to_response('distribution/invoices.html', {
         'orders': orders, 
@@ -2797,12 +2797,12 @@ def send_invoices(request, cust_id, year, month, day):
             orders = Order.objects.filter(
                 customer=customer, 
                 delivery_date=thisdate,
-                state__contains="Delivered"
+                state__contains="Filled"
             )
         else:
             orders = Order.objects.filter(
                 delivery_date=thisdate,
-                state__contains="Delivered"
+                state__contains="Filled"
             )
         #import pdb; pdb.set_trace()
         for order in orders:

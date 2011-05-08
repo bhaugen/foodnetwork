@@ -1346,10 +1346,10 @@ class TransactionPayment(models.Model):
 ORDER_STATES = (
     ('Unsubmitted', _('Unsubmitted')),
     ('Submitted', _('Submitted')),
-    ('Delivered', _('Delivered')),
+    ('Filled', _('Filled')),
     ('Paid', _('Paid')),
-    ('Paid-Delivered', _('Paid and Delivered')),
-    ('Delivered-Paid', _('Delivered and Paid')),
+    ('Paid-Filled', _('Paid and Filled')),
+    ('Filled-Paid', _('Filled and Paid')),
 )
 
 
@@ -1393,7 +1393,7 @@ class Order(models.Model):
         #todo: what about partials?
         if self.paid:
             return True
-        if self.state == "Paid" or self.state == "Paid-Delivered" or self.state == "Delivered-Paid":
+        if self.state == "Paid" or self.state == "Paid-Filled" or self.state == "Filled-Paid":
             return True
         return False
 
@@ -1407,25 +1407,25 @@ class Order(models.Model):
     def delete_payments(self):
         for cp in self.customer_payments.all():
             cp.delete()
-        if self.state == "Paid-Delivered" or self.state == "Delivered-Paid":
-            self.state = "Delivered"
+        if self.state == "Paid-Filled" or self.state == "Filled-Paid":
+            self.state = "Filled"
         else:
             self.state = "Submitted"
         self.save()
 
     def is_delivered(self):
         #todo: what about partials?
-        if self.state == "Delivered" or self.state == "Paid-Delivered" or self.state == "Delivered-Paid":
+        if self.state == "Filled" or self.state == "Paid-Filled" or self.state == "Filled-Paid":
             return True
         return False
 
     def register_delivery(self):
-        if self.state.find("Delivered") < 0:
+        if self.state.find("Filled") < 0:
             #print "registering delivery for order", self
             if self.state == "Paid":
-                self.state = "Paid-Delivered"
+                self.state = "Paid-Filled"
             else:
-                self.state = "Delivered"
+                self.state = "Filled"
             self.save()
 
     def set_paid_state(self):
@@ -1435,8 +1435,8 @@ class Order(models.Model):
         """
 
         if self.state.find("Paid") < 0:
-            if self.state == "Delivered":
-                self.state = "Delivered-Paid"
+            if self.state == "Filled":
+                self.state = "Filled-Paid"
             else:
                 self.state = "Paid"
             return True

@@ -131,7 +131,7 @@ def create_history_table(customer, from_date, to_date):
     items = OrderItem.objects.filter(
         order__customer=customer, 
         order__delivery_date__range=(from_date, to_date),
-        order__state__contains="Paid"
+        order__state__contains="Filled"
     )
     row_dict = {}
     for item in items:
