@@ -55,6 +55,13 @@ def use_plans_for_ordering():
         answer = False
     return answer
 
+def default_product_expiration_days():
+    try:
+        answer = food_network().default_product_expiration_days
+    except FoodNetwork.DoesNotExist:
+        answer = 6
+    return answer
+
 def customer_terms():
     return food_network().customer_terms
 
@@ -668,7 +675,7 @@ class Product(models.Model):
         help_text=_('If checked, the Food Network pays the producer for issues, deliveries and damages of this product.'))
     pay_producer_on_terms = models.BooleanField(_('pay producer on terms'), default=False,
         help_text=_('If checked, producer paid on member terms. If not, producers paid based on customer order payments. Note: Issues always paid on member terms.'))
-    expiration_days = models.IntegerField(_('expiration days'), default=6,
+    expiration_days = models.IntegerField(_('expiration days'), default=default_product_expiration_days,
         help_text=_('Inventory Items (Lots) of this product will expire in this many days.'))
 
     def __unicode__(self):
