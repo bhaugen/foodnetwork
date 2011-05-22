@@ -98,9 +98,10 @@ class CustomerProductAvailability(object):
          self.inventory_date = inventory_date
          self.expiration_date = expiration_date
 
-
-class StaffProductOrderingStats(object):
-     def __init__(self, avail, ordered, inventory_date, expiration_date):
+class StaffProductAvailability(object):
+     def __init__(self, product, price, avail, ordered, inventory_date, expiration_date):
+         self.product = product
+         self.price = price
          self.avail = avail
          self.ordered = ordered
          self.inventory_date = inventory_date
@@ -511,6 +512,42 @@ class FoodNetwork(Party):
         avail = sorted(avail, key=attrgetter('product_name'))
         return avail
 
+    def staff_availability(self, delivery_date):
+        avail = []
+        products = {}
+        if self.use_plans_for_ordering:
+            plans = ProductPlan.objects.filter(
+                role="producer",
+                from_date__lte=delivery_date, 
+                to_date__gte=delivery_date)
+            for plan in plans:
+                if plan.product.id not in products:
+                    products[plan.product.id] = StaffProductAvailability(plan.product,
+                        Decimal("0"), Decimal("0"), Decimal("0"), plan.from_date, plan.to_date)
+                products[plan.product.id].avail += plan.quantity
+        else:
+            items = self.avail_items_for_customer(delivery_date)
+            for item in items:
+                if item.product.id not in products:
+                    products[item.product.id] = StaffProductAvailability(item.product,
+                         Decimal("0"), Decimal("0"), Decimal("0"), item.inventory_date, item.expiration_date)
+                pa = products[item.product.id]
+                pa.avail += item.avail_qty()
+                if pa.inventory_date < item.inventory_date:
+                    pa.inventory_date = item.inventory_date
+                if pa.expiration_date > item.expiration_date:
+                    pa.expiration_date = item.expiration_date
+        for pa in products.values():
+            pa.ordered -= pa.product.total_ordered_for_timespan(
+                pa.inventory_date, pa.expiration_date)
+            if pa.avail > 0:
+                pa.category = pa.product.parent_string()
+                pa.product_name = pa.product.short_name
+                pa.price = pa.product.unit_price_for_date(delivery_date).quantize(Decimal('.01'), rounding=ROUND_UP)
+                avail.append(pa)
+        avail = sorted(avail, key=attrgetter('category'))
+        return avail
+
     # deprecated
     def all_active_items(self, thisdate = None):
         # todo: this and dashboard need work
@@ -773,39 +810,7 @@ class Product(models.Model):
             return sum(plan.quantity for plan in self.production_plans(thisdate))
         else:
             return sum(item.avail_qty() for item in self.avail_items_today(thisdate))
-
-    def staff_ordering_stats(self, delivery_date):
-        stats = None
-        if use_plans_for_ordering():
-            plans = ProductPlan.objects.filter(
-                product=self,
-                role="producer",
-                from_date__lte=delivery_date, 
-                to_date__gte=delivery_date)
-            for plan in plans:
-                if not stats:
-                    stats = StaffProductOrderingStats(
-                        Decimal("0"), Decimal("0"), plan.from_date, plan.to_date)
-                stats.avail += plan.quantity
-        else:
-            items = self.avail_items_today(delivery_date)
-            for item in items:
-                if not stats:
-                    stats = StaffProductOrderingStats(
-                        Decimal("0"), Decimal("0"), item.inventory_date, item.expiration_date)
-                stats.avail += item.avail_qty()
-                if stats.inventory_date < item.inventory_date:
-                    stats.inventory_date = item.inventory_date
-                if stats.expiration_date > item.expiration_date:
-                    stats.expiration_date = item.expiration_date
-        if stats:
-            stats.ordered = self.total_ordered_for_timespan(
-                stats.inventory_date, stats.expiration_date)
-        else:
-            stats = StaffProductOrderingStats(
-                Decimal("0"), Decimal("0"), delivery_date, delivery_date)
-        return stats
-            
+           
     #suspect    
     def avail_producers(self, thisdate):
         producers = []

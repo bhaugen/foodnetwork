@@ -820,7 +820,6 @@ class OrderItemForm(forms.ModelForm):
          model = OrderItem
          exclude = ('order', 'product', 'fee', 'orig_qty')
 
-
 def create_order_item_forms(order, delivery_date, data=None):
     form_list = []
     item_dict = {}
@@ -828,52 +827,45 @@ def create_order_item_forms(order, delivery_date, data=None):
         items = order.orderitem_set.all()
         for item in items:
             item_dict[item.product.id] = item
-    prods = list(Product.objects.filter(sellable=True))
-    for prod in prods:
-        prod.parents = prod.parent_string()
-    prods.sort(lambda x, y: cmp(x.parents, y.parents))
-    for prod in prods:
-        stats = prod.staff_ordering_stats(delivery_date)
-        totavail = stats.avail
-        totordered = stats.ordered
+    fn = food_network()
+    avail = fn.staff_availability(delivery_date)
+    for prod in avail:
+        totavail = prod.avail
+        totordered = prod.ordered
+        producers = prod.product.avail_producers(delivery_date)
         try:
-            item = item_dict[prod.id]
+            item = item_dict[prod.product.id]
         except KeyError:
             item = False
         if item:
-            producers = prod.avail_producers(delivery_date)
             initial_data = {
-                'prod_id': prod.id,
+                'prod_id': prod.product.id,
                 'avail': totavail,
                 'unit_price': item.formatted_unit_price(),
                 'ordered': totordered,
             }
-            oiform = OrderItemForm(data, prefix=prod.id, instance=item,
+            oiform = OrderItemForm(data, prefix=prod.product.id, instance=item,
                                    initial=initial_data)
             oiform.producers = producers
-            oiform.description = prod.long_name
-            oiform.parents = prod.parents
-            oiform.growing_method = prod.growing_method
+            oiform.description = prod.product.long_name
+            oiform.parents = prod.category
+            oiform.growing_method = prod.product.growing_method
             form_list.append(oiform)
         else:
             #fee = prod.decide_fee()
-            if totavail > 0:
-                producers = prod.avail_producers(delivery_date)
-                oiform = OrderItemForm(data, prefix=prod.short_name, initial={
-                    'prod_id': prod.id, 
-                    'description': prod.long_name, 
-                    'avail': totavail, 
-                    'ordered': totordered, 
-                    'unit_price': prod.unit_price_for_date(delivery_date), 
-                    #'fee': fee,  
-                    'quantity': 0})
-                oiform.description = prod.long_name
-                oiform.producers = producers
-                oiform.parents = prod.parents
-                oiform.growing_method = prod.growing_method
-                form_list.append(oiform)
+            oiform = OrderItemForm(data, prefix=prod.product.id, initial={
+                'prod_id': prod.product.id, 
+                'avail': totavail, 
+                'ordered': totordered, 
+                'unit_price': prod.price, 
+                #'fee': fee,  
+                'quantity': 0})
+            oiform.description = prod.product.long_name
+            oiform.producers = producers
+            oiform.parents = prod.category
+            oiform.growing_method = prod.product.growing_method
+            form_list.append(oiform)
     return form_list
-
 
 class EmailForm(forms.Form):
     email_address = forms.EmailField()

@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from django.forms.formsets import formset_factory
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
@@ -48,7 +50,6 @@ def create_new_product_list_forms(data=None):
         form_list.append(form)
     return form_list
 
-
 def create_order_item_forms(order, product_list, availdate, data=None):
     form_list = []
     item_dict = {}
@@ -56,59 +57,52 @@ def create_order_item_forms(order, product_list, availdate, data=None):
         items = order.orderitem_set.all()
         for item in items:
             item_dict[item.product.id] = item
-    products = list(Product.objects.filter(sellable=True))
+    fn = food_network()
+    avail = fn.customer_availability(availdate)
+    avail = sorted(avail, key=attrgetter('category'))
     if product_list:
         listed_products = CustomerProduct.objects.filter(
             product_list=product_list).values_list("product_id")
         listed_products = set(id[0] for id in listed_products)
     prods = []
-    for prod in products:
+    for prod in avail:
         ok = True
         if product_list:
-            if not prod.id in listed_products:
+            if not prod.product.id in listed_products:
                 ok = False
         if ok:
-            prod.parents = prod.parent_string()
             prods.append(prod)
-    prods.sort(lambda x, y: cmp(x.parents, y.parents))
     for prod in prods:
-        totavail = prod.avail_for_customer(availdate)
         try:
-            item = item_dict[prod.id]
+            item = item_dict[prod.product.id]
         except KeyError:
             item = False
         if item:
-            producers = prod.avail_producers(availdate)
-            # maybe like this?
+            producers = prod.product.avail_producers(availdate)
             initial_data = {
-                'prod_id': prod.id,
-                'avail': totavail,
+                'prod_id': prod.product.id,
+                'avail': prod.qty,
                 'unit_price': item.formatted_unit_price(),
-                #'ordered': totordered,
             }
-            oiform = OrderItemForm(data, prefix=prod.id, instance=item,
+            oiform = OrderItemForm(data, prefix=prod.product.id, instance=item,
                                    initial=initial_data)
             oiform.producers = producers
-            oiform.description = prod.long_name
-            oiform.parents = prod.parents
-            oiform.growing_method = prod.growing_method
+            oiform.description = prod.product.long_name
+            oiform.parents = prod.category
+            oiform.growing_method = prod.product.growing_method
             form_list.append(oiform)
         else:
-            if totavail > 0:
-                producers = prod.avail_producers(availdate)
-                oiform = OrderItemForm(data, prefix=prod.id, initial={
-                    'parents': prod.parents, 
-                    'prod_id': prod.id, 
-                    'description': prod.long_name, 
-                    'avail': totavail, 
-                    #'ordered': totordered, 
-                    'unit_price': prod.formatted_unit_price_for_date(availdate), 
-                    'quantity': 0})
-                oiform.description = prod.long_name
-                oiform.producers = producers
-                oiform.parents = prod.parents
-                oiform.growing_method = prod.growing_method
-                form_list.append(oiform)
+            producers = prod.product.avail_producers(availdate)
+            oiform = OrderItemForm(data, prefix=prod.product.id, initial={
+                'prod_id': prod.product.id, 
+                'avail': prod.qty, 
+                'unit_price': prod.price, 
+                'quantity': 0})
+            oiform.description = prod.product.long_name
+            oiform.producers = producers
+            oiform.parents = prod.category
+            oiform.growing_method = prod.product.growing_method
+            form_list.append(oiform)
     return form_list
 
 class DisplayTable(object):
