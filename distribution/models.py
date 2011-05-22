@@ -538,7 +538,7 @@ class FoodNetwork(Party):
                 if pa.expiration_date > item.expiration_date:
                     pa.expiration_date = item.expiration_date
         for pa in products.values():
-            pa.ordered -= pa.product.total_ordered_for_timespan(
+            pa.ordered = pa.product.total_ordered_for_timespan(
                 pa.inventory_date, pa.expiration_date)
             if pa.avail > 0:
                 pa.category = pa.product.parent_string()
