@@ -2020,12 +2020,19 @@ class InventoryTransaction(EconomicEvent):
         return self.is_due()
 
     def extended_producer_fee(self):
+        # todo: this is wrong, but not sure why it was done this way
+        # shd investigate more sometime, but for now, just fix
+        #if self.order_item:
+        #    return self.order_item.extended_producer_fee()
+        #else:
+        #    unit_price = self.unit_price
+        #    answer = self.amount * unit_price * producer_fee()
+        #    return answer.quantize(Decimal('.01'), rounding=ROUND_UP)
+        price = self.unit_price
         if self.order_item:
-            return self.order_item.extended_producer_fee()
-        else:
-            unit_price = self.unit_price
-            answer = self.amount * unit_price * producer_fee()
-            return answer.quantize(Decimal('.01'), rounding=ROUND_UP)
+            price = self.order_item.unit_price
+        answer = self.amount * price * producer_fee()
+        return answer.quantize(Decimal('.01'), rounding=ROUND_UP)
     
     def service_cost(self):
         cost = Decimal(0)

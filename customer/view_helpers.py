@@ -53,12 +53,18 @@ def create_new_product_list_forms(data=None):
 def create_order_item_forms(order, product_list, availdate, data=None):
     form_list = []
     item_dict = {}
+    fn = food_network()
+    avail = fn.customer_availability(availdate)
     if order:
         items = order.orderitem_set.all()
         for item in items:
             item_dict[item.product.id] = item
-    fn = food_network()
-    avail = fn.customer_availability(availdate)
+    avail_ids = [prod.product.id for prod in avail]
+    for item in items:
+        if not item.product.id in avail_ids:
+            item.category = item.product.parent_string()
+            item.qty = item.product.total_avail_today(availdate)
+            avail.append(item)
     avail = sorted(avail, key=attrgetter('category'))
     if product_list:
         listed_products = CustomerProduct.objects.filter(
@@ -81,7 +87,7 @@ def create_order_item_forms(order, product_list, availdate, data=None):
             producers = prod.product.avail_producers(availdate)
             initial_data = {
                 'prod_id': prod.product.id,
-                'avail': prod.qty,
+                'avail': item.product.total_avail_today(availdate),
                 'unit_price': item.formatted_unit_price(),
             }
             oiform = OrderItemForm(data, prefix=prod.product.id, instance=item,
