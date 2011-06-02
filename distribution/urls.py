@@ -109,6 +109,9 @@ urlpatterns = patterns('',
     (r'^statementselection/$', statement_selection),
     url(r'^statements/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', statements),
 
+    # reports
+    url(r'^receiptsandsales/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', receipts_and_sales, name="receipts_and_sales"),
+
     # emails
     url(r'^emailselection/$', email_selection, name="email_selection"),
     url(r'^availemailprep/(?P<cycles>\w+)/$', avail_email_prep, name="avail_email_prep"),

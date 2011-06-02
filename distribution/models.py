@@ -350,6 +350,47 @@ class FoodNetwork(Party):
     @property
     def email(self):
         return self.email_address
+
+    def receipts_sales(self, thisdate):
+        month_start = datetime.date(thisdate.year, thisdate.month, 1)
+        week_start = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
+        start = min(month_start, week_start)
+        items = InventoryItem.objects.filter(
+            inventory_date__gte=start)
+        products = {}
+        for item in items:
+            if not item.product.id in products:
+                products[item.product.id] =  ProductReceiptsAndSales(
+                    item.product,
+                    Decimal("0"), Decimal("0"), Decimal("0"), Decimal("0"),
+                    Decimal("0"), Decimal("0"), Decimal("0"), Decimal("0"),
+                )
+            pras = products[item.product.id]
+            qty = item.received
+            if not qty:
+                qty = item.planned
+            money = qty * item.product.price
+            money -= money * producer_fee()
+            if item.inventory_date >= week_start:
+                pras.receipts_qty_week += qty
+                pras.receipts_money_week += money
+            if item.inventory_date >= month_start:
+                pras.receipts_qty_month += qty
+                pras.receipts_money_month += money
+            ois = OrderItem.objects.filter(
+                product = item.product,
+                order__delivery_date__gte=start)
+            for oi in ois:
+                if oi.order.delivery_date >= week_start:
+                    pras.sales_qty_week += oi.quantity
+                    pras.sales_money_week += oi.extended_price()
+                if oi.order.delivery_date >= month_start:
+                    pras.sales_qty_month += oi.quantity
+                    pras.sales_money_month += oi.extended_price()
+        report_lines = products.values()
+        report_lines.sort(lambda x, y: cmp(x.product.short_name,
+                                           y.product.short_name))
+        return report_lines
     
     # deprecated
     def fresh_list(self, thisdate = None):

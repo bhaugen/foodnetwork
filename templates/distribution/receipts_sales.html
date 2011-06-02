@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Receipts and Sales" %}
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="reports">
+
+	{% include "distribution/tabnav.html" %}
+
+
+	<h2>{% trans "Receipts and Sales as of" %} {{ date }}</h2>
+	<table class="ga-event-table" >
+		<tr>
+			<th>&nbsp;</th>
+			<th colspan="4" style="text-align: center;" >
+				{% trans "Week-to-date since" %} {{ week_start|date:"n-d" }}
+			</th>
+			<th colspan="4" style="text-align: center;" >
+				{% trans "Month-to-date since" %} {{ month_start|date:"n-d" }}
+			</th>
+		</tr>
+		<tr>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Receipts Qty" %}</th>
+			<th>{% trans "Receipts $" %}</th>
+			<th>{% trans "Sales Qty" %}</th>
+			<th>{% trans "Sales $" %}</th>
+			<th>{% trans "Receipts Qty" %}</th>
+			<th>{% trans "Receipts $" %}</th>
+			<th>{% trans "Sales Qty" %}</th>
+        	   	<th>{% trans "Sales $" %}</th>
+	        </tr>
+        	{% for item in receipts_sales %}
+		<tr>
+			<td>{{ item.product }}</td>
+			<td style="text-align: right; ">{{ item.receipts_qty_week }}</td>
+			<td style="text-align: right; ">{{ item.receipts_money_week }}</td>
+			<td style="text-align: right; ">{{ item.sales_qty_week }}</td>
+			<td style="text-align: right; ">{{ item.sales_money_week }}</td>
+			<td style="text-align: right; ">{{ item.receipts_qty_month }}</td>
+			<td style="text-align: right; ">{{ item.receipts_money_month }}</td>
+			<td style="text-align: right; ">{{ item.sales_qty_month }}</td>
+			<td style="text-align: right; ">{{ item.sales_money_month }}</td>
+		</tr>
+        	{% endfor %}
+	</table>
+
+</div>
+
+{% endblock %} 
+

@@ -739,6 +739,7 @@ def create_delivery_forms(thisdate, customer, data=None):
         delivery_count = len(deliveries)
         field_set_count = max(len(choices)-1, delivery_count)
         field_set_count = min(field_set_count, 4)
+        print "field_set_count:", field_set_count
         if delivery_count:
             dtf.delivery_forms = []
             d = 0
@@ -759,8 +760,11 @@ def create_delivery_forms(thisdate, customer, data=None):
                 dtf.empty_fields = ["---" for x in range(field_count, 8)]
             form_list.append(dtf)              
         else:
-            # this next stmt is why the first lot in undelivered items has no initial inventory_item
-            delform = DeliveryForm(data, prefix=str(oi.id) + '0', initial={'quantity': oi.quantity})
+            if field_set_count:
+                delform = DeliveryForm(data, prefix=str(oi.id) + '0')
+            else:
+                delform = DeliveryForm(data, prefix=str(oi.id) + '0',
+                                   initial={'amount': oi.quantity})
             dtf.delivery_forms = [delform,]
             dtf.delivery_forms.extend(
                 [DeliveryForm(data, prefix=str(oi.id) + str(x), instance=InventoryTransaction()) for x in range(1, field_set_count)])

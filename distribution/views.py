@@ -1339,6 +1339,20 @@ def order_table(request, year, month, day):
          'orders': orders,}, context_instance=RequestContext(request))
 
 @login_required
+def receipts_and_sales(request, year, month, day):
+    thisdate = datetime.date(int(year), int(month), int(day))
+    month_start = datetime.date(thisdate.year, thisdate.month, 1)
+    week_start = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
+    fn = food_network()
+    receipts_sales = fn.receipts_sales(thisdate)
+    return render_to_response('distribution/receipts_sales.html', 
+        {'date': thisdate, 
+         'receipts_sales': receipts_sales,
+         'week_start': week_start,
+         'month_start': month_start,
+        }, context_instance=RequestContext(request))
+
+@login_required
 def order_table_by_product(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     date_string = thisdate.strftime('%Y_%m_%d')
