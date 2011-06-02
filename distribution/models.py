@@ -90,6 +90,30 @@ class ProductQuantity(object):
          self.product = product
          self.qty = qty
 
+
+class ProductReceiptsAndSales(object):
+     def __init__(self,
+                  product,
+                  receipts_qty_week,
+                  receipts_money_week,
+                  sales_qty_week,
+                  sales_money_week,
+                  receipts_qty_month,
+                  receipts_money_month,
+                  sales_qty_month,
+                  sales_money_month
+                 ):
+         self.product = product
+         self.receipts_qty_week = receipts_qty_week
+         self.receipts_money_week = receipts_money_week
+         self.sales_qty_week = sales_qty_week
+         self.sales_money_week = sales_money_week
+         self.receipts_qty_month = receipts_qty_month
+         self.receipts_money_month = receipts_money_month
+         self.sales_qty_month = sales_qty_month
+         self.sales_money_month = sales_money_month
+
+
 class CustomerProductAvailability(object):
      def __init__(self, product, price, qty, inventory_date, expiration_date):
          self.product = product

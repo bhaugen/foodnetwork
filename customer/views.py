@@ -68,12 +68,14 @@ def customer_dashboard(request):
         return render_to_response('account/no_permissions.html')
     cycle = customer.next_delivery_cycle()
     dd = customer.next_delivery_date()
+    avail_rows = fn.customer_availability(dd)
     specials = Special.objects.filter(
         from_date__lte=dd,
         to_date__gte=dd)
     return render_to_response('customer/customer_dashboard.html', 
         {'customer': customer,
          'food_network': fn,
+         'avail_rows': avail_rows,
          'specials': specials,
          'cycle': cycle,
          }, context_instance=RequestContext(request))

@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load humanize %}
+
 {% block title %}
      {{ food_network }} Customer Dashboard
 {% endblock %}
@@ -29,15 +31,40 @@
 	
 	<h3 style="padding-top: 0; margin-top: 0; " >{{ food_network.long_name }} Customer Dashboard for {{ customer.long_name }}</h3>
 
-	<p>This is a rough draft of a customer dashboard page.  What do you want to see here?</p>
-
 	<p>
 	Next delivery date: {{ cycle.delivery_date|date:"l, F j" }}&nbsp;&nbsp; 
 	Order closing: {{ cycle.order_closing|date:"l, F j, f A" }}
 	</p>
 
+	<div style="float: left; width: 40%;">
+	<h3 style="padding-top: 0; margin-top: 0; " >What's available:</h3>
+	<table class="ga-event-table" >
+		<thead>
+		<tr>
+			<th style="text-align:left;" >Product</th>
+			<th>Growing Method</th>
+			<th style="text-align: right:" >Quantity</th>
+			<th style="text-align: right;" >Price</th>
+		</tr>
+		</thead>
+		<tbody>
+
+		{% for row in avail_rows %}
+			<tr>
+				<th style="text-align:left;" >{{ row.product }}</th>
+				<td>{{ row.product.growing_method }}</td>
+				<td style="text-align: right;" >{{ row.qty|intcomma }}</td>
+				<td style="text-align: right;" >{{ row.price}}</td>
+		
+			</tr>
+			{% endfor %}
+		</tbody>
+
+	</table>
+	</div>
+
 	{% if specials %}
-	<div style="border: 2px solid grey; width: 50%; margin-top: 1em; padding-left: 1em; padding-bottom: 4px;" >
+	<div style="float: left; border: 2px solid grey; width: 40%; padding-left: 1em; padding-bottom: 4px;" >
 		<h2>Specials</h2>
 		{% for special in specials %}
 		<h4>{{ special.headline }}</h4>
@@ -50,6 +77,8 @@
 		{% endfor %}
 	</div>
 	{% endif %}
+	<div style="clear: both;"></div>
+
 </div>
 {% endblock %}
 
