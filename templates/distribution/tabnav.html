@@ -33,8 +33,8 @@ div.order-update li.order-update,
 div.order-table li.order-table, 
 div.delivery-update li.delivery-update, 
 div.deliveries li.deliveries, 
-div.producer-payments li.producer-payments, 
-div.payment-update li.payment-update, 
+div.payments li.payments, 
+div.reports li.reports, 
 div.invoices li.invoices, 
 div.help li.help, 
 div.plans li.plans, 
@@ -52,8 +52,8 @@ div.order-update li.order-update a,
 div.order-table li.order-table a, 
 div.delivery-update li.delivery-update a, 
 div.deliveries li.deliveries a, 
-div.producer-payments li.producer-payments a, 
-div.payment-update li.payment-update a, 
+div.payments li.payments a, 
+div.reports li.reports a, 
 div.invoices li.invoices a, 
 div.help li.help a, 
 div.plans li.plans a, 
@@ -104,8 +104,8 @@ ul#tabnav a:hover
 			</li>
 		{% endif %}
 		<li class="invoices" ><a title="Print invoices for all orders for this week" href="/distribution/invoiceselection">{% trans "Invoices" %}</a> </li>
-		<li class="producer-payments" ><a title="Show payments due to producers this week" href="/distribution/producerpaymentselection">{% trans "Payment Table" %}</a> </li>
-		<li class="payment-update" ><a title="Create or update payments to producers" href="/distribution/paymentupdateselection">{% trans "Payment Update" %}</a> </li>
+		<li class="payments" ><a title="View upcoming payments to members and update payments to members and from customers" href="/distribution/paymentselection">{% trans "Payments" %}</a> </li>
+		<li class="reports" ><a title="View or print business reports" href="/distribution/reportselection">{% trans "Reports" %}</a> </li>
 		<li class="statements" ><a title="Print payment statements" href="/distribution/statementselection">{% trans "Statements" %}</a> </li>
 		<li class="plans" ><a title="Create or update plans for producers" href="/distribution/planselection">{% trans "Plan" %}</a> </li>
 		<li class="admin" ><a title="Maintain Producers, Products and Customers" href="/admin">{% trans "Admin" %}</a> </li>

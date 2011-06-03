@@ -15,6 +15,99 @@
         dojo.require("dijit.form.DateTextBox");
     </script>
 
+    <script type="text/javascript" >
+
+		var paymentSelections = []
+
+		function insertOption(selField, optionText, optionValue)
+		{
+			var newOpt = document.createElement('option');
+			newOpt.text = optionText;
+			if(typeof(optionValue) != "undefined")
+			{
+				newOpt.value = optionValue;
+			}
+			else
+			{
+				newOpt.value = optionText;
+			}
+			try
+			{
+				selField.add(newOpt,null); // standards compliant
+			}
+			catch(ex)
+			{
+				selField.add(newOpt); // IE only
+			}
+		}
+
+		function producerChanged(evt)
+		{
+			var selectField = dojo.byId('id_payment');
+			var sfLength = selectField.length;
+			for (var i=0; i<sfLength; i++)
+			{
+			   selectField.remove(selectField.options[0]);
+			}
+
+			var producerId = evt.target.value;
+			if(producerId)
+			{
+				var jsonUrl = "/distribution/jsonpayments/" + evt.target.value + "/";
+				dojo.xhrGet( 
+				{
+						url: jsonUrl,
+						handleAs: "json",
+						load: function(responseObject, ioArgs) 
+						{
+							var payments = responseObject;
+
+							insertOption(selectField, 'New', '')
+							for(var idx=0;idx<payments.length;idx++)
+							{
+								var payment = payments[idx];
+								var paymentLabel = '#' + payment.pk + ' ' + payment.fields.transaction_date + ' $' + payment.fields.amount;
+								insertOption(selectField, paymentLabel, payment.pk);
+							}
+						}
+				});
+			}
+			else
+			{
+				var sels = paymentSelections;
+				for(var idx=0;idx<paymentSelections.length;idx++)
+				{
+					var sel = paymentSelections[idx];
+					insertOption(selectField, sel[0], sel[1]);
+				}
+			}
+		}
+
+		function savePaymentSelections()
+		{
+			sels = dojo.byId('id_payment').options;
+			for(var idx=0;idx<sels.length;idx++)
+			{
+				var sel = sels[idx];
+				var el = []
+				el[0] = sel.text;
+				el[1] = sel.value;
+				paymentSelections.push(el);
+			}
+			
+		}
+
+		dojo.addOnLoad(function()
+		{
+			dojo.connect(dojo.byId("id_producer"), "onchange", "producerChanged");
+			savePaymentSelections();
+
+		});
+
+    </script>
+
+
+
 {% endblock %}
 
 {% block header %}
@@ -23,9 +116,12 @@
 
 {% block content %}
 
-<div class="producer-payments">
+<div class="payments">
 
 	{% include "distribution/tabnav.html" %}
+
+	<div style="border: 2px solid grey; width: 50%; padding-left: 1em;">
+		<h4>View Payment Table:</h4>
 
     <form action="." method="POST" >{% csrf_token %}
         <table>
@@ -69,8 +165,69 @@
 
         </table>
         <p>
-            <input type="submit" value="{% trans 'Submit' %}" />
+            <input name="submit-payment-table" type="submit" value="{% trans 'Submit' %}" />
         </p>
-    </form>
+</form>
+	</div>
+
+
+	<div style="border: 2px solid grey; width: 50%; padding-left: 1em;">
+		<h4>Update Payments to Members:</h4>
+
+	    <form action="." method="POST" >{% csrf_token %}
+        	<table>
+	            <tr>
+        	        <th style="text-align: right; " >{% trans "Member" %}:</th>
+			<td>{{ member_selection_form.producer }}</td>
+			{% if member_selection_form.producer.errors %}
+				<td style="color: red; " >
+					{{ member_selection_form.producer.errors }}
+				</td>
+			{% endif %}
+	            </tr>
+        	    <tr>
+                	<th style="text-align: right; " >{% trans "Payment" %}:</th>
+	                <td>{{ member_selection_form.payment }}</td>
+        	    </tr>
+	        </table>
+
+        	<p>
+	            <input name="submit-member-payments" type="submit" value="{% trans 'Submit' %}" />
+        	</p>
+	    </form>
+	</div>
+
+	<div style="border: 2px solid grey; width: 50%; padding-left: 1em;">
+		<h4>Update Payments from Customers:</h4>
+
+	    <form action="." method="POST" >{% csrf_token %}
+        	<table>
+	            <tr>
+        	        <th style="text-align: right; " >{% trans "Customer" %}:</th>
+			<td>{{ customer_selection_form.customer }}</td>
+			{% if customer_selection_form.customer.errors %}
+				<td style="color: red; " >
+					{{ customer_selection_form.customer.errors }}
+				</td>
+			{% endif %}
+	            </tr>
+        	    <tr>
+                	<th style="text-align: right; " >{% trans "Payment" %}:</th>
+			<td>{{ customer_selection_form.payment }}</td>
+			{% if customer_selection_form.payment.errors %}
+				<td style="color: red; " >
+					{{ customer_selection_form.payment.errors }}
+				</td>
+			{% endif %}
+        	    </tr>
+	        </table>
+
+        	<p>
+	            <input name="submit-customer-payments" type="submit" value="{% trans 'Submit' %}" />
+        	</p>
+	    </form>
+	</div>
+
+
 </div>
 {% endblock %}

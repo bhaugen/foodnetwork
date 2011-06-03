@@ -814,24 +814,6 @@ def order_selection(request):
         {'header_form': ihform,
          'unpaid_orders': unpaid_orders}, context_instance=RequestContext(request))
 
-
-    #init = {"delivery_date": next_delivery_date(),}
-    #if request.method == "POST":
-    #    ihform = OrderSelectionForm(request.POST)  
-    #    if ihform.is_valid():
-    #        ihdata = ihform.cleaned_data
-    #        customer_id = ihdata['customer']
-    #        ord_date = ihdata['delivery_date']
-    #        if ordering_by_lot():
-    #            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-    #               % ('distribution/orderbylot', customer_id, ord_date.year, ord_date.month, ord_date.day))
-    #        else:
-    #            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-    #               % ('distribution/orderupdate', customer_id, ord_date.year, ord_date.month, ord_date.day))
-    #else:)
-    #    ihform = OrderSelectionForm(initial=init)
-    #return render_to_response('distribution/order_selection.html', {'header_form': ihform})
-
 #todo: this whole view shd be changed a la PBC
 # plus, it is a logical mess...
 @login_required
@@ -1238,25 +1220,11 @@ def order_item_rows_by_product(thisdate):
     orders = Order.objects.filter(delivery_date=thisdate).exclude(state='Unsubmitted')
     if not orders:
         return []
-    #cust_list = []
-    #for order in orders:
-    #    cust_list.append(order.customer.short_name)
-    #cust_count = len(cust_list)
     order_list = []
     for order in orders:
         order_list.append(order.id)
     order_count = len(order_list)
-    #prods = Product.objects.all()
     product_dict = {}
-    #for prod in prods:
-    #    totavail = prod.total_avail(thisdate)
-    #    totordered = prod.total_ordered(thisdate)
-    #    if totordered > 0:
-    #        producers = prod.avail_producers(thisdate)
-    #        product_dict[prod.id] = [prod.parent_string(),
-    #            prod.long_name, prod.growing_method, producers, totavail, totordered]
-    #        for x in range(order_count):
-    #            product_dict[prod.id].append(' ')
     items = OrderItem.objects.filter(order__delivery_date=thisdate)
     for item in items:
         prod = item.product
@@ -1283,16 +1251,7 @@ def order_item_rows(thisdate):
     for order in orders:
         cust_list.append(order.customer.id)
     cust_count = len(cust_list)
-    #prods = Product.objects.all()
     product_dict = {}
-    #for prod in prods:
-    #    totavail = prod.total_avail(thisdate)
-    #    totordered = prod.total_ordered(thisdate)
-    #    if totordered > 0:
-    #        producers = prod.avail_producers(thisdate)
-    #        product_dict[prod.id] = [prod.parent_string(), prod.long_name, producers, totavail, totordered]
-    #        for x in range(cust_count):
-    #            product_dict[prod.id].append(' ')
     items = OrderItem.objects.filter(order__delivery_date=thisdate)
     for item in items:
         prod = item.product
@@ -1356,6 +1315,18 @@ def order_table(request, year, month, day):
          'heading_list': heading_list, 
          'item_list': item_list,
          'orders': orders,}, context_instance=RequestContext(request))
+
+@login_required
+def report_selection(request):
+    if request.method == "POST":
+        if request.POST.get('submit-receipts-sales'):
+            td = datetime.date.today()        
+            return HttpResponseRedirect('/%s/%s/%s/%s/'
+               % ('distribution/receiptsandsales', td.year, td.month, td.day ))
+    return render_to_response('distribution/report_selection.html', 
+        {
+        }, context_instance=RequestContext(request))
+
 
 @login_required
 def receipts_and_sales(request, year, month, day):
@@ -2022,23 +1993,39 @@ def payment_selection(request):
         'from_date': thisdate - datetime.timedelta(days=7),
         'to_date': thisdate + datetime.timedelta(days=5),
     }
+    ihform = PaymentSelectionForm(data=request.POST or None, initial=init)
+    msform = PaymentUpdateSelectionForm(data=request.POST or None)
+    csform = CustomerPaymentSelectionForm(data=request.POST or None)
     if request.method == "POST":
-        ihform = PaymentSelectionForm(request.POST)  
-        if ihform.is_valid():
-            ihdata = ihform.cleaned_data
-            producer_id = ihdata['producer']
-            from_date = ihdata['from_date'].strftime('%Y_%m_%d')
-            to_date = ihdata['to_date'].strftime('%Y_%m_%d')
-            due = 1 if ihdata['due'] else 0
-            paid_member = ihdata['paid_member']
-            return HttpResponseRedirect('/%s/%s/%s/%s/%s/%s/'
-               % ('distribution/producerpayments', producer_id, from_date, to_date, due, paid_member))
-    else:
-        #ihform = PaymentSelectionForm(initial={'from_date': thisdate, 'to_date': thisdate })
-    #return render_to_response('distribution/payment_selection.html', {'avail_date': thisdate, 'header_form': ihform})
-        ihform = PaymentSelectionForm(initial=init)
-    return render_to_response('distribution/payment_selection.html', 
-        {'header_form': ihform}, context_instance=RequestContext(request))
+        if request.POST.get('submit-payment-table'):
+            if ihform.is_valid():
+                ihdata = ihform.cleaned_data
+                producer_id = ihdata['producer']
+                from_date = ihdata['from_date'].strftime('%Y_%m_%d')
+                to_date = ihdata['to_date'].strftime('%Y_%m_%d')
+                due = 1 if ihdata['due'] else 0
+                paid_member = ihdata['paid_member']
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/%s/'
+                   % ('distribution/producerpayments', producer_id, from_date, to_date, due, paid_member))
+        if request.POST.get('submit-member-payments'):
+            if msform.is_valid():
+                msdata = msform.cleaned_data
+                producer = msdata['producer'] if msdata['producer'] else 0
+                payment = msdata['payment'] if msdata['payment'] else 0
+                return HttpResponseRedirect('/%s/%s/%s/'
+                   % ('distribution/paymentupdate', producer, payment))
+        if request.POST.get('submit-customer-payments'):
+            if csform.is_valid():
+                csdata = csform.cleaned_data
+                customer = csdata['customer'] if csdata['customer'] else 0
+                payment = csdata['payment'] if csdata['payment'] else 0
+                return HttpResponseRedirect('/%s/%s/%s/'
+                   % ('distribution/customerpaymentupdate', customer, payment))
+    return render_to_response('distribution/payment_selection.html', {
+        'header_form': ihform,
+        'member_selection_form': msform,
+        'customer_selection_form': csform,
+    }, context_instance=RequestContext(request))
 
 @login_required
 def statement_selection(request):
@@ -2572,7 +2559,6 @@ def payment_update_selection(request):
                 payment = msdata['payment'] if msdata['payment'] else 0
                 return HttpResponseRedirect('/%s/%s/%s/'
                    % ('distribution/paymentupdate', producer, payment))
-    if request.method == "POST":
         if request.POST.get('submit-customer-payments'):
             if csform.is_valid():
                 csdata = csform.cleaned_data

@@ -51,7 +51,7 @@ urlpatterns = patterns('',
     url(r'^produceravail/(?P<prod_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', produceravail),
 
     # payments
-    (r'^producerpaymentselection/$', payment_selection),
+    (r'^paymentselection/$', payment_selection),
     (r'^paymentupdateselection/$', payment_update_selection),
     url(r'^producerpayments/(?P<prod_id>\d+)/(?P<from_date>\w{10})/(?P<to_date>\w{10})/(?P<due>\d{1})/(?P<paid_member>\w+)/$', producer_payments),
     url(r'^paymentupdate/(?P<producer_id>\d+)/(?P<payment_id>\d+)/$', payment_update),
@@ -110,6 +110,7 @@ urlpatterns = patterns('',
     url(r'^statements/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$', statements),
 
     # reports
+    (r'^reportselection/$', report_selection),
     url(r'^receiptsandsales/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', receipts_and_sales, name="receipts_and_sales"),
 
     # emails

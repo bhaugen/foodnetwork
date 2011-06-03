@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Report Selection" %}
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+
+{% include "dojo_include.html" %}
+
+<script type="text/javascript">
+        dojo.require("dojo.parser");
+        dojo.require("dijit.form.DateTextBox");
+</script>
+
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="reports">
+
+	{% include "distribution/tabnav.html" %}
+
+	<p><i>More to come...</i></p>
+
+    <form action="." method="POST" >{% csrf_token %}
+        <p>
+            <input name="submit-receipts-sales" type="submit" value="{% trans 'Receipts and Sales Report' %}" />
+        </p>
+    </form>
+</div>
+{% endblock %}
+
