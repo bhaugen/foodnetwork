@@ -17,7 +17,8 @@
 
     <script type="text/javascript" >
 
-		var paymentSelections = []
+	    var paymentSelections = [];
+	    var customerPaymentSelections = [];
 
 		function insertOption(selField, optionText, optionValue)
 		{
@@ -83,6 +84,49 @@
 			}
 		}
 
+		function customerChanged(evt)
+		{
+			var selectField = dojo.byId('id_customer_payment');
+			var sfLength = selectField.length;
+			for (var i=0; i<sfLength; i++)
+			{
+			   selectField.remove(selectField.options[0]);
+			}
+
+			var producerId = evt.target.value;
+			if(producerId)
+			{
+				var jsonUrl = "/distribution/jsoncustomerpayments/" + evt.target.value + "/";
+				dojo.xhrGet( 
+				{
+						url: jsonUrl,
+						handleAs: "json",
+						load: function(responseObject, ioArgs) 
+						{
+							var payments = responseObject;
+
+							insertOption(selectField, 'New', '')
+							for(var idx=0;idx<payments.length;idx++)
+							{
+								var payment = payments[idx];
+								var paymentLabel = '#' + payment.pk + ' ' + payment.fields.transaction_date + ' $' + payment.fields.amount;
+								insertOption(selectField, paymentLabel, payment.pk);
+							}
+						}
+				});
+			}
+			else
+			{
+				var sels = paymentSelections;
+				for(var idx=0;idx<paymentSelections.length;idx++)
+				{
+					var sel = paymentSelections[idx];
+					insertOption(selectField, sel[0], sel[1]);
+				}
+			}
+		}
+
+
 		function savePaymentSelections()
 		{
 			sels = dojo.byId('id_payment').options;
@@ -94,12 +138,23 @@
 				el[1] = sel.value;
 				paymentSelections.push(el);
 			}
+
+			sels = dojo.byId('id_customer_payment').options;
+			for(var idx=0;idx<sels.length;idx++)
+			{
+				var sel = sels[idx];
+				var el = []
+				el[0] = sel.text;
+				el[1] = sel.value;
+				customerPaymentSelections.push(el);
+			}
 			
 		}
 
 		dojo.addOnLoad(function()
 		{
 			dojo.connect(dojo.byId("id_producer"), "onchange", "producerChanged");
+			dojo.connect(dojo.byId("id_customer"), "onchange", "customerChanged");
 			savePaymentSelections();
 
 		});
@@ -213,10 +268,10 @@
 	            </tr>
         	    <tr>
                 	<th style="text-align: right; " >{% trans "Payment" %}:</th>
-			<td>{{ customer_selection_form.payment }}</td>
-			{% if customer_selection_form.payment.errors %}
+			<td>{{ customer_selection_form.customer_payment }}</td>
+			{% if customer_selection_form.customer_payment.errors %}
 				<td style="color: red; " >
-					{{ customer_selection_form.payment.errors }}
+					{{ customer_selection_form.customer_payment.errors }}
 				</td>
 			{% endif %}
         	    </tr>

@@ -2018,7 +2018,7 @@ def payment_selection(request):
             if csform.is_valid():
                 csdata = csform.cleaned_data
                 customer = csdata['customer'] if csdata['customer'] else 0
-                payment = csdata['payment'] if csdata['payment'] else 0
+                payment = csdata['customer_payment'] if csdata['customer_payment'] else 0
                 return HttpResponseRedirect('/%s/%s/%s/'
                    % ('distribution/customerpaymentupdate', customer, payment))
     return render_to_response('distribution/payment_selection.html', {
@@ -2708,7 +2708,15 @@ def customer_payment_update(request, customer_id, payment_id):
 
 def json_payments(request, producer_id):
     # todo: shd limit to a few most recent payments
-    data = serializers.serialize("json", EconomicEvent.objects.payments_to_party(producer_id))
+    data = serializers.serialize("json",
+        EconomicEvent.objects.payments_to_party(producer_id))
+    return HttpResponse(data, mimetype="text/json-comment-filtered")
+
+
+def json_customer_payments(request, customer_id):
+    # todo: shd limit to a few most recent payments
+    data = serializers.serialize("json",
+        EconomicEvent.objects.payments_from_party(customer_id))
     return HttpResponse(data, mimetype="text/json-comment-filtered")
 
 def json_products(request, product_id=None):

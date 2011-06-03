@@ -105,11 +105,11 @@ class PaymentUpdateSelectionForm(forms.Form):
 
 class CustomerPaymentSelectionForm(forms.Form):
     customer = forms.ChoiceField(required=False)
-    payment = forms.ChoiceField(required=False)
+    customer_payment = forms.ChoiceField(required=False)
     def __init__(self, *args, **kwargs):
         super(CustomerPaymentSelectionForm, self).__init__(*args, **kwargs)
         self.fields['customer'].choices = [('', '----------')] + [(cust.id, cust.short_name) for cust in Customer.objects.all()]
-        self.fields['payment'].choices = [('', 'New')] + [
+        self.fields['customer_payment'].choices = [('', 'New')] + [
             (payment.payment.id, payment) for payment in CustomerPayment.objects.all()]
 
     def clean(self):

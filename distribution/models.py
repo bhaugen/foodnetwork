@@ -1288,6 +1288,14 @@ class EconomicEventManager(models.Manager):
                 payments.append(event)
         return payments
 
+    def payments_from_party(self, party):
+        events = EconomicEvent.raw_objects.filter(from_whom=party)
+        payments = []
+        for event in events:
+            if isinstance(event.as_leaf_class(), Payment):
+                payments.append(event)
+        return payments
+
     def payments_to_members(self):
         fn = food_network()
         payments = Payment.objects.all().exclude(to_whom=fn)

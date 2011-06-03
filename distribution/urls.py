@@ -68,8 +68,8 @@ urlpatterns = patterns('',
     url(r'^jsoncustomer/(?P<customer_id>\d+)/$', json_customer_info),
     url(r'^jsonproducer/(?P<producer_id>\d+)/$', json_producer_info),    
     url(r'^jsonpayments/(?P<producer_id>\d+)/$', json_payments),
+    url(r'^jsoncustomerpayments/(?P<customer_id>\d+)/$', json_customer_payments),
     
-
     # dojo
     url(r'^dojoproducts/$', dojo_products, name="dojo_products"),
     url(r'^jsonproducts/$', json_products, name="json_products"),
