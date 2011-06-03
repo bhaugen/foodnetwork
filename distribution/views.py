@@ -1246,25 +1246,35 @@ def order_item_rows_by_product(thisdate):
     for order in orders:
         order_list.append(order.id)
     order_count = len(order_list)
-    prods = Product.objects.all()
+    #prods = Product.objects.all()
     product_dict = {}
-    for prod in prods:
-        totavail = prod.total_avail(thisdate)
-        totordered = prod.total_ordered(thisdate)
-        if totordered > 0:
-            producers = prod.avail_producers(thisdate)
-            product_dict[prod.short_name] = [prod.parent_string(),
-                prod.long_name, prod.growing_method, producers, totavail, totordered]
-            for x in range(order_count):
-                product_dict[prod.short_name].append(' ')
+    #for prod in prods:
+    #    totavail = prod.total_avail(thisdate)
+    #    totordered = prod.total_ordered(thisdate)
+    #    if totordered > 0:
+    #        producers = prod.avail_producers(thisdate)
+    #        product_dict[prod.id] = [prod.parent_string(),
+    #            prod.long_name, prod.growing_method, producers, totavail, totordered]
+    #        for x in range(order_count):
+    #            product_dict[prod.id].append(' ')
     items = OrderItem.objects.filter(order__delivery_date=thisdate)
     for item in items:
+        prod = item.product
+        if not prod.id in product_dict:
+            totavail = prod.total_avail(thisdate)
+            totordered = prod.total_order_quantity(thisdate)
+            producers = prod.avail_producers(thisdate)
+            product_dict[prod.id] = [prod.parent_string(),
+                prod.long_name, prod.growing_method, producers, totavail, totordered]
+            for x in range(order_count):
+                product_dict[prod.id].append(' ')
         prod_cell = order_list.index(item.order.id) + 6
-        product_dict[item.product.short_name][prod_cell] = item.quantity
+        product_dict[prod.id][prod_cell] = item.quantity
     item_list = product_dict.values()
     item_list.sort()
     return item_list
 
+#todo: lotsa dup code between this method and the one above
 def order_item_rows(thisdate):
     orders = Order.objects.filter(delivery_date=thisdate).exclude(state='Unsubmitted')
     if not orders:
@@ -1273,18 +1283,27 @@ def order_item_rows(thisdate):
     for order in orders:
         cust_list.append(order.customer.id)
     cust_count = len(cust_list)
-    prods = Product.objects.all()
+    #prods = Product.objects.all()
     product_dict = {}
-    for prod in prods:
-        totavail = prod.total_avail(thisdate)
-        totordered = prod.total_ordered(thisdate)
-        if totordered > 0:
-            producers = prod.avail_producers(thisdate)
-            product_dict[prod.id] = [prod.parent_string(), prod.long_name, producers, totavail, totordered]
-            for x in range(cust_count):
-                product_dict[prod.id].append(' ')
+    #for prod in prods:
+    #    totavail = prod.total_avail(thisdate)
+    #    totordered = prod.total_ordered(thisdate)
+    #    if totordered > 0:
+    #        producers = prod.avail_producers(thisdate)
+    #        product_dict[prod.id] = [prod.parent_string(), prod.long_name, producers, totavail, totordered]
+    #        for x in range(cust_count):
+    #            product_dict[prod.id].append(' ')
     items = OrderItem.objects.filter(order__delivery_date=thisdate)
     for item in items:
+        prod = item.product
+        if not prod.id in product_dict:
+            totavail = prod.total_avail(thisdate)
+            totordered = prod.total_order_quantity(thisdate)
+            producers = prod.avail_producers(thisdate)
+            product_dict[prod.id] = [prod.parent_string(),
+                prod.long_name, prod.growing_method, producers, totavail, totordered]
+            for x in range(cust_count):
+                product_dict[prod.id].append(' ')
         prod_cell = cust_list.index(item.order.customer.id) + 5
         product_dict[item.product.id][prod_cell] = item.quantity
     item_list = product_dict.values()

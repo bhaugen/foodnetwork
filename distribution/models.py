@@ -911,14 +911,17 @@ class Product(models.Model):
     def current_orders(self, thisdate):
         #todo: this date range shd be changed
         # maybe something based on DeliveryCycle?
-        weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
-        weekend = weekstart + datetime.timedelta(days=5)
-        return OrderItem.objects.filter(product=self, order__delivery_date__range=(weekstart, weekend))
+        return OrderItem.objects.filter(product=self,
+                                        order__delivery_date=thisdate)
 
     #dup - used alot
     #shd differentiate, one shd be all ordered including filled and unfilled?
     def total_ordered(self, thisdate):
         return sum(order.unfilled_quantity() for order in self.current_orders(thisdate))
+
+    # temp - differentiated
+    def total_order_quantity(self, thisdate):
+        return sum(order.quantity for order in self.current_orders(thisdate))
 
     #dup - used once below
     def total_unfilled(self, thisdate):
