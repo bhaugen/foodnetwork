@@ -760,11 +760,13 @@ def create_delivery_forms(thisdate, customer, data=None):
                 dtf.empty_fields = ["---" for x in range(field_count, 8)]
             form_list.append(dtf)              
         else:
-            if field_set_count:
-                delform = DeliveryForm(data, prefix=str(oi.id) + '0')
-            else:
-                delform = DeliveryForm(data, prefix=str(oi.id) + '0',
-                                   initial={'amount': oi.quantity})
+            #todo: still thinking about this idea
+            #if field_set_count:
+            #    delform = DeliveryForm(data, prefix=str(oi.id) + '0')
+            #else:
+            #    delform = DeliveryForm(data, prefix=str(oi.id) + '0',
+            #                       initial={'amount': oi.quantity})
+            delform = DeliveryForm(data, prefix=str(oi.id) + '0')
             dtf.delivery_forms = [delform,]
             dtf.delivery_forms.extend(
                 [DeliveryForm(data, prefix=str(oi.id) + str(x), instance=InventoryTransaction()) for x in range(1, field_set_count)])
