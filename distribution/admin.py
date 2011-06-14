@@ -128,10 +128,11 @@ class OrderAdmin(admin.ModelAdmin):
 admin.site.register(Order, OrderAdmin)
 
 
-#class OrderItemAdmin(admin.ModelAdmin):
-#    list_display = ('order', 'product', 'quantity', 'unit_price', 'extended_price')
+class OrderItemChangeAdmin(admin.ModelAdmin):
+    list_display = ('order', 'customer', 'order_item',  'action', 'reason', 'changed_by',
+                    'when_changed', 'prev_qty', 'new_qty', 'prev_notes', 'new_notes')
   
-#admin.site.register(OrderItem, OrderItemAdmin)
+admin.site.register(OrderItemChange, OrderItemChangeAdmin)
 
 
 class ProcessTypeAdmin(admin.ModelAdmin):

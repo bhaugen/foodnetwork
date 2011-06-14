@@ -824,7 +824,7 @@ class OrderItemForm(forms.ModelForm):
 
      class Meta:
          model = OrderItem
-         exclude = ('order', 'product', 'fee', 'orig_qty')
+         exclude = ('order', 'product', 'fee')
 
 def create_order_item_forms(order, delivery_date, data=None):
     form_list = []

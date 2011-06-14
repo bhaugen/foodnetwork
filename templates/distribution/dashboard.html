@@ -66,10 +66,10 @@
 				{% for oic in order_changes %}
 				<tr>
 					<td>
-						{% ifchanged oic.order.customer %}
-						{{ oic.order.customer }}
+						{% ifchanged oic.customer %}
+						{{ oic.customer }}
 						{% else %}&nbsp;
-						{% endifchanged %}
+						{% endifchanged %}						
 					</td>
 					<td>
 						{% ifchanged oic.order.id %}

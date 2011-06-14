@@ -1657,7 +1657,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, verbose_name=_('order'))
     product = models.ForeignKey(Product, verbose_name=_('product'))
     quantity = models.DecimalField(_('quantity'), max_digits=8, decimal_places=2)
-    orig_qty = models.DecimalField(_('orig qty'), max_digits=8, decimal_places=2, default=Decimal('0'))
+    #orig_qty = models.DecimalField(_('orig qty'), max_digits=8, decimal_places=2, default=Decimal('0'))
     unit_price = models.DecimalField(_('unit price'), max_digits=8, decimal_places=2)
     fee = models.DecimalField(_('fee'), max_digits=3, decimal_places=2, default=Decimal('0'),
         help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
@@ -1711,7 +1711,19 @@ class OrderItem(models.Model):
     def short_adjusted_extended_price(self):
         answer = self.short_adjusted_qty() * self.unit_price
         return answer.quantize(Decimal('.01'), rounding=ROUND_UP)
-  
+
+    def qty_before_staff_short_change(self):
+        #todo: consider customer unforced changes after staff short change?
+        staff_short_changes = self.order_item_changes.filter(
+            reason=3)
+        if staff_short_changes:
+            return staff_short_changes[0].prev_qty
+        else:
+            return None
+
+    def orig_qty(self):
+        return self.qty_before_staff_short_change()
+
     def producers(self):
         txs = self.inventorytransaction_set.all()
         producers = []
@@ -1800,16 +1812,27 @@ class OrderItem(models.Model):
 ACTION_CHOICES = (
     (1, _('Add')),
     (2, _('Change')),
-    (4, _('Delete')),
+    (3, _('Delete')),
+)
+
+REASON_CHOICES = (
+    (1, _('Customer unforced change')),
+    (2, _('Customer short change')),
+    (3, _('Staff short change')),
+    (4, _('Customer order deletion')),
 )
 
 class OrderItemChange(models.Model):
     action = models.PositiveSmallIntegerField(_('action'), max_length="1",
         choices=ACTION_CHOICES)
+    reason = models.PositiveSmallIntegerField(_('reason'), max_length="1",
+        choices=REASON_CHOICES)
     when_changed = models.DateTimeField(_('when changed'), auto_now_add=True)
     changed_by = models.ForeignKey(User, verbose_name=_('changed by'),
         related_name='order_items_changed', blank=True, null=True)
     order = models.ForeignKey(Order, verbose_name=_('order'),
+        related_name="order_changes", blank=True, null=True)
+    customer = models.ForeignKey(Customer, verbose_name=_('customer'),
         related_name="order_changes")
     order_item = models.ForeignKey(OrderItem, verbose_name=_('order_item'),
         related_name="order_item_changes", blank=True, null=True)

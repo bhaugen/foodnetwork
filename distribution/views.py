@@ -1409,8 +1409,21 @@ def shorts(request, year, month, day):
                     #print "qty:", qty, "id:", id
                     item = OrderItem.objects.get(pk=id)
                     if item.quantity != qty:
-                        if not item.orig_qty:
-                            item.orig_qty = item.quantity
+                        #if not item.orig_qty:
+                        #    item.orig_qty = item.quantity
+                        oic = OrderItemChange(
+                            action=2,
+                            reason=3,
+                            when_changed=datetime.datetime.now(),
+                            changed_by=request.user,
+                            order=item.order,
+                            customer=item.order.customer,
+                            order_item=item,
+                            product=item.product,
+                            prev_qty=item.quantity,
+                            new_qty=qty,
+                        )
+                        oic.save()
                         item.quantity = qty
                         item.save()
                         changed_items.append(item)
@@ -1423,10 +1436,11 @@ def shorts(request, year, month, day):
 @login_required
 def shorts_changes(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
-    changed_items = OrderItem.objects.filter(
+    changes = OrderItemChange.objects.filter(
         order__delivery_date=thisdate,
-        orig_qty__gt=Decimal("0")
+        reason=3,
     )
+    changed_items = [change.order_item for change in changes]
     return render_to_response('distribution/shorts_changes.html', 
         {'date': thisdate, 
          'changed_items': changed_items }, context_instance=RequestContext(request))
@@ -1444,10 +1458,11 @@ def send_short_change_notices(request, year, month, day):
 
             if fn:
                 thisdate = datetime.date(int(year), int(month), int(day))
-                changed_items = OrderItem.objects.filter(
+                changes = OrderItemChange.objects.filter(
                     order__delivery_date=thisdate,
-                    orig_qty__gt=Decimal("0")
+                    reason=3,
                 )
+                changed_items = [change.order_item for change in changes]
                 orders = {}
                 for item in changed_items:
                     if not item.order in orders:
@@ -1916,8 +1931,15 @@ def dashboard(request):
             shorts_label = "Shorts vs Plans"
         orders = Order.objects.filter(
             delivery_date=thisdate).exclude(state="Unsubmitted")
-        order_changes = OrderItemChange.objects.filter(
-            order__delivery_date=thisdate)
+        order_changes = list(OrderItemChange.objects.filter(
+            order__delivery_date=thisdate,
+            reason=1,
+        ))
+        order_changes.extend(list(OrderItemChange.objects.filter(
+            reason=4,
+            when_changed__range=(monday, saturday)
+        )))
+        #import pdb; pdb.set_trace()
 
     return render_to_response('distribution/dashboard.html', 
         {'plans': plans,

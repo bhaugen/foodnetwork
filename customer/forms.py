@@ -74,7 +74,7 @@ class OrderItemForm(forms.ModelForm):
 
      class Meta:
          model = OrderItem
-         exclude = ('order', 'product', 'fee', 'orig_qty')
+         exclude = ('order', 'product', 'fee')
 
 class MemberPlanSelectionForm(forms.Form):
     plan_from_date = forms.DateField(

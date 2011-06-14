@@ -501,6 +501,21 @@ def delete_order_confirmation(request, order_id):
 def delete_order(request, order_id):
     if request.method == "POST":
         order = get_object_or_404(Order, id=int(order_id))
+        for item in order.orderitem_set.all():
+            oic = OrderItemChange(
+                action=3,
+                reason=4,
+                when_changed=datetime.datetime.now(),
+                changed_by=request.user,
+                order=None,
+                customer=item.order.customer,
+                order_item=None,
+                product=item.product,
+                prev_qty=item.quantity,
+                new_qty=Decimal("0"),
+            )
+            oic.save()
+
         order.delete()
         return HttpResponseRedirect(reverse("customer_order_selection"))
     return HttpResponseRedirect(reverse("customer_order_selection"))
@@ -552,9 +567,11 @@ def update_order(order, itemforms, is_change):
                     if qty != item.quantity or notes != item.notes:
                         oic = OrderItemChange(
                             action=2,
+                            reason=1,
                             when_changed=datetime.datetime.now(),
                             changed_by=order.changed_by,
                             order=order,
+                            customer=order.customer,
                             order_item=item,
                             product=item.product,
                             prev_qty=item.quantity,
@@ -567,9 +584,11 @@ def update_order(order, itemforms, is_change):
                 else:
                     oic = OrderItemChange(
                         action=3,
+                        reason=1,
                         when_changed=datetime.datetime.now(),
                         changed_by=order.changed_by,
                         order=order,
+                        customer=order.customer,
                         order_item=None,
                         product=item.product,
                         prev_qty=item.quantity,
@@ -590,9 +609,11 @@ def update_order(order, itemforms, is_change):
                     oi.save()
                     oic = OrderItemChange(
                         action=1,
+                        reason=1,
                         when_changed=datetime.datetime.now(),
                         changed_by=order.changed_by,
                         order=order,
+                        customer=order.customer,
                         order_item=oi,
                         product=product,
                         prev_qty=Decimal("0"),
@@ -642,7 +663,21 @@ def resave_short_adjusted_order(request, order_id):
         order = get_object_or_404(Order, pk=order_id)
         shorts = order.short_items()
         for short in shorts:
-            short.quantity = short.short_adjusted_qty()
+            new_qty = short.short_adjusted_qty()
+            oic = OrderItemChange(
+                action=2,
+                reason=2,
+                when_changed=datetime.datetime.now(),
+                changed_by=request.user,
+                order=order,
+                customer=order.customer,
+                order_item=short,
+                product=short.product,
+                prev_qty=short.quantity,
+                new_qty=new_qty,
+            )
+            oic.save()
+            short.quantity = new_qty
             short.save()
         return HttpResponseRedirect('/%s/%s/'
                % ('customer/orderconfirmation', order.id))

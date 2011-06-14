@@ -53,6 +53,7 @@ def create_new_product_list_forms(data=None):
 def create_order_item_forms(order, product_list, availdate, data=None):
     form_list = []
     item_dict = {}
+    items = []
     fn = food_network()
     avail = fn.customer_availability(availdate)
     if order:
