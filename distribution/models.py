@@ -729,15 +729,24 @@ class Customer(Party):
                     break
         return answer
 
-        
-
-
     @property
     def email(self):
         return self.email_address
 
     class Meta:
         ordering = ('short_name',)
+
+
+class CustomerContact(models.Model):
+    customer = models.ForeignKey(Customer,
+        verbose_name=_('customer'), related_name='contacts')
+    name = models.CharField(_('name'), max_length=64)
+    email = models.EmailField(_('email address'), max_length=96, blank=True, null=True)
+    phone = PhoneNumberField(_('phone'), blank=True)
+    cell = PhoneNumberField(_('cell'), blank=True)
+    login_user = models.OneToOneField(User, related_name='customer_contact',
+        blank=True, null=True)
+
 
 # based on dfs from threaded_comments
 def nested_objects(node, all_nodes):

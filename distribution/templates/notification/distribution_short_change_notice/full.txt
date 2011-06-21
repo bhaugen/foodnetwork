@@ -1,4 +1,4 @@
-We are sorry that we could not fulfill the following order items for {{ order_date }}:
+We are sorry that we could not fulfill the following order items for {{ order.delivery_date }}:
 {% for item in items %}
 * {{ item.product.long_name }}, Original quantity: {{ item.orig_qty }} Changed to: {{ item.quantity }}
 {% endfor %}

@@ -123,7 +123,12 @@ def send_order_notices(request):
                 weekend = weekstart + datetime.timedelta(days=5)
                 order_list = Order.objects.filter(delivery_date__range=(weekstart, weekend))
                 for order in order_list:
-                    users = [order.customer, fn]
+                    customer = order.customer
+                    users = [customer, fn]
+                    for contact in customer.users.all():
+                        if contact.email != customer.email:
+                            users.append(contact)
+                    users = list(set(users))
                     notification.send(users, "distribution_order_notice", {
                             "order": order, 
                             "order_date": thisdate})
@@ -1470,15 +1475,20 @@ def send_short_change_notices(request, year, month, day):
                     orders[item.order].append(item)
 
                 for order in orders:
-                    users = [order.customer, fn]
-                    if order.created_by:
-                        if request.user.id == order.created_by.id:
-                            parties = request.user.parties.all()
-                            if parties:
-                                user_party = parties[0]
-                                if user_party.id == order.customer.id:
-                                    if not user.email == order.customer.email:
-                                        users.append(request.user)             
+                    customer = order.customer
+                    users = [customer, fn]
+                    for contact in customer.contacts.all():
+                        if contact.email != customer.email:
+                            users.append(contact)
+                    users = list(set(users))
+                    #if order.created_by:
+                    #    if request.user.id == order.created_by.id:
+                    #        parties = request.user.parties.all()
+                    #        if parties:
+                    #            user_party = parties[0]
+                                #if user_party.id == order.customer.id:
+                                #    if not user.email == order.customer.email:
+                                #        users.append(request.user)         
                     notification.send(users, "distribution_short_change_notice", {
                         "order": order, 
                         "items": orders[order],
@@ -2855,15 +2865,20 @@ def send_invoices(request, cust_id, year, month, day):
             )
         #import pdb; pdb.set_trace()
         for order in orders:
-            users = [order.customer, fn]
-            if order.created_by:
-                if request.user.id == order.created_by.id:
-                    parties = request.user.parties.all()
-                    if parties:
-                        user_party = parties[0]
-                        if user_party.id == order.customer.id:
-                            if not user.email == order.customer.email:
-                                users.append(request.user)             
+            customer = order.customer
+            users = [customer, fn]
+            for contact in customer.contacts.all():
+                if contact.email != customer.email:
+                    users.append(contact)
+            users = list(set(users))
+            #if order.created_by:
+            #    if request.user.id == order.created_by.id:
+            #        parties = request.user.parties.all()
+            #        if parties:
+            #            user_party = parties[0]
+            #            if user_party.id == order.customer.id:
+            #                if not user.email == order.customer.email:
+            #                    users.append(request.user)             
             notification.send(users, "distribution_invoice", {
                 "order": order,
                 "network": fn,
@@ -2903,15 +2918,20 @@ def send_order_emails(request, cust_id, year, month, day):
             )
         #import pdb; pdb.set_trace()
         for order in orders:
-            users = [order.customer, fn]
-            if order.created_by:
-                if request.user.id == order.created_by.id:
-                    parties = request.user.parties.all()
-                    if parties:
-                        user_party = parties[0]
-                        if user_party.id == order.customer.id:
-                            if not user.email == order.customer.email:
-                                users.append(request.user)             
+            customer = order.customer
+            users = [customer, fn]
+            for contact in customer.contacts.all():
+                if contact.email != customer.email:
+                    users.append(contact)
+            users = list(set(users))
+            #if order.created_by:
+            #    if request.user.id == order.created_by.id:
+            #        parties = request.user.parties.all()
+            #        if parties:
+            #            user_party = parties[0]
+            #            if user_party.id == order.customer.id:
+            #                if not user.email == order.customer.email:
+            #                    users.append(request.user)             
             notification.send(users, "distribution_order", {
                 "order": order,
                 "network": fn,

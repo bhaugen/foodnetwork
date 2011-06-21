@@ -33,12 +33,15 @@ admin.site.register(Distributor, DistributorAdmin)
 class CustomerDeliveryCycleInline(admin.TabularInline):
     model = CustomerDeliveryCycle
 
+class CustomerContactInline(admin.TabularInline):
+    model = CustomerContact
+
 
 class CustomerAdmin(admin.ModelAdmin):
     form = CustomerForm
     list_display = ('short_name', 'member_id', 'long_name', 'contact', 'phone',
                     'customer_transportation_fee', 'apply_transportation_fee')
-    inlines = [ CustomerDeliveryCycleInline, ]
+    inlines = [ CustomerContactInline, CustomerDeliveryCycleInline, ]
     
 admin.site.register(Customer, CustomerAdmin)
 
@@ -98,10 +101,10 @@ class SpecialAdmin(admin.ModelAdmin):
     
 admin.site.register(Special, SpecialAdmin)
 
-class PartyUserAdmin(admin.ModelAdmin):
-    list_display = ('user', 'party')
+#class PartyUserAdmin(admin.ModelAdmin):
+#    list_display = ('user', 'party')
     
-admin.site.register(PartyUser, PartyUserAdmin)
+#admin.site.register(PartyUser, PartyUserAdmin)
 
 
 class InventoryItemAdmin(admin.ModelAdmin):

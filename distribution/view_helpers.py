@@ -583,8 +583,14 @@ def send_avail_emails(cycle):
     food_network_name = fn.long_name
     delivery_date = cycle.next_delivery_date_using_closing()
     fresh_list = fn.customer_availability(delivery_date)
-    users = list(cycle.customers.all())
+    users = []
+    for customer in cycle.customers.all():
+        users.append(customer)
+        for contact in customer.contacts.all():
+            if contact.email != customer.email:
+                users.append(contact)
     users.append(fn)
+    users = list(set(users))
     intro = avail_email_intro()
     domain = Site.objects.get_current().domain
     notification.send(users, "distribution_fresh_list", {

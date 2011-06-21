@@ -21,11 +21,19 @@
 		from {{ network.long_name }}</h2>
 
 	<p>
-		Order closing: {{ order_closing|date:"l, F j, f A" }}.&nbsp;&nbsp;
+	Order closing: {{ order_closing|date:"l, F j, f A" }}.&nbsp;&nbsp;
+	{% comment %}
 		If you have customer login credentials, you may 
 		<a href="{% url customer_dashboard %}">place an order</a>.
+	
 	</p>
-	<p>If you want to become a customer, please <a href="mailto:orders@keewaydinorganics.com">send us an email</a></p>
+
+	<p>
+	If you want customer login credentials, please <a href="mailto:orders@keewaydinorganics.com">send us an email</a>
+	{% endcomment %}
+	</p>
+	<p>Ability to enter and manage your own orders online coming soon.
+	</p>
 
 	<div style="float: left; width: 40%;">
 	<table class="ga-event-table" >
