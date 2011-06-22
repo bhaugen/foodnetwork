@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 
 from account.forms import *
+from distribution.models import CustomerContact
 
 def login(request, form_class=LoginForm, template_name="account/login.html"):
     if request.method == "POST":
