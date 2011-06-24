@@ -269,6 +269,7 @@ class SuppliableDemandCell(object):
         return answer
 
 def suppliable_demand(from_date, to_date, member=None):
+    #import pdb; pdb.set_trace()
     plans = ProductPlan.objects.all()
     if member:
         plans = plans.filter(member=member)
@@ -333,6 +334,7 @@ def suppliable_demand(from_date, to_date, member=None):
     return sdtable
 
 def json_income_rows(from_date, to_date, member=None):
+    #import pdb; pdb.set_trace()
     plans = ProductPlan.objects.all()
     if member:
         plans = plans.filter(member=member)

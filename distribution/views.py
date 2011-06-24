@@ -149,7 +149,7 @@ def json_producer_info(request, producer_id):
 #@login_required
 def plan_selection(request):
     #import pdb; pdb.set_trace()
-    from_date = datetime.date.today()
+    from_date = next_delivery_date()
     # force from_date to Monday, to_date to Sunday
     from_date = from_date - datetime.timedelta(days=datetime.date.weekday(from_date))
     to_date = from_date + datetime.timedelta(weeks=16)
