@@ -407,7 +407,7 @@ class FoodNetwork(Party):
         for item in items:
             if not item.product.id in products:
                 products[item.product.id] = ProductOrderedAndAvailable(
-                    item.product, item.quantity, [])
+                    item.product, Decimal("0"), [])
             products[item.product.id].ordered += item.quantity
         items = products.values()
         for item in items:
