@@ -1348,6 +1348,18 @@ def receipts_and_sales(request, year, month, day):
         }, context_instance=RequestContext(request))
 
 @login_required
+def ordered_vs_available(request, year, month, day):
+    delivery_date = datetime.date(int(year), int(month), int(day))
+    fn = food_network()
+    ordered_available = fn.ordered_available(delivery_date)
+    return render_to_response('distribution/ordered_vs_available.html', 
+        {'delivery_date': delivery_date, 
+         'ordered_available': ordered_available,
+        }, context_instance=RequestContext(request))
+
+
+
+@login_required
 def order_table_by_product(request, year, month, day):
     thisdate = datetime.date(int(year), int(month), int(day))
     date_string = thisdate.strftime('%Y_%m_%d')

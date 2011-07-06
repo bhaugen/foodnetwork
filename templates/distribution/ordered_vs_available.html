@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Ordered vs Available" %}
+{% endblock %}
+
+{% block header %}
+
+<style type="text/css">
+	th, td
+	{
+		padding:5px;
+	}
+	th
+	{
+		font-weight:bold;
+	}
+	tr.alt td 
+	{
+		color:#000000;
+		background-color:#EAF2D3;
+	}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="reports">
+
+	{% include "distribution/tabnav.html" %}
+
+
+	<h2>{% trans "Ordered vs Available to be delivered" %} {{ delivery_date }}</h2>
+	<table >
+		<tr>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Ordered" %}</th>
+			<th>{% trans "Producer" %}</th>
+			<th>{% trans "Ready" %}</th>
+	        </tr>
+        	{% for item in ordered_available %}
+		<tr>
+			<td>{{ item.product }}</td>
+			<td style="text-align: right; ">{{ item.quantity }}</td>
+			{% if item.lots %}
+			{% for lot in item.lots %}
+			{% if forloop.first %}
+			<td>{{ lot.producer }}</td>
+			<td style="text-align: right; ">{{ lot.planned }}</td>
+			{% else %}
+			<tr>
+				<td>&nbsp;</td><td>&nbsp;</td>
+				<td>{{ lot.producer }}</td>
+				<td style="text-align: right; ">{{ lot.planned }}</td>
+			</tr>
+			{% endif %}
+
+			{% endfor %}
+			{% else %}
+			<td>&nbsp;</td><td>&nbsp;</td>
+			{% endif %}
+		</tr>
+        	{% endfor %}
+	</table>
+
+</div>
+
+{% endblock %} 
+
+

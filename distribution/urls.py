@@ -112,6 +112,8 @@ urlpatterns = patterns('',
     # reports
     (r'^reportselection/$', report_selection),
     url(r'^receiptsandsales/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', receipts_and_sales, name="receipts_and_sales"),
+    url(r'^orderedvsavailable/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
+        ordered_vs_available, name="ordered_vs_available"),
 
     # emails
     url(r'^emailselection/$', email_selection, name="email_selection"),

@@ -91,6 +91,13 @@ class ProductQuantity(object):
          self.qty = qty
 
 
+class ProductOrderedAndAvailable(object):
+     def __init__(self, product, ordered, lots):
+         self.product = product
+         self.ordered = ordered
+         self.lots = lots
+
+
 class ProductReceiptsAndSales(object):
      def __init__(self,
                   product,
@@ -391,6 +398,22 @@ class FoodNetwork(Party):
         report_lines.sort(lambda x, y: cmp(x.product.short_name,
                                            y.product.short_name))
         return report_lines
+
+    def ordered_available(self, delivery_date):
+        #todo: combine order qties.
+        items = OrderItem.objects.filter(
+            order__delivery_date=delivery_date)
+        products = {}
+        for item in items:
+            if not item.product.id in products:
+                products[item.product.id] = ProductOrderedAndAvailable(
+                    item.product, item.quantity, [])
+            products[item.product.id].ordered += item.quantity
+        items = products.values()
+        for item in items:
+            item.lots = [lot for lot in
+                    item.product.ready_items_today(delivery_date)]
+        return items                
     
     # deprecated
     def fresh_list(self, thisdate = None):
@@ -827,13 +850,24 @@ class Product(models.Model):
     # ok
     def avail_items_today(self, thisdate):
         """
-        means all available inventory items not reduced by orders
+        means all available inventory items not reduced by orders?
         """
         items = InventoryItem.objects.filter(product=self,
             inventory_date__lte=thisdate,
             expiration_date__gt=thisdate)
         items = items.filter(Q(remaining__gt=0) | Q(onhand__gt=0))
         return items
+
+    def ready_items_today(self, thisdate):
+        """
+        means all non-received ready inventory items
+        """
+        items = InventoryItem.objects.filter(product=self,
+            inventory_date__lte=thisdate,
+            expiration_date__gt=thisdate)
+        items = items.filter(received=Decimal("0"), planned__gt=0)
+        return items
+
 
     def production_plans(self, thisdate):
         weekstart = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
