@@ -16,7 +16,7 @@
 	{
 		font-weight:bold;
 	}
-	tr.alt td 
+	tr.even td 
 	{
 		color:#000000;
 		background-color:#EAF2D3;
@@ -43,7 +43,7 @@
 			<th>{% trans "Notes" %}</th>
 	        </tr>
         	{% for item in ordered_available %}
-		<tr>
+		<tr class="{% cycle 'odd' 'even' %}">
 			<td>{{ item.product }}</td>
 			<td style="text-align: right; ">{{ item.ordered }}</td>
 			{% if item.lots %}
