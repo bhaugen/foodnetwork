@@ -1323,13 +1323,22 @@ def order_table(request, year, month, day):
 
 @login_required
 def report_selection(request):
+    init = {"selected_date": next_delivery_date(),}
+    dsform = DateSelectionForm(data=request.POST or None, initial=init)
     if request.method == "POST":
+        if request.POST.get('submit-ordered_available'):
+            if dsform.is_valid():
+                dsdata = dsform.cleaned_data
+                ord_date = dsdata['selected_date']
+                return HttpResponseRedirect('/%s/%s/%s/%s/'
+                    % ('distribution/orderedvsavailable', ord_date.year, ord_date.month, ord_date.day))
         if request.POST.get('submit-receipts-sales'):
             td = datetime.date.today()        
             return HttpResponseRedirect('/%s/%s/%s/%s/'
                % ('distribution/receiptsandsales', td.year, td.month, td.day ))
     return render_to_response('distribution/report_selection.html', 
         {
+            'dsform': dsform,
         }, context_instance=RequestContext(request))
 
 
