@@ -129,6 +129,7 @@ class CustomerProductAvailability(object):
          self.inventory_date = inventory_date
          self.expiration_date = expiration_date
 
+
 class StaffProductAvailability(object):
      def __init__(self, product, price, avail, ordered, inventory_date, expiration_date):
          self.product = product
@@ -1511,10 +1512,11 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if self.paid:
-            state_reset = self.set_paid_state()
+            self.set_paid_state()
         self.save_base(*args, **kwargs)
     
     def delete(self):
+        #todo: is this necessary?  shd be cascaded, no?
         deliveries = InventoryTransaction.objects.filter(order_item__order=self) 
         for delivery in deliveries:
             delivery.delete()
@@ -1713,6 +1715,7 @@ class OrderItem(models.Model):
             str(self.quantity)])
     
     def delete(self):
+        #todo: is this necessary? shd be cascaded, no?
         deliveries = self.inventorytransaction_set.all()
         for delivery in deliveries:
             delivery.delete()
