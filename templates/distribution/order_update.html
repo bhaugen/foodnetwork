@@ -199,6 +199,22 @@
 			validateNumber(evt, checkForDistributor);
 		}
 
+		function distributorChanged(evt)
+		{
+			var jsonUrl = "/distribution/jsondistributor/" + evt.target.value + "/";
+			dojo.xhrGet( 
+			{
+					url: jsonUrl,
+					handleAs: "json",
+					load: function(responseObject, ioArgs) 
+					{
+						var distributor = responseObject[0];
+						dojo.byId("id_transportation_fee").value = distributor.fields.transportation_fee;
+					}
+			});
+		}
+
+
 		dojo.addOnLoad(function()
 		{
 			var queryNodes = dojo.query(".quantity-field");
@@ -228,6 +244,8 @@
 			}
 			node = dojo.byId("id_transportation_fee");
 			dojo.connect(node, "onblur", "transportationFeeChanged");
+
+			dojo.connect(dojo.byId("id_distributor"), "onchange", "distributorChanged");
 
 		});
 

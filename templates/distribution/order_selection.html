@@ -92,7 +92,32 @@
         	    <input type="submit" value="{% trans 'Submit' %}" />
 	        </p>
 	    </form>
+    	</div>
+
+    	{% if changeable_orders %}
+	<div style="padding-left: 1em;">
+		<h4>Changeable orders:</h4>
+		<ul>
+		{% for order in changeable_orders %}
+
+			<li>
+				<a href="{% url distribution_order order_id=order.id %}">
+					{{ order.customer }} 
+					Ordered: {{ order.order_date }} Delivery: {{ order.delivery_date }} 
+					${{ order.grand_total }}
+					- {{ order.get_state_display }}
+				</a>&nbsp;&nbsp; 
+				<a href="{% url staff_edit_order order_id=order.id %}">Change</a>
+				{% comment %}
+				<a href="{% url delete_order_confirmation order_id=order.id %}">Delete</a>
+				{% endcomment %}
+			</li>
+
+		{% endfor %}
+		</ul>
 	</div>
+	{% endif %}
+
 
 	{% if unpaid_orders %}
 		<div style="padding-left: 1em;">

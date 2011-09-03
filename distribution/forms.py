@@ -798,14 +798,13 @@ class OrderForm(forms.ModelForm):
         
     def __init__(self, order=None, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
-        #sublist = list(Party.subclass_objects.all().exclude(pk=1))
-        #sublist.sort(lambda x, y: cmp(y.__class__, x.__class__))
         self.fields['distributor'].choices = [(party.id, party.short_name) for party in Party.subclass_objects.all_distributors()]
         #import pdb; pdb.set_trace()
         if order:
             try:
                 transportation_tx = TransportationTransaction.objects.get(order=order)
                 self.initial['transportation_fee'] = transportation_tx.amount
+                self.initial['distributor'] = transportation_tx.from_whom
             except TransportationTransaction.DoesNotExist:
                 pass
 

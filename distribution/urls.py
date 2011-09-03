@@ -10,6 +10,9 @@ urlpatterns = patterns('',
     # orders
     url(r'^orderdeliveries/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', orders_with_deliveries),
     (r'^orderselection/$', order_selection),
+    url(r'^neworder/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
+        new_order, name="new_order"),
+    url(r'^editorder/(?P<order_id>\d+)/$', edit_order, name="staff_edit_order"),
     url(r'^orderupdate/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', order_update),
     url(r'^orderbylot/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', order_by_lot),
     url(r'^order/(?P<order_id>\d+)/$', order, name="distribution_order"),
@@ -66,6 +69,7 @@ urlpatterns = patterns('',
     
     # json
     url(r'^jsoncustomer/(?P<customer_id>\d+)/$', json_customer_info),
+    url(r'^jsondistributor/(?P<distributor_id>\d+)/$', json_distributor_info),
     url(r'^jsonproducer/(?P<producer_id>\d+)/$', json_producer_info),    
     url(r'^jsonpayments/(?P<producer_id>\d+)/$', json_payments),
     url(r'^jsoncustomerpayments/(?P<customer_id>\d+)/$', json_customer_payments),

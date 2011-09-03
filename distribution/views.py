@@ -141,6 +141,14 @@ def json_customer_info(request, customer_id):
     data = serializers.serialize("json", Party.objects.filter(pk=customer_id))
     return HttpResponse(data, mimetype="text/json-comment-filtered")
 
+def json_distributor_info(request, distributor_id):
+    # Note: serializer requires an iterable, not a single object. Thus filter rather than get.
+    qs = Distributor.objects.filter(pk=distributor_id)
+    if not qs.count():
+        qs = FoodNetwork.objects.filter(pk=distributor_id)
+    data = serializers.serialize("json", qs)
+    return HttpResponse(data, mimetype="text/json-comment-filtered")
+
 
 def json_producer_info(request, producer_id):
     data = serializers.serialize("json", Party.objects.filter(pk=producer_id))
@@ -799,6 +807,36 @@ def all_inventory_update(request, year, month, day):
 
 @login_required
 def order_selection(request):
+    delivery_date = next_delivery_date()
+    changeable_orders = Order.objects.filter(
+        state="Submitted",
+        delivery_date__lte=delivery_date,
+    ).order_by('-delivery_date')
+
+    unpaid_orders = Order.objects.exclude(state__contains="Paid").exclude(state="Unsubmitted")
+    if request.method == "POST":
+        ihform = OrderSelectionForm(request.POST)  
+        if ihform.is_valid():
+            ihdata = ihform.cleaned_data
+            customer_id = ihdata['customer']
+            ord_date = ihdata['delivery_date']
+            if ordering_by_lot():
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                   % ('distribution/orderbylot', customer_id, ord_date.year, ord_date.month, ord_date.day))
+            else:
+                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                   % ('distribution/neworder', customer_id, ord_date.year, ord_date.month, ord_date.day))
+    else:
+        ihform = OrderSelectionForm(initial={'delivery_date': delivery_date})
+    return render_to_response(
+        'distribution/order_selection.html', 
+        {'header_form': ihform,
+         'changeable_orders': changeable_orders,
+         'unpaid_orders': unpaid_orders,
+        }, context_instance=RequestContext(request))
+
+@login_required
+def old_order_selection(request):
     unpaid_orders = Order.objects.exclude(state__contains="Paid").exclude(state="Unsubmitted")
     if request.method == "POST":
         ihform = OrderSelectionForm(request.POST)  
@@ -819,7 +857,8 @@ def order_selection(request):
         {'header_form': ihform,
          'unpaid_orders': unpaid_orders}, context_instance=RequestContext(request))
 
-#todo: this whole view shd be changed a la PBC
+
+#todo: this whole view shd be changed a la customer side
 # plus, it is a logical mess...
 @login_required
 def order_update(request, cust_id, year, month, day):
@@ -930,6 +969,237 @@ def order_update(request, cust_id, year, month, day):
          'avail_date': availdate, 
          'order_form': ordform, 
          'item_forms': itemforms}, context_instance=RequestContext(request))
+
+@login_required
+def new_order(request, cust_id, year, month, day):
+    delivery_date = datetime.date(int(year), int(month), int(day))
+    availdate = delivery_date
+
+    try:
+        fn = food_network()
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
+
+
+    order = None
+
+    customer = get_object_or_404(Customer, pk=int(cust_id))
+
+    if request.method == "POST":
+        ordform = OrderForm(data=request.POST)
+        #import pdb; pdb.set_trace()
+        itemforms = create_order_item_forms(order, availdate, request.POST)     
+        if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
+            the_order = ordform.save(commit=False)
+            the_order.customer = customer
+            data = ordform.cleaned_data
+            transportation_fee = data['transportation_fee']
+            distributor = data['distributor']
+            the_order.distributor = distributor
+            the_order.created_by = request.user
+            the_order.save()
+            if transportation_fee:
+                transportation_tx = TransportationTransaction(
+                    from_whom=distributor,
+                    to_whom=customer,
+                    order=order, 
+                    amount=transportation_fee,
+                    transaction_date=order.delivery_date)
+                transportation_tx.save()
+            is_change = False
+            update_order(the_order, itemforms, is_change)
+            return HttpResponseRedirect('/%s/%s/'
+               % ('distribution/order', the_order.id))
+    else:
+        ordform = OrderForm(initial={
+            'customer': customer, 
+            'order_date': datetime.date.today(),
+            'delivery_date': delivery_date,
+            'transportation_fee': fn.transportation_fee,
+        })
+        itemforms = create_order_item_forms(order, availdate)
+    return render_to_response('distribution/order_update.html', 
+        {'customer': customer, 
+         'order': order, 
+         'delivery_date': delivery_date, 
+         'avail_date': availdate, 
+         'order_form': ordform, 
+         'item_forms': itemforms}, context_instance=RequestContext(request))
+
+
+@login_required
+def edit_order(request, order_id):
+    order = get_object_or_404(Order, id=int(order_id))
+    orderdate = order.order_date
+    availdate = order.delivery_date
+
+    customer = order.customer
+    product_list = order.product_list
+
+    if request.method == "POST":
+        ordform = OrderForm(data=request.POST)
+        #import pdb; pdb.set_trace()
+        itemforms = create_order_item_forms(order, availdate, request.POST)     
+        if ordform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
+            data = ordform.cleaned_data
+            transportation_fee = data['transportation_fee']
+            distributor = data['distributor']
+            order.changed_by = request.user
+            order.distributor = distributor
+            order.save()
+            if transportation_fee:
+                transportation_tx = None
+                try:
+                    transportation_tx = TransportationTransaction.objects.get(order=order)
+                    if transportation_fee != transportation_tx.amount:
+                        transportation_tx.amount = transportation_fee
+                        transportation_tx.save()
+                    if distributor != transportation_tx.from_whom:
+                        transportation_tx.from_whom = distributor
+                        transportation_tx.save()
+                except TransportationTransaction.DoesNotExist:
+                    pass
+                if not transportation_tx:
+                    transportation_tx = TransportationTransaction(
+                        from_whom=distributor,
+                        to_whom=customer,
+                        order=order, 
+                        amount=transportation_fee,
+                        transaction_date=order.delivery_date)
+                    transportation_tx.save()
+            is_change = True
+            update_order(order, itemforms, is_change)
+            return HttpResponseRedirect('/%s/%s/'
+               % ('distribution/order', order.id))
+    else:
+        ordform = OrderForm(order, instance=order)
+        itemforms = create_order_item_forms(order, availdate)
+    return render_to_response('distribution/order_update.html', 
+        {'customer': customer, 
+         'order': order, 
+         'order_date': orderdate, 
+         'avail_date': availdate, 
+         'order_form': ordform, 
+         'item_forms': itemforms}, context_instance=RequestContext(request))
+
+
+@login_required
+def delete_order_confirmation(request, order_id):
+    order = get_object_or_404(Order, id=int(order_id))
+    return render_to_response('distribution/order_delete_confirmation.html',
+            {'order': order}, context_instance=RequestContext(request))
+
+@login_required
+def delete_order(request, order_id):
+    if request.method == "POST":
+        order = get_object_or_404(Order, id=int(order_id))
+        for item in order.orderitem_set.all():
+            oic = OrderItemChange(
+                action=3,
+                reason=4,
+                when_changed=datetime.datetime.now(),
+                changed_by=request.user,
+                order=None,
+                customer=item.order.customer,
+                order_item=None,
+                product=item.product,
+                prev_qty=item.quantity,
+                new_qty=Decimal("0"),
+            )
+            oic.save()
+
+        order.delete()
+        return HttpResponseRedirect(reverse("customer_order_selection"))
+    return HttpResponseRedirect(reverse("customer_order_selection"))
+
+
+def update_order(order, itemforms, is_change):
+    customer = order.customer
+    #import pdb; pdb.set_trace()
+
+    for itemform in itemforms:
+        data = itemform.cleaned_data
+        qty = data['quantity']
+        notes = data['notes']
+        #import pdb; pdb.set_trace()
+        if is_change and order.state == "Submitted":
+            if itemform.instance.id:
+                item = OrderItem.objects.get(id=itemform.instance.id)
+                if qty > 0:
+                    if qty != item.quantity or notes != item.notes:
+                        oic = OrderItemChange(
+                            action=2,
+                            reason=1,
+                            when_changed=datetime.datetime.now(),
+                            changed_by=order.changed_by,
+                            order=order,
+                            customer=order.customer,
+                            order_item=item,
+                            product=item.product,
+                            prev_qty=item.quantity,
+                            new_qty=qty,
+                            prev_notes=item.notes,
+                            new_notes=notes,
+                        )
+                        oic.save()
+                        itemform.save()
+                else:
+                    oic = OrderItemChange(
+                        action=3,
+                        reason=1,
+                        when_changed=datetime.datetime.now(),
+                        changed_by=order.changed_by,
+                        order=order,
+                        customer=order.customer,
+                        order_item=None,
+                        product=item.product,
+                        prev_qty=item.quantity,
+                        new_qty=qty,
+                        prev_notes=item.notes,
+                        new_notes=notes,
+                    )
+                    oic.save()
+                    itemform.instance.delete()
+            else:
+                # added
+                if qty > 0:
+                    prod_id = data['prod_id']
+                    product = Product.objects.get(id=prod_id)
+                    oi = itemform.save(commit=False)
+                    oi.order = order
+                    oi.product = product
+                    oi.save()
+                    oic = OrderItemChange(
+                        action=1,
+                        reason=1,
+                        when_changed=datetime.datetime.now(),
+                        changed_by=order.changed_by,
+                        order=order,
+                        customer=order.customer,
+                        order_item=oi,
+                        product=product,
+                        prev_qty=Decimal("0"),
+                        new_qty=qty,
+                        prev_notes="",
+                        new_notes=notes,
+                    )
+                    oic.save()
+        else:
+            if itemform.instance.id:
+                if qty > 0:
+                    itemform.save()
+                else:
+                    itemform.instance.delete()
+            else:
+                if qty > 0:
+                    prod_id = data['prod_id']
+                    product = Product.objects.get(id=prod_id)
+                    oi = itemform.save(commit=False)
+                    oi.order = order
+                    oi.product = product
+                    oi.save()
+    return True
+
 
 def create_order_by_lot_forms(order, delivery_date, data=None):    
     fn = food_network()

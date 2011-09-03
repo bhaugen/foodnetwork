@@ -302,6 +302,7 @@ class Party(models.Model):
         self.save_base(*args, **kwargs)
         
 
+# todo: obsolete?
 class PartyUser(models.Model):
     party = models.ForeignKey(Party, related_name="users", verbose_name=_('party'))
     user = models.ForeignKey(User, related_name="parties", verbose_name=_('user'))
@@ -330,9 +331,9 @@ class FoodNetwork(Party):
     member_terms = models.IntegerField(_('member terms'), blank=True, null=True,
         help_text=_('Net number of days for network to pay member'))
     customer_fee = models.DecimalField(_('customer fee'), max_digits=3, decimal_places=2, default=Decimal("0"),
-        help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
+        help_text=_('Customer Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%. It is a markup, added to the price of an order as a separate line item on invoices'))
     producer_fee = models.DecimalField(_('producer fee'), max_digits=3, decimal_places=2, default=Decimal("0"),
-        help_text=_('Fee is a decimal fraction, not a percentage - for example, .05 instead of 5%'))
+        help_text=_('Producer Fee is a decimal fraction, not a percentage. It is a margin, subtracted from the price, giving the pay price to the producer.'))
     transportation_fee = models.DecimalField(_('transportation fee'), max_digits=8, decimal_places=2, default=Decimal("0"),
         help_text=_('This fee will be added to all orders unless overridden on the Customer'))
     #current_week = models.DateField(_('current week'), default=datetime.date.today, 
@@ -672,7 +673,8 @@ class Processor(Party):
 
 
 class Distributor(Party):
-    pass
+    transportation_fee = models.DecimalField(_('transportation fee'), max_digits=8, decimal_places=2, default=Decimal("0"),
+        help_text=_('Anything but a zero here overrides the Food Network default transportation fee for this distributor.'))
 
 
 class NextDeliveryCycle(object):
