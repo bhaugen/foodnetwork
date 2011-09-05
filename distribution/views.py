@@ -144,13 +144,15 @@ def availability_csv(request, year, month, day):
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=availability.csv'
     writer = csv.writer(response)
-    writer.writerow(["Producer", "Product", "Price", "Quantity"])
+    writer.writerow(["Producer", "Product", "Price", "Quantity", "Notes"])
     for item in fn.avail_items_for_customer(avail_date):
         writer.writerow(
             [item.producer.long_name,
              item.product,
              item.product.formatted_unit_price_for_date(avail_date),
-             item.remaining]
+             item.remaining,
+             item.notes
+            ]
         )
     return response
 
