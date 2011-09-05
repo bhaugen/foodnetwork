@@ -140,12 +140,25 @@ def supply_demand_rows(from_date, to_date, member=None):
         default_avail_qty__gt=0,
     )
     constants = {}
+    rows = {}
+    #import pdb; pdb.set_trace()
+    #todo: what if some NIPs and some inventoried for same product?
+    #does code does allow for that?
     for cp in cps:
         constants.setdefault(cp.product, Decimal("0"))
-        constants[cp.product] += cp.default_avail_qty
+        constant = cp.default_avail_qty
+        product = cp.product
+        constants[product] += constant
+        row = {}
+        row["product"] =  product.long_name
+        row["id"] = product.id
+        rows.setdefault(product, row)
+        wkdate = from_date
+        while wkdate <= to_date:            
+            row[wkdate.strftime('%Y_%m_%d')] = str(constant)
+            wkdate = wkdate + datetime.timedelta(days=7)
     if member:
         plans = plans.filter(member=member)
-    rows = {}
     #todo: 
     # spread storage items over many weeks
     # if plan.product expiration_days > 1 week:
@@ -154,21 +167,22 @@ def supply_demand_rows(from_date, to_date, member=None):
     # may require another pass thru storage plans...
     for plan in plans:
         wkdate = from_date
-        #this is slow:
+        #this is too slow:
         #product = plan.product.supply_demand_product()
         product = plan.product
         #constant = Decimal('0')
-        constant = ""
-        cp = constants.get(product)
-        if cp:
-            constant = str(cp)
+        #constant = ""
+        #cp = constants.get(product)
+        #if cp:
+        #    constant = str(cp)
         row = {}
-        while wkdate <= to_date:
-            row[wkdate.strftime('%Y_%m_%d')] = str(constant)
-            wkdate = wkdate + datetime.timedelta(days=7)
+        #while wkdate <= to_date:
+        #    row[wkdate.strftime('%Y_%m_%d')] = str(constant)
+        #    wkdate = wkdate + datetime.timedelta(days=7)
         row["product"] =  product.long_name
         row["id"] = product.id
         rows.setdefault(product, row)
+        #import pdb; pdb.set_trace()
         wkdate = from_date
         while wkdate <= to_date:
             if plan.from_date <= wkdate and plan.to_date >= wkdate:
@@ -195,11 +209,27 @@ def supply_demand_weekly_table(week_date):
     ).order_by("-role", "member__short_name")
     columns = []
     rows = {}
+    cps = ProducerProduct.objects.filter(
+        inventoried=False,
+        default_avail_qty__gt=0,
+    )
+    for cp in cps:
+        if not cp.producer in columns:
+            columns.append(cp.producer)
     for plan in plans:
         if not plan.member in columns:
             columns.append(plan.member)
     columns.insert(0, "Product\Member")
     columns.append("Balance")
+    for cp in cps:
+        if not rows.get(cp.product):
+            row = []
+            for i in range(0, len(columns)-1):
+                row.append(Decimal("0"))
+            row.insert(0, cp.product)
+            rows[cp.product] = row
+            rows[cp.product][columns.index(cp.producer)] += cp.default_avail_qty
+            rows[cp.product][len(columns)-1] += cp.default_avail_qty
     for plan in plans:
         if not rows.get(plan.product):
             row = []
@@ -229,11 +259,28 @@ def dojo_supply_demand_weekly_table(week_date):
     # for rows: dictionaries with the above keys
     columns = []
     rows = {}
+    cps = ProducerProduct.objects.filter(
+        inventoried=False,
+        default_avail_qty__gt=0,
+    )
+    for cp in cps:
+        if not cp.producer in columns:
+            columns.append(cp.producer.short_name)
     for plan in plans:
         if not plan.member.short_name in columns:
             columns.append(plan.member.short_name)
-    #columns.insert(0, "Product\Member")
     columns.append("Balance")
+    for cp in cps:
+        if not rows.get(cp.product):
+            row = {}
+            for column in columns:
+                row[column] = 0
+            row["product"] = cp.product.long_name
+            row["id"] = cp.product.id
+            row["Balance"] = 0
+            rows[cp.product] = row
+        rows[cp.product][cp.producer.short_name] += int(cp.default_avail_qty)
+        rows[cp.product]["Balance"] += int(cp.default_avail_qty)
     for plan in plans:
         if not rows.get(plan.product):
             row = {}
@@ -333,6 +380,8 @@ def suppliable_demand(from_date, to_date, member=None):
     sdtable = SupplyDemandTable(columns, income_rows)
     return sdtable
 
+#todo: does not use contants (NIPs)
+#or correct logic for storage items
 def json_income_rows(from_date, to_date, member=None):
     #import pdb; pdb.set_trace()
     plans = ProductPlan.objects.all()

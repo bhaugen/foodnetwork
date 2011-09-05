@@ -135,6 +135,25 @@ def send_order_notices(request):
                 request.user.message_set.create(message="Order Notice emails have been sent")
         return HttpResponseRedirect(request.POST["next"])
 
+def availability_csv(request, year, month, day):
+    try:
+        fn = food_network()
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
+    avail_date = datetime.date(int(year), int(month), int(day))
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=availability.csv'
+    writer = csv.writer(response)
+    writer.writerow(["Producer", "Product", "Price", "Quantity"])
+    for item in fn.avail_items_for_customer(avail_date):
+        writer.writerow(
+            [item.producer.long_name,
+             item.product,
+             item.product.formatted_unit_price_for_date(avail_date),
+             item.remaining]
+        )
+    return response
+
 
 def json_customer_info(request, customer_id):
     # Note: serializer requires an iterable, not a single object. Thus filter rather than get.
@@ -634,9 +653,9 @@ def inventory_selection(request):
         fn = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
-    this_week = next_delivery_date()
-    init = {"avail_date": this_week,}
-    available = fn.all_avail_items(this_week)
+    avail_date = next_delivery_date()
+    init = {"avail_date": avail_date,}
+    available = fn.all_avail_items(avail_date)
     if request.method == "POST":
         ihform = InventorySelectionForm(request.POST)  
         if ihform.is_valid():
@@ -655,6 +674,9 @@ def inventory_selection(request):
     return render_to_response('distribution/inventory_selection.html', {
         'header_form': ihform,
         'available': available,
+        'avail_year': avail_date.year,
+        'avail_month': avail_date.month,
+        'avail_day': avail_date.day,
     }, context_instance=RequestContext(request))
 
 @login_required
@@ -1002,9 +1024,9 @@ def new_order(request, cust_id, year, month, day):
                 transportation_tx = TransportationTransaction(
                     from_whom=distributor,
                     to_whom=customer,
-                    order=order, 
+                    order=the_order, 
                     amount=transportation_fee,
-                    transaction_date=order.delivery_date)
+                    transaction_date=the_order.delivery_date)
                 transportation_tx.save()
             is_change = False
             update_order(the_order, itemforms, is_change)

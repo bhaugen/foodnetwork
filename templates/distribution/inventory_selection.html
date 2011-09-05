@@ -94,10 +94,17 @@
 
 	</div>
 
+
+
 	{% if available %}
 
 	<div style="float: left; margin-top: 1em; " >
-	<h3>What's Available</h3>
+	<h3>What's Available &nbsp;&nbsp;&nbsp;&nbsp;
+	<a href="{% url availability_csv year=avail_year month=avail_month day=avail_day  %}">
+		{% trans "Export availability list as CSV file" %}
+	</a>
+	</h3>
+
 
 	<table class="ga-event-table" style="font-size: 80%;" >
 		<tr>
