@@ -188,12 +188,14 @@ dojo.require("dojo.parser");
 		<h3>What customers will see</h3>
 		<table>
 			<tr>
+				<th>{% trans "Category" %}</th>
 				<th>{% trans "Product" %}</th>
 				<th>{% trans "Available" %}</th>
 				<th>{% trans "Price" %}</th>
 			</tr>
 			{% for product in products %}
 			<tr>
+				<td>{{ product.category }}</td>
 				<td>{{ product.product }}</td>
 				<td style="text-align: right;" >{{ product.qty }}</td>
 				<td style="text-align: right;" >{{ product.price }}</td>

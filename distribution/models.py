@@ -130,6 +130,11 @@ class CustomerProductAvailability(object):
          self.expiration_date = expiration_date
 
 
+class CategoryProductAvailability(object):
+    def __init__(self, category, products):
+         self.category = category
+         self.products = products
+
 class StaffProductAvailability(object):
      def __init__(self, product, price, avail, ordered, inventory_date, expiration_date):
          self.product = product
@@ -599,8 +604,19 @@ class FoodNetwork(Party):
                 pa.product_name = pa.product.short_name
                 pa.price = pa.product.unit_price_for_date(delivery_date).quantize(Decimal('.01'), rounding=ROUND_UP)
                 avail.append(pa)
-        avail = sorted(avail, key=attrgetter('product_name'))
+        avail = sorted(avail, key=attrgetter('category', 'product_name'))
         return avail
+
+    def email_availability(self, delivery_date):
+        avail = self.customer_availability(delivery_date)
+        cats = {}
+        for ap in avail:
+            if ap.category not in cats:
+                cats[ap.category] = CategoryProductAvailability(ap.category, [])
+            cats[ap.category].products.append(ap)
+        cat_avail = cats.values()
+        cat_avail = sorted(cat_avail, key=attrgetter('category'))
+        return cat_avail
 
     def staff_availability(self, delivery_date):
         avail = []

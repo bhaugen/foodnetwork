@@ -4,6 +4,8 @@ When this email was sent, the products listed below were available from {{ food_
 
 To see what is available right now, and place an order, go to
 http://{{ domain }}{% url customer_availability cycle_id=cycle.id %}
-{% for item in fresh_list %}
-{{ item.product }}, Quantity available: {{ item.qty }}, Price: ${{ item.price }}
-{% endfor %}
+{% for cat in fresh_list %}
+{{ cat.category }}
+{% for item in cat.products %}
+    {{ item.product }}, Quantity available: {{ item.qty }}, Price: ${{ item.price }}
+{% endfor %}{% endfor %}

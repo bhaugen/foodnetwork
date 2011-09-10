@@ -633,7 +633,7 @@ def send_avail_emails(cycle):
     fn = food_network()
     food_network_name = fn.long_name
     delivery_date = cycle.next_delivery_date_using_closing()
-    fresh_list = fn.customer_availability(delivery_date)
+    fresh_list = fn.email_availability(delivery_date)
     users = []
     for customer in cycle.customers.all():
         users.append(customer)
