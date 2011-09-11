@@ -658,23 +658,66 @@ def inventory_selection(request):
     avail_date = next_delivery_date()
     init = {"avail_date": avail_date,}
     available = fn.all_avail_items(avail_date)
+    ihform = InventorySelectionForm(data=request.POST or None, initial=init)
+    unplanned_form = UnplannedInventoryForm(data=request.POST or None, 
+        initial={"inventory_date": avail_date})
     if request.method == "POST":
-        ihform = InventorySelectionForm(request.POST)  
-        if ihform.is_valid():
-            ihdata = ihform.cleaned_data
-            producer_id = ihdata['producer']
-            inv_date = ihdata['avail_date']
-            #import pdb; pdb.set_trace()
-            if int(producer_id):
-                return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-                    % ('distribution/inventoryupdate', producer_id, inv_date.year, inv_date.month, inv_date.day))
-            else:
-                return HttpResponseRedirect('/%s/%s/%s/%s/'
-                    % ('distribution/allinventoryupdate', inv_date.year, inv_date.month, inv_date.day))
-    else:
-        ihform = InventorySelectionForm(initial=init)
+        if request.POST.get('submit-planned'):
+            #ihform = InventorySelectionForm(request.POST)  
+            if ihform.is_valid():
+                ihdata = ihform.cleaned_data
+                producer_id = ihdata['producer']
+                inv_date = ihdata['avail_date']
+                #import pdb; pdb.set_trace()
+                if int(producer_id):
+                    return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
+                        % ('distribution/inventoryupdate', producer_id, inv_date.year, inv_date.month, inv_date.day))
+                else:
+                    return HttpResponseRedirect('/%s/%s/%s/%s/'
+                        % ('distribution/allinventoryupdate', inv_date.year, inv_date.month, inv_date.day))
+        if request.POST.get('submit-unplanned'):
+            #unplanned_form = UnplannedInventoryForm(request.POST)  
+            if unplanned_form.is_valid():
+                unplanned_data = unplanned_form.cleaned_data
+                producer = unplanned_data['producer']
+                product = unplanned_data['product']
+                planned = unplanned_data['planned']
+                received = unplanned_data['received'] or Decimal("0")
+                remaining = planned
+                if received:
+                    remaining = received
+                if not producer:
+                    producer_name = unplanned_data['new_producer_name']
+                    producer = Producer(
+                        short_name = producer_name,
+                        long_name = producer_name)
+                    producer.save()
+                pp, created = ProducerProduct.objects.get_or_create(
+                    producer=producer,
+                    product=product)
+                lot = InventoryItem(
+                    producer = producer,
+                    product = product,
+                    custodian = unplanned_data['custodian'],
+                    freeform_lot_id = unplanned_data['freeform_lot_id'],
+                    field_id = unplanned_data['field_id'],
+                    inventory_date = unplanned_data['inventory_date'],
+                    planned = planned,
+                    received = received,
+                    remaining = remaining,
+                    notes = unplanned_data['notes'],
+                )
+                lot.save()
+                ihform = InventorySelectionForm(initial=init)
+                unplanned_form = UnplannedInventoryForm(initial={"inventory_date": avail_date})
+                
+    #else:
+    #    ihform = InventorySelectionForm(initial=init)
+    #    unplanned_form = UnplannedInventoryForm(initial={"inventory_date":
+    #                                                     avail_date})
     return render_to_response('distribution/inventory_selection.html', {
         'header_form': ihform,
+        'unplanned_form': unplanned_form,
         'available': available,
         'avail_year': avail_date.year,
         'avail_month': avail_date.month,
@@ -766,7 +809,8 @@ def all_inventory_update(request, year, month, day):
     #import pdb; pdb.set_trace()
     items = InventoryItem.objects.select_related(depth=1).filter(
         remaining__gt=0,
-        inventory_date__range=(monday, saturday))
+        inventory_date=availdate)
+        #inventory_date__range=(monday, saturday))
     plans = ProductPlan.objects.select_related(depth=1).filter(
         role="producer",
         from_date__lte=availdate, 

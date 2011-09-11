@@ -199,6 +199,14 @@ class PartyManager(models.Manager):
                     producers.append(prod)
         return producers
 
+    def all_producers(self):
+        producers = []
+        all_prods = Party.objects.all()
+        for prod in all_prods:
+            if prod.is_producer():
+                producers.append(prod)
+        return producers
+
     def all_distributors(self):
         parties = Party.objects.all()
         dists = []

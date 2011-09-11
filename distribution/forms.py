@@ -503,6 +503,64 @@ class AllInventoryItemForm(forms.ModelForm):
         super(AllInventoryItemForm, self).__init__(*args, **kwargs)
         self.fields['custodian'].choices = [('', '------------')] + [(prod.id, prod.short_name) for prod in Party.subclass_objects.possible_custodians()]
 
+class UnplannedInventoryForm(forms.Form):
+    producer = forms.producer = forms.ModelChoiceField(required=False,
+        queryset=QuerySet(model=Party))
+    product = forms.producer = forms.ModelChoiceField(required=False,
+        queryset=Product.objects.filter(stockable=True))
+    custodian = forms.producer = forms.ModelChoiceField(required=False,
+        queryset=QuerySet(model=Party))
+    new_producer_name = forms.CharField(required=False,
+                                      widget=forms.TextInput(attrs={'size': '43', 'value': ''}))
+    freeform_lot_id = forms.CharField(required=False,
+                                      widget=forms.TextInput(attrs={'size': '16', 'value': ''}))
+    field_id = forms.CharField(required=False,
+                               widget=forms.TextInput(attrs={'size': '5', 'value': ''}))
+    inventory_date = forms.DateField(widget=forms.TextInput(attrs={
+                                                                  "dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
+    #expiration_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))
+    planned = forms.DecimalField(widget=forms.TextInput(attrs={'class':
+                                                               'quantity-field',
+                                                               'size': '6'}))
+    received = forms.DecimalField(required=False, widget=forms.TextInput(attrs={'class':
+                                                                'quantity-field',
+                                                                'size': '6'}))
+    notes = forms.CharField(required=False, widget=forms.TextInput(attrs={'size': '32', 'value': ''}))
+
+        
+    def __init__(self, *args, **kwargs):
+        super(UnplannedInventoryForm, self).__init__(*args, **kwargs)
+        self.fields['producer'].choices = [('', '------------')] + [(prod.id,
+            prod.short_name) for prod in Party.subclass_objects.all_producers()]
+        self.fields['custodian'].choices = [('', '------------')] + [(prod.id, 
+            prod.short_name) for prod in Party.subclass_objects.possible_custodians()]
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        producer = cleaned_data.get("producer")
+        new_producer_name = cleaned_data.get("new_producer_name")
+
+        if producer and new_producer_name:
+            raise forms.ValidationError("Don't select a producer and also add a new producer")
+        if not producer:
+            if not new_producer_name:
+                raise forms.ValidationError("Either select a producer or add a new producer")
+
+        return cleaned_data
+
+    def clean_new_producer_name(self):
+        new_producer_name = self.cleaned_data["new_producer_name"]
+        if new_producer_name:
+            dups = Party.objects.filter(short_name=new_producer_name)
+            if dups.count():
+                raise forms.ValidationError("That name is taken")
+            #dups = Customer.objects.filter(member_id=member_id)
+            #if dups.count():
+            #    if not dups[0].pk == self.instance.pk:
+            #        raise forms.ValidationError("Someone already has that member id")
+        return new_producer_name
+
+
 
 class AvailableItemForm(forms.Form):
     inventory_date = forms.DateField(widget=forms.TextInput(attrs={'size': '10'}))

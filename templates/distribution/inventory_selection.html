@@ -54,7 +54,8 @@
 
 	{% include "distribution/tabnav.html" %}
 
-	<div style="float: left; border: 2px solid grey; float: left; width: 40%; padding-left: 1em; padding-top: 4px; margin-right: 1em; ">
+	<div style="float: left; border: 2px solid grey; width: 33%; padding-left: 1em; padding-top: 4px; margin-right: 1em; ">
+		<h4 style="margin-top: 0;" >Planned</h4>
 
     <form action="." method="POST" >{% csrf_token %}
         <table>
@@ -88,13 +89,139 @@
             </tr>
         </table>
         <p>
-            <input type="submit" value='{% trans "Add or change inventory " %}' />
+            <input type="submit" name="submit-planned" value='{% trans "Add or change inventory " %}' />
         </p>
 	</form>
 
 	</div>
 
+	<div style="float: left; border: 2px solid grey; padding-left: 1em; padding-right: 1em; " >
+		<h4 style="margin-top: 0;" >Unplanned</h4>
 
+		<form action="." method="POST" >{% csrf_token %}
+			<table>
+				{% if unplanned_form.non_field_errors %}
+				<ul style="color: red; " >
+					{{ unplanned_form.non_field_errors.as_ul }}
+				</ul>
+				{% endif %}
+				<tr>
+					<th style="text-align: right; " >{% trans "Select Producer" %}:</th>
+					<td>
+						{{ unplanned_form.producer }}
+					</td>
+					{% if unplanned_form.producer.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.producer.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Or New Producer" %}:</th>
+					<td>
+						{{ unplanned_form.new_producer_name }}
+					</td>
+					{% if unplanned_form.new_producer_name.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.new_producer_name.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Product" %}:</th>
+					<td>
+						{{ unplanned_form.product }}
+					</td>
+					{% if unplanned_form.product.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.product.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Lot ID" %}:</th>
+					<td>
+						{{ unplanned_form.freeform_lot_id }}
+					</td>
+					{% if unplanned_form.freeform_lot_id.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.freeform_lot_id.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Field" %}:</th>
+					<td>
+						{{ unplanned_form.field_id }}
+					</td>
+					{% if unplanned_form.field_id.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.field_id.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Custodian" %}:</th>
+					<td>
+						{{ unplanned_form.custodian }}
+					</td>
+					{% if unplanned_form.custodian.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.custodian.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Inventory Date" %}:</th>
+					<td>
+						{{ unplanned_form.inventory_date }}
+					</td>
+					{% if unplanned_form.inventory_date.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.inventory_date.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Ready" %}:</th>
+					<td>
+						{{ unplanned_form.planned }}
+					</td>
+					{% if unplanned_form.planned.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.planned.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Received" %}:</th>
+					<td>
+						{{ unplanned_form.received }}
+					</td>
+					{% if unplanned_form.received.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.received.errors }}
+					</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<th style="text-align: right; " >{% trans "Notes" %}:</th>
+					<td>
+						{{ unplanned_form.notes }}
+					</td>
+					{% if unplanned_form.notes.errors %}
+					<td style="color: red; " >
+						{{ unplanned_form.notes.errors }}
+					</td>
+					{% endif %}
+				</tr>
+			</table>
+			<p>
+            			<input type="submit" name="submit-unplanned" value='{% trans "Add unplanned inventory" %}' />
+        		</p>
+		</form>
+
+	</div>
 
 	{% if available %}
 
