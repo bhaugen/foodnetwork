@@ -43,6 +43,7 @@ dojo.require("dojo.parser");
 <div style="border: 2px solid grey; float: left; width: 40%; padding-left: 1em;">
 
 	<h3>Availability Emails</h3>
+	{% if forms %}
 
 	<form action="." method="POST" style="font-size: 90%;" >{% csrf_token %}
 
@@ -64,6 +65,12 @@ dojo.require("dojo.parser");
 			<input name="submit-availability" type="submit" value="{% trans 'Submit' %}" />
 		</p>
 	</form>
+	{% else %}
+	<p>
+		Availability emails go to customers on delivery cycles.  To send these emails, 
+		you must create some delivery cycles and assign customers to them.
+	</p>
+	{% endif %}
 
 </div>
 
