@@ -2283,6 +2283,7 @@ def dashboard(request):
     shorts = []
     orders = []
     items = []
+    order_changes = []
     if fn:
         thisdate = next_delivery_date()
         monday = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))
@@ -2320,6 +2321,7 @@ def dashboard(request):
          'orders': orders,
          'delivery_date': thisdate,
          'date_form': date_form,
+         'food_net': fn,
          'food_network_name': food_network_name,
          'order_changes': order_changes,
          }, context_instance=RequestContext(request))

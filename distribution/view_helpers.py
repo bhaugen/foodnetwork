@@ -504,16 +504,22 @@ def plans_for_dojo(member, products, from_date, to_date):
     plans = ProductPlan.objects.filter(member=member)
     rows = {}    
     for pp in products:
-        yearly = "0"
+        yearly = 0
         try:
             product = pp.product
-            yearly = str(pp.default_quantity)
+            yearly = pp.default_quantity
         except:
             product = pp
+        if not yearly:
+            try:
+                pp = ProducerProduct.objects.get(producer=member, product=product)
+                yearly = pp.default_quantity
+            except:
+                pass
         wkdate = from_date
         row = {}
         row["product"] = product.long_name
-        row["yearly"] = yearly
+        row["yearly"] = int(yearly)
         row["id"] = product.id
         row["member_id"] = member.id
         row["from_date"] = from_date.strftime('%Y-%m-%d')
