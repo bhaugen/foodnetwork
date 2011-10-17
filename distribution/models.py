@@ -1146,6 +1146,7 @@ class ProductPlan(models.Model):
 
 class ProducerProduct(models.Model):
     producer = models.ForeignKey(Party, 
+        limit_choices_to = {"content_type__name": "producer"},
         related_name="producer_products", verbose_name=_('producer')) 
     product = models.ForeignKey(Product, 
         related_name="product_producers", verbose_name=_('product'))
@@ -1622,6 +1623,13 @@ class Order(models.Model):
         return total.quantize(Decimal('.01'), rounding=ROUND_UP)
     
     def coop_fee(self):
+        total = self.total_price()
+        # todo: shd consider customer_fee_override?
+        fee = customer_fee()
+        answer = total * fee
+        return answer.quantize(Decimal('.01'), rounding=ROUND_UP)
+
+    def customer_fee(self):
         total = self.total_price()
         # todo: shd consider customer_fee_override?
         fee = customer_fee()

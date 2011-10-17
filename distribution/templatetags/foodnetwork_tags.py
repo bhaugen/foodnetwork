@@ -6,7 +6,7 @@ class FoodNet(Node):
     def render(self, context):
         try:
             answer = FoodNetwork.objects.all()[0]
-        except FoodNetwork.DoesNotExist:
+        except IndexError:
             answer = None
         context['food_network'] = answer
         return ''
