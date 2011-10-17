@@ -2278,9 +2278,11 @@ def dashboard(request):
     
     thisdate = ""
     date_form = ""
+    shorts_label = ""
     plans = []
     shorts = []
     orders = []
+    items = []
     if fn:
         thisdate = next_delivery_date()
         monday = thisdate - datetime.timedelta(days=datetime.date.weekday(thisdate))

@@ -22,7 +22,7 @@ class EmptyDatabaseTest(TestCase):
 
 class DistributionTabsTest(TestCase):
 
-    #fixtures = ["distribution_test.json"]
+    fixtures = ["distribution_test.json"]
 
     def setUp(self):
         self.fn = FoodNetwork(
@@ -39,7 +39,8 @@ class DistributionTabsTest(TestCase):
     def test_dashboard(self):
         response = self.client.get('/distribution/dashboard/', {})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['food_network'].short_name, 'FN' ) 
+        self.assertEqual(response.context['food_network'].short_name, 'FN' )
+        import pdb; pdb.set_trace()
         response = self.client.post('/distribution/resetdate/',
                                {'next_delivery_date': '2011-09-01', })
         self.assertEqual(response.status_code, 302)
