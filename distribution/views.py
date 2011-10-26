@@ -3149,8 +3149,9 @@ def invoice_selection(request):
             dsdata = dsform.cleaned_data
             cust_id = dsdata['customer']
             ord_date = dsdata['delivery_date']
-            return HttpResponseRedirect('/%s/%s/%s/%s/%s/'
-               % ('distribution/invoices', cust_id, ord_date.year, ord_date.month, ord_date.day))
+            order_state = dsdata['order_state']
+            return HttpResponseRedirect('/%s/%s/%s/%s/%s/%s/'
+               % ('distribution/invoices', order_state, cust_id, ord_date.year, ord_date.month, ord_date.day))
     else:
         dsform = DeliverySelectionForm(initial=init)
     return render_to_response('distribution/invoice_selection.html', 
@@ -3159,7 +3160,7 @@ def invoice_selection(request):
         }, context_instance=RequestContext(request))
 
 @login_required
-def invoices(request, cust_id, year, month, day):
+def invoices(request, order_state, cust_id, year, month, day):
     try:
         fn = food_network()
     except FoodNetwork.DoesNotExist:
@@ -3173,18 +3174,39 @@ def invoices(request, cust_id, year, month, day):
             raise Http404
     else:
         customer = ''
-    #todo: shd include only unpaid but delivered orders?
-    if customer:
-        orders = Order.objects.filter(
-            customer=customer, 
-            delivery_date=thisdate,
-            state__contains="Filled"
-        )
-    else:
-        orders = Order.objects.filter(
-            delivery_date=thisdate,
-            state__contains="Filled"
-        )
+    #import pdb; pdb.set_trace()
+    if order_state == '1':
+        if customer:
+            orders = Order.objects.filter(
+                customer=customer, 
+                delivery_date=thisdate,
+                state__contains="Filled"
+            ).exclude(state__contains="Paid")
+        else:
+            orders = Order.objects.filter(
+                delivery_date=thisdate,
+                state__contains="Filled"
+            ).exclude(state__contains="Paid")
+    elif order_state == '2':
+        if customer:
+            orders = Order.objects.filter(
+                customer=customer, 
+                delivery_date=thisdate,
+            ).exclude(state__contains="Paid")
+        else:
+            orders = Order.objects.filter(
+                delivery_date=thisdate,
+            ).exclude(state__contains="Paid")
+    elif order_state == '3':
+        if customer:
+            orders = Order.objects.filter(
+                customer=customer, 
+                delivery_date=thisdate
+            )
+        else:
+            orders = Order.objects.filter(
+                delivery_date=thisdate,
+            )
     return render_to_response('distribution/invoices.html', {
         'orders': orders, 
         'network': fn,

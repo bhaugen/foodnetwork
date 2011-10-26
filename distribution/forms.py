@@ -325,9 +325,16 @@ class DeliverySelectionForm(forms.Form):
     delivery_date = forms.DateField(
         widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
     customer = forms.ChoiceField()
+    order_state = forms.ChoiceField()
     def __init__(self, *args, **kwargs):
         super(DeliverySelectionForm, self).__init__(*args, **kwargs)
         self.fields['customer'].choices = [('0', 'All')] + [(cust.id, cust.short_name) for cust in Customer.objects.all()]
+        self.fields['order_state'].choices = [
+            ('1', 'Filled and unpaid orders only'),
+            ('2', 'All unpaid orders'),
+            ('3', 'All orders'),
+        ]
+
 
 class PaymentSelectionForm(forms.Form):
     producer = forms.ChoiceField()
@@ -788,8 +795,10 @@ def create_delivery_forms(thisdate, customer, data=None):
         # avail_items now does return a queryset
         # todo: maybe rethink some of this code, altho it does work
         avail_items = oi.product.avail_items(thisdate)
+        amount = 0
         if avail_items.count() == 1:
             choices = [(item.id, item.delivery_label()) for item in avail_items]
+            amount = float(min(avail_items[0].remaining, oi.quantity))
         else:
             choices = [('', '----------')] + [(item.id, item.delivery_label()) for item in avail_items]
         deliveries = oi.inventorytransaction_set.filter(transaction_type='Delivery')
@@ -797,7 +806,7 @@ def create_delivery_forms(thisdate, customer, data=None):
         delivery_count = len(deliveries)
         field_set_count = max(len(choices)-1, delivery_count)
         field_set_count = min(field_set_count, 4)
-        print "field_set_count:", field_set_count
+        #print "field_set_count:", field_set_count
         if delivery_count:
             dtf.delivery_forms = []
             d = 0
@@ -824,7 +833,9 @@ def create_delivery_forms(thisdate, customer, data=None):
             #else:
             #    delform = DeliveryForm(data, prefix=str(oi.id) + '0',
             #                       initial={'amount': oi.quantity})
-            delform = DeliveryForm(data, prefix=str(oi.id) + '0')
+            #todo: many tx amounts shd not overspend lot qty
+            init = {'amount': amount,}
+            delform = DeliveryForm(data, prefix=str(oi.id) + '0', initial=init)
             dtf.delivery_forms = [delform,]
             dtf.delivery_forms.extend(
                 [DeliveryForm(data, prefix=str(oi.id) + str(x), instance=InventoryTransaction()) for x in range(1, field_set_count)])

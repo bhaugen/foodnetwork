@@ -70,7 +70,11 @@
 						{{ header_form.delivery_date.errors }}
 					</td>
 				{% endif %}
-            </tr>
+		</tr>
+		<tr>
+			<th style="text-align: right; " >{% trans "Order states" %}:</th>
+			<td>{{ header_form.order_state}}</td>
+		</tr>
             <tr>
                 <th style="text-align: right; " >{% trans "Contact" %}:</th>
                <td  id="contact" >---</td>
@@ -93,7 +97,7 @@
 		{% for order in unpaid_invoices %}
 
 			<li>
-				<a href="{% url invoices cust_id=order.customer.id year=order.delivery_date.year month=order.delivery_date.month day=order.delivery_date.day %}">
+				<a href="{% url invoices order_state='1' cust_id=order.customer.id year=order.delivery_date.year month=order.delivery_date.month day=order.delivery_date.day %}">
 					#{{ order.id }} {{ order.customer }} 
 					Ordered: {{ order.order_date }} Delivered: {{ order.delivery_date }} 
 					${{ order.grand_total }}	

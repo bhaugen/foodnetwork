@@ -106,7 +106,7 @@ urlpatterns = patterns('',
     
     # invoices
     (r'^invoiceselection/$', invoice_selection),
-    url(r'^invoices/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
+    url(r'^invoices/(?P<order_state>\d{1})/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
         invoices, name="invoices"),
     url(r'^sendinvoices/(?P<cust_id>\d+)/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
         send_invoices, name="send_invoices"),
