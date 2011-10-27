@@ -2,9 +2,10 @@ foodnetwork is administrative software for food aggregation and distribution net
 
 These are generally groups of farmers who aggregate food from many farmers and distribute it to many customers.
 
-It is being refactored and generalized from two previous systems for two different food networks, one in Minnesota and one in Wisconsin.  The one in Wisconsin includes customers, distributors and processors as members as well as farmers.
+The system has been developed in collaboration with several working food networks.
 
-You can read about the previous systems at http://www.group-accounting.com/Home/fooddistribution
+You can read about the history of the software at http://foodnetworksoftware.org/history/ 
+and tour the features at http://foodnetworksoftware.org/features/
 
-This version of the software is not yet ready for use.  When ready, it will be used by 2 new food networks in the Driftless region of western Wisconsin.
+This version of the software is now being used by 2 food networks in the Driftless region of western Wisconsin.
 
