@@ -3144,7 +3144,7 @@ def invoice_selection(request):
     unpaid_invoices = Order.objects.filter(
         state="Filled")
     if request.method == "POST":
-        dsform = DeliverySelectionForm(request.POST)  
+        dsform = InvoiceSelectionForm(request.POST)  
         if dsform.is_valid():
             dsdata = dsform.cleaned_data
             cust_id = dsdata['customer']
@@ -3153,7 +3153,7 @@ def invoice_selection(request):
             return HttpResponseRedirect('/%s/%s/%s/%s/%s/%s/'
                % ('distribution/invoices', order_state, cust_id, ord_date.year, ord_date.month, ord_date.day))
     else:
-        dsform = DeliverySelectionForm(initial=init)
+        dsform = InvoiceSelectionForm(initial=init)
     return render_to_response('distribution/invoice_selection.html', 
         {'header_form': dsform,
          'unpaid_invoices': unpaid_invoices,

@@ -321,19 +321,28 @@ class DateSelectionForm(forms.Form):
         widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
 
 
-class DeliverySelectionForm(forms.Form):
+class InvoiceSelectionForm(forms.Form):
     delivery_date = forms.DateField(
         widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
     customer = forms.ChoiceField()
     order_state = forms.ChoiceField()
     def __init__(self, *args, **kwargs):
-        super(DeliverySelectionForm, self).__init__(*args, **kwargs)
+        super(InvoiceSelectionForm, self).__init__(*args, **kwargs)
         self.fields['customer'].choices = [('0', 'All')] + [(cust.id, cust.short_name) for cust in Customer.objects.all()]
         self.fields['order_state'].choices = [
             ('1', 'Filled and unpaid orders only'),
             ('2', 'All unpaid orders'),
             ('3', 'All orders'),
         ]
+
+
+class DeliverySelectionForm(forms.Form):
+    delivery_date = forms.DateField(
+        widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
+    customer = forms.ChoiceField()
+    def __init__(self, *args, **kwargs):
+        super(DeliverySelectionForm, self).__init__(*args, **kwargs)
+        self.fields['customer'].choices = [('0', 'All')] + [(cust.id, cust.short_name) for cust in Customer.objects.all()]
 
 
 class PaymentSelectionForm(forms.Form):
