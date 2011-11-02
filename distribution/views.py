@@ -1568,7 +1568,9 @@ def order_item_rows_by_product(thisdate):
         order_list.append(order.id)
     order_count = len(order_list)
     product_dict = {}
-    items = OrderItem.objects.filter(order__delivery_date=thisdate)
+    items = OrderItem.objects.filter(
+        order__delivery_date=thisdate).exclude(order__state='Unsubmitted')
+    #import pdb; pdb.set_trace()
     for item in items:
         prod = item.product
         if not prod.id in product_dict:

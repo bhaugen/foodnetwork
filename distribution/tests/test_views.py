@@ -1,12 +1,14 @@
 import datetime
 from decimal import *
+import json
 
 from django.test import TestCase
 from django.test import Client
 from django.contrib.auth.models import User
+#from django.utils import simplejson
 
 from distribution.models import *
-
+    
 class EmptyDatabaseTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -32,6 +34,22 @@ class DistributionTabsTest(TestCase):
         #    producer_fee=Decimal(".1"),
         #)
         #self.fn.save()
+        fn = food_network()
+        dd = fn.next_delivery_date
+        customer = Customer.objects.get(short_name="AC")
+        product = Product.objects.get(short_name="Kale")
+        self.order = Order(
+            customer=customer,
+            order_date=dd,
+            delivery_date=dd)
+        self.order.save()
+        oi = OrderItem(
+            order=self.order,
+            product=product,
+            quantity=Decimal("10"),
+            unit_price=product.price)
+        oi.save()
+
         self.client = Client()
         self.user = User.objects.create_user('alice', 'alice@whatever.com', 'password')
         logged_in = self.client.login(username='alice', password='password')
@@ -42,7 +60,7 @@ class DistributionTabsTest(TestCase):
         self.assertEqual(response.context['food_network'].short_name, 'Demo' )
         self.assertEqual(response.context['shorts'][0].product.short_name, 'Cucumbers')
         self.assertEqual(response.context['order_changes'][0].product.short_name, 'Cucumbers')
-        self.assertEqual(len(response.context['orders']), 2)
+        self.assertEqual(len(response.context['orders']), 3)
         self.assertEqual(len(response.context['items']), 11)
         #import pdb; pdb.set_trace()
         response = self.client.post('/distribution/resetdate/',
@@ -257,8 +275,8 @@ class DistributionTabsTest(TestCase):
     def test_new_order(self):
         response = self.client.get('/distribution/orderselection/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['changeable_orders']), 6)
-        self.assertEqual(len(response.context['unpaid_orders']), 8)
+        self.assertEqual(len(response.context['changeable_orders']), 7)
+        self.assertEqual(len(response.context['unpaid_orders']), 9)
         response = self.client.get('/distribution/neworder/30/2011/8/26/')
         self.assertEqual(response.status_code, 200)
         response = self.client.post('/distribution/neworder/30/2011/8/26/',
@@ -334,7 +352,7 @@ class DistributionTabsTest(TestCase):
              u'delivery_date': [u'2011-08-26'], 
              u'54-unit_price': [u'4.00']})
         self.assertEqual(response.status_code, 302)
-        response = self.client.get('/distribution/order/9/')
+        response = self.client.get('/distribution/order/10/')
         self.assertEqual(response.status_code, 200)
         order = response.context['order']
         self.assertEqual(order.orderitem_set.all().count(), 2)
@@ -458,5 +476,140 @@ class DistributionTabsTest(TestCase):
         item = changes[0]
         self.assertEqual(item.quantity, 30)
         self.assertEqual(item.orig_qty(), 40)
+
+    def test_assign_lots(self):
+        response = self.client.get('/distribution/orderselection/')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get('/distribution/deliveryupdate/42/2011/8/26/')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post('/distribution/deliveryupdate/42/2011/8/26/',
+            {u'30-product_id': [u'92'], 
+             u'300-inventory_item': [u'96'], 
+             u'30-order_qty': [u'10'], 
+             u'30-order_item_id': [u'30'], 
+             u'300-amount': [u'10.0'],
+            })
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get('/distribution/orderdeliveries/2011/8/26/')
+        self.assertEqual(response.status_code, 200)
+        items = response.context['orderitem_list']
+        self.assertEqual(len(items), 12)
+        item = self.order.orderitem_set.all()[0]
+        self.assertEqual(item.delivered_quantity(), Decimal("10"))
+
+        # test invoices 
+        # (included in assign_lots because it needs the filled order)
+        response = self.client.get('/distribution/invoiceselection/')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post('/distribution/invoiceselection/',
+            {u'customer': [u'0'], 
+             u'order_state': [u'1'], 
+             u'delivery_date': [u'2011-08-26']})
+        self.assertEqual(response.status_code, 302)
+        #filled and unpaid orders only
+        response = self.client.get('/distribution/invoices/1/0/2011/8/26/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['orders']), 1)
+        #all unpaid orders
+        response = self.client.get('/distribution/invoices/2/0/2011/8/26/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['orders']), 3)
+        #all orders
+        response = self.client.get('/distribution/invoices/3/0/2011/8/26/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['orders']), 3)
+
+#todo: payments needs more test data...
+
+    def test_ordered_available_report(self):
+        response = self.client.get('/distribution/orderedvsavailable/2011/8/26/')
+        self.assertEqual(response.status_code, 200)
+        rows = response.context['ordered_available']
+        self.assertEqual(len(rows), 9)
+
+    def test_receipts_sales_report(self):
+        response = self.client.get('/distribution/receiptsandsales/2011/08/15/')
+        self.assertEqual(response.status_code, 200)
+        rows = response.context['receipts_sales']
+        self.assertEqual(len(rows), 12)
+
+    def test_supply_demand(self):
+        response = self.client.get('/distribution/dojosupplydemand/2011_08_22/2011_12_18/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['column_count'], 17)
+        response = self.client.get('/distribution/jsonsupplydemand/2011_08_22/2011_12_18/')
+        self.assertEqual(response.status_code, 200)
+        rows = json.loads(response.content)
+        self.assertEqual(len(rows), 12)
+        #import pdb; pdb.set_trace()
+
+    def test_planned_income(self):
+        response = self.client.get('/distribution/dojoincome/2011_08_22/2011_12_18/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_net'], 564)
+        self.assertEqual(response.context['total_gross'], 2068)
+        response = self.client.get('/distribution/jsonincome/2011_08_22/2011_12_18/')
+        self.assertEqual(response.status_code, 200)
+        rows = json.loads(response.content)
+        self.assertEqual(len(rows), 3)
+        #import pdb; pdb.set_trace()
         
+    def test_planning_table(self):
+        response = self.client.get('/distribution/dojoplanningtable/45/M/2011_08_22/2011_12_18/')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get('/distribution/jsonplanningtable/45/M/2011_08_22/2011_12_18/',
+            HTTP_RANGE='items=0-999')
+        self.assertEqual(response.status_code, 200)
+        rows = json.loads(response.content)
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(rows, 
+            [{"yearly": 400, "2011-11-07": "0", "2011-10-03": "0",
+             "2011-08-22": "0", "2011-09-19": "0", "2011-10-10":
+             "0", "2011-09-12": "0", "2011-08-29": "0", "to_date":
+             "2011-12-18", "id": 44, "2011-10-17": "0","2011-12-12": "0", 
+             "from_date": "2011-08-22","2011-11-14": "0", 
+             "product": "Cherry Tomatoes per pint", "2011-10-31": "0", 
+             "2011-09-05": "0","2011-09-26": "0", "2011-11-28": "0", 
+             "2011-12-05":"0", "member_id": 45, "2011-11-21": "0", "2011-10-24":"0"}, 
+            {"yearly": 500, "2011-11-07": "0", "2011-10-03":"0", 
+             "2011-08-22": "0", "2011-09-19": "0","2011-10-10": "0", 
+             "2011-09-12": "0", "2011-08-29": "0", "to_date": "2011-12-18", 
+             "id": 54, "2011-10-17": "0", "2011-12-12": "0", 
+             "from_date": "2011-08-22", "2011-11-14": "0", 
+             "product": "Eggs per doz", "2011-10-31": "0", 
+             "2011-09-05": "0", "2011-09-26": "0","2011-11-28": "0", 
+             "2011-12-05": "0","member_id": 45, "2011-11-21": "0",
+             "2011-10-24": "0"}, 
+            {"yearly": 100, "2011-11-07": "0", "2011-10-03": "0",
+             "2011-08-22": "0","2011-09-19": "0", "2011-10-10": "0",
+             "2011-09-12": "0","2011-08-29": "0","to_date": "2011-12-18",
+             "id": 94, "2011-10-17":"0", "2011-12-12": "0","from_date": "2011-08-22",
+             "2011-11-14": "0", "product": "Salad Mix per lb", 
+             "2011-10-31": "0","2011-09-05": "0","2011-09-26": "0",
+             "2011-11-28": "0", "2011-12-05": "0","member_id": 45,
+             "2011-11-21": "0", "2011-10-24": "0"}])
+        payload = {"yearly":400,"2011-11-07":"0","2011-10-03":"0","2011-08-22":"55","2011-09-19":"0","2011-10-10":"0","2011-09-12":"0","2011-08-29":"0","to_date":"2011-12-18","id":44,"2011-10-17":"0","2011-12-12":"0","from_date":"2011-08-22","2011-11-14":"0","product":"Cherry Tomatoes per pint","2011-10-31":"0","2011-09-05":"0","2011-09-26":"0","2011-11-28":"0","2011-12-05":"0","member_id":45,"2011-11-21":"0","2011-10-24":"0"}
+        payload = json.dumps(payload)
+        response = self.client.put('/distribution/jsonplanningtable/45/M/2011_08_22/2011_12_18/44',
+            payload, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        payload = {"yearly":500,"2011-11-07":"0","2011-10-03":"0","2011-08-22":"0","2011-09-19":"0","2011-10-10":"0","2011-09-12":"0","2011-08-29":"66","to_date":"2011-12-18","id":54,"2011-10-17":"0","2011-12-12":"0","from_date":"2011-08-22","2011-11-14":"0","product":"Eggs per doz","2011-10-31":"0","2011-09-05":"0","2011-09-26":"0","2011-11-28":"0","2011-12-05":"0","member_id":45,"2011-11-21":"0","2011-10-24":"0"}
+        payload = json.dumps(payload)
+        response = self.client.put('/distribution/jsonplanningtable/45/M/2011_08_22/2011_12_18/54',
+            payload, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        payload = {"yearly":100,"2011-11-07":"0","2011-10-03":"0","2011-08-22":"0","2011-09-19":"0","2011-10-10":"0","2011-09-12":"0","2011-08-29":"0","to_date":"2011-12-18","id":94,"2011-10-17":"0","2011-12-12":"0","from_date":"2011-08-22","2011-11-14":"0","product":"Salad Mix per lb","2011-10-31":"0","2011-09-05":"22","2011-09-26":"0","2011-11-28":"0","2011-12-05":"0","member_id":45,"2011-11-21":"0","2011-10-24":"0"}
+        payload = json.dumps(payload)
+        response = self.client.put('/distribution/jsonplanningtable/45/M/2011_08_22/2011_12_18/94',
+            payload, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get('/distribution/jsonmemberplans/2011_08_22/2011_12_18/45/')
+        self.assertEqual(response.status_code, 200)
+        rows = json.loads(response.content)
+        self.assertEqual(len(rows), 3)
+        #self.maxDiff = None
+        self.assertEqual(rows,
+            [{u'yearly': 400, u'2011-11-07': u'0', u'2011-10-03': u'0', u'2011-08-22': u'55', u'2011-09-19': u'0', u'2011-08-22:plan_id': 359, u'product': u'Cherry Tomatoes per pint', u'2011-09-12': u'0', u'2011-08-29': u'0', u'to_date': u'2011-12-18', u'id': 44, u'2011-10-17': u'0', u'from_date': u'2011-08-22', u'2011-12-12': u'0', u'2011-11-14': u'0', u'2011-10-10': u'0', u'2011-10-31': u'0', u'2011-09-05': u'0', u'2011-09-26': u'0', u'2011-11-28': u'0', u'2011-12-05': u'0', u'member_id': 45, u'2011-11-21': u'0', u'2011-10-24': u'0'}, 
+            {u'yearly': 500, u'2011-11-07': u'0', u'2011-10-03': u'0', u'2011-08-22': u'0', u'2011-09-19': u'0', u'product': u'Eggs per doz', u'2011-09-12': u'0', u'2011-08-29': u'66', u'to_date': u'2011-12-18', u'id': 54, u'2011-10-17': u'0', u'2011-08-29:plan_id': 360, u'from_date': u'2011-08-22', u'2011-12-12': u'0', u'2011-11-14': u'0', u'2011-10-10': u'0', u'2011-10-31': u'0', u'2011-09-05': u'0', u'2011-09-26': u'0', u'2011-11-28': u'0', u'2011-12-05': u'0', u'member_id': 45, u'2011-11-21': u'0', u'2011-10-24': u'0'},
+            {u'yearly': 100, u'2011-11-07': u'0', u'2011-10-03': u'0', u'2011-08-22': u'0', u'2011-09-19': u'0', u'product': u'Salad Mix per lb', u'2011-09-12': u'0', u'2011-08-29': u'0', u'to_date': u'2011-12-18', u'id': 94, u'2011-10-17': u'0', u'from_date': u'2011-08-22', u'2011-12-12': u'0', u'2011-11-14': u'0', u'2011-10-10': u'0', u'2011-10-31': u'0', u'2011-09-05': u'22', u'2011-09-26': u'0', u'2011-09-05:plan_id': 361, u'2011-11-28': u'0', u'2011-12-05': u'0', u'member_id': 45, u'2011-11-21': u'0', u'2011-10-24': u'0'}])
 

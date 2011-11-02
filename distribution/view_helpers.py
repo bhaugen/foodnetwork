@@ -187,7 +187,10 @@ def supply_demand_rows(from_date, to_date, member=None):
         while wkdate <= to_date:
             if plan.from_date <= wkdate and plan.to_date >= wkdate:
                 key = wkdate.strftime('%Y_%m_%d')
-                value = rows[product][key]
+                try:
+                    value = rows[product][key]
+                except KeyError:
+                    value = Decimal("0")
                 if value == "":
                     value = Decimal("0")
                 else:
