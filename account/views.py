@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 
 from account.forms import *
-from distribution.models import CustomerContact
+from distribution.models import CustomerContact, ProducerContact
 
 def login(request, form_class=LoginForm, template_name="account/login.html"):
     if request.method == "POST":
@@ -27,28 +27,24 @@ def login(request, form_class=LoginForm, template_name="account/login.html"):
         form = form_class(request.POST)
         user = form.login(request)
         if user:
-            try:
-                cc = user.customer_contact
-            except CustomerContact.DoesNotExist:
-                cc = None
-            if cc:
-                redirect_to = reverse("customer_dashboard")
-            #todo: need to revive producer users...
-            #user_parties = user.parties.all()
-            #if user_parties:
-            #    if user_parties.count() > 1:
-            #        redirect_to = reverse("party_chooser")
-            #    else:
-            #        party = user_parties[0].party
-                    #todo: dashboards maybe shd be in models?
-                    # and what about parties with 2 roles?
-            #        if party.is_customer():
-            #            redirect_to = reverse("customer_dashboard")
-            #        elif party.is_producer() or party.is_processor():
-            #            redirect_to = reverse("producer_dashboard")
-            elif user.is_staff:
-                if not next:
-                    redirect_to = reverse("dashboard")
+            if user.is_staff:
+                redirect_to = reverse("dashboard")
+            else:
+                try:
+                    cc = user.customer_contact
+                    redirect_to = reverse("customer_dashboard")
+                except CustomerContact.DoesNotExist:
+                    pass
+                try:
+                    pc = user.producer_contact
+                    redirect_to = reverse("producer_dashboard")
+                except ProducerContact.DoesNotExist:
+                    pass
+            #if cc:
+            #    redirect_to = reverse("customer_dashboard")
+            #elif user.is_staff:
+            #    if not next:
+            #        redirect_to = reverse("dashboard")
             return HttpResponseRedirect(redirect_to)
     else:
         form = form_class()

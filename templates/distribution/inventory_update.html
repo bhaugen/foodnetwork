@@ -90,7 +90,7 @@
 
 <div class="inventory-update">
 
-	{% include "distribution/tabnav.html" %}
+	{% include tabnav %}
 
     <form action="." method="POST" >{% csrf_token %}
 		<input name='producer-id' type='hidden' value='{{ producer.id }}' />

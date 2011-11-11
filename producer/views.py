@@ -31,11 +31,17 @@ try:
 except ImportError:
     notification = None
 
+def get_producer(request):
+    try:
+        pc = request.user.producer_contact
+        return pc.producer
+    except ProducerContact.DoesNotExist:
+        return None
 
 def producer_dashboard(request):
     fn = food_network()
     #todo: all uses of the next statement shd be changed
-    producer = request.user.parties.all()[0].party
+    producer = get_producer(request)
     return render_to_response('producer/producer_dashboard.html', 
         {'producer': producer,
          'food_network': fn,
@@ -44,7 +50,7 @@ def producer_dashboard(request):
 @login_required
 def inventory_selection(request):
     init = {"next_delivery_date": next_delivery_date(),}
-    producer = request.user.parties.all()[0].party
+    producer = get_producer(request)
     form = DeliveryDateForm(data=request.POST or None, initial=init)
     if request.method == "POST":
         if form.is_valid():
@@ -110,7 +116,9 @@ def inventory_update(request, prod_id, year, month, day):
     return render_to_response('producer/inventory_update.html', {
         'avail_date': availdate, 
         'producer': producer, 
-        'item_forms': itemforms}, context_instance=RequestContext(request))
+        'item_forms': itemforms,
+        'tabnav': "producer/producer_tabnav.html",
+    }, context_instance=RequestContext(request))
 
 @login_required
 def produceravail(request, prod_id, year, month, day):
@@ -160,7 +168,7 @@ def new_process(request, process_type_id):
         foodnet = food_network()
     except FoodNetwork.DoesNotExist:
         return render_to_response('distribution/network_error.html')
-    process_manager = request.user.parties.all()[0].party
+    process_manager = get_producer(request)
 
     weekstart = next_delivery_date()
     weekend = weekstart + datetime.timedelta(days=5)
@@ -391,7 +399,7 @@ def plan_selection(request):
         'from_date': from_date,
         'to_date': to_date,
     }
-    member = request.user.parties.all()[0].party
+    member = get_producer(request)
     member_has_plans = False
     plans = ProductPlan.objects.filter(member=member)
     if plans.count():
@@ -599,7 +607,7 @@ def supply_and_demand(request, from_date, to_date):
         to_date = datetime.datetime(*time.strptime(to_date, '%Y_%m_%d')[0:5]).date()
     except ValueError:
             raise Http404
-    member = request.user.parties.all()[0].party
+    member = get_producer(request)
     sdtable = supply_demand_table(from_date, to_date, member)
     return render_to_response('distribution/supply_demand.html', 
         {
@@ -617,7 +625,7 @@ def income(request, from_date, to_date):
         to_date = datetime.datetime(*time.strptime(to_date, '%Y_%m_%d')[0:5]).date()
     except ValueError:
             raise Http404
-    member = request.user.parties.all()[0].party
+    member = get_producer(request)
     income_table = producer_suppliable_demand(from_date, to_date, member)
     total_income =  sum(row[len(row)-1] for row in income_table.rows)
     return render_to_response('producer/producer_income.html', 

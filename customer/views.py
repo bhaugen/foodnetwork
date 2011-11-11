@@ -52,11 +52,6 @@ def get_customer(request):
     try:
         cc = request.user.customer_contact
         return cc.customer
-        #customer = request.user.parties.all()[0].party
-        #if customer.is_customer():
-        #    return customer.as_leaf_class()
-        #else:
-        #    return None
     except CustomerContact.DoesNotExist:
         return None
 

@@ -9,9 +9,14 @@ class FoodNetworkAdmin(admin.ModelAdmin):
 admin.site.register(FoodNetwork, FoodNetworkAdmin)
 
 
+class ProducerContactInline(admin.TabularInline):
+    model = ProducerContact
+
+
 class ProducerAdmin(admin.ModelAdmin):
     form = ProducerForm
     list_display = ('short_name', 'member_id', 'long_name', 'contact', 'phone', 'delivers')
+    inlines = [ ProducerContactInline,]
     
 admin.site.register(Producer, ProducerAdmin)
 

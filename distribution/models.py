@@ -798,6 +798,17 @@ class CustomerContact(models.Model):
         blank=True, null=True)
 
 
+class ProducerContact(models.Model):
+    producer = models.ForeignKey(Producer,
+        verbose_name=_('producer'), related_name='contacts')
+    name = models.CharField(_('name'), max_length=64)
+    email = models.EmailField(_('email address'), max_length=96, blank=True, null=True)
+    phone = PhoneNumberField(_('phone'), blank=True)
+    cell = PhoneNumberField(_('cell'), blank=True)
+    login_user = models.OneToOneField(User, related_name='producer_contact',
+        blank=True, null=True)
+
+
 # based on dfs from threaded_comments
 def nested_objects(node, all_nodes):
      to_return = [node,]
@@ -1169,6 +1180,7 @@ class ProducerProduct(models.Model):
             self.product.short_name])
         
     class Meta:
+        unique_together = ('producer', 'product')
         ordering = ('producer', 'product')
 
 
@@ -1199,6 +1211,7 @@ class CustomerProduct(models.Model):
 
         
     class Meta:
+        unique_together = ('customer', 'product')
         ordering = ('customer', 'product')
 
     def __unicode__(self):

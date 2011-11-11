@@ -799,7 +799,9 @@ def inventory_update(request, prod_id, year, month, day):
         'avail_date': availdate, 
         'producer': producer,
         'planned': planned,
-        'item_forms': itemforms}, context_instance=RequestContext(request))
+        'item_forms': itemforms,
+        'tabnav': "distribution/tabnav.html",
+    }, context_instance=RequestContext(request))
 
 @login_required
 def all_inventory_update(request, year, month, day):
