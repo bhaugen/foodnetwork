@@ -264,6 +264,7 @@ class Party(models.Model):
     address = models.TextField(_('address'), blank=True)
     email_address = models.EmailField(_('email address'), max_length=96, blank=True, null=True)
     description = models.TextField(_('description'), blank=True)
+    storage_capacity = models.TextField(_('storage capacity'), blank=True)
     content_type = models.ForeignKey(ContentType,editable=False,null=True)
     
     objects = models.Manager()
