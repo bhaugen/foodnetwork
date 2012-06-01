@@ -753,7 +753,7 @@ def inventory_update(request, prod_id, year, month, day):
         #import pdb; pdb.set_trace()
         if all([itemform.is_valid() for itemform in itemforms]):
             producer_id = request.POST['producer-id']
-            producer = Producer.objects.get(pk=producer_id)
+            producer = Party.objects.get(pk=producer_id)
             inv_date = request.POST['avail-date']
             for itemform in itemforms:
                 data = itemform.cleaned_data
@@ -831,7 +831,7 @@ def all_inventory_update(request, year, month, day):
             for itemform in itemforms:
                 data = itemform.cleaned_data
                 producer_id = int(data['producer_id'])
-                producer = Producer.objects.get(pk=producer_id)
+                producer = Party.objects.get(pk=producer_id)
                 prod_id = int(data['product_id'])
                 item_id = int(data['item_id'])
                 custodian = data['custodian']
