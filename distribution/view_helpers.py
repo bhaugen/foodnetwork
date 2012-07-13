@@ -21,6 +21,30 @@ def is_number(s):
     except ValueError:
         return False
 
+
+class SalesRow(object):
+    def __init__(self, product, customer, quantity, extended_price):
+         self.product = product
+         self.customer = customer
+         self.quantity = quantity
+         self.extended_price = extended_price
+
+
+def sales_table(from_date, to_date):
+    items = OrderItem.objects.filter(
+        order__delivery_date__range=(from_date, to_date))
+    rows = {}
+    for item in items:
+        key = "-".join([str(item.product.id), str(item.order.customer.id)])
+        if not key in rows:
+            rows[key] = SalesRow(item.product.long_name,
+                                 item.order.customer.long_name,
+                                 Decimal("0"), Decimal("0"))
+        rows[key].quantity += item.quantity
+        rows[key].extended_price += item.extended_price()
+    return sorted(rows.values(), key=attrgetter('product', 'customer'))
+
+
 def weekly_production_plans(week_date):
     monday = week_date - datetime.timedelta(days=datetime.date.weekday(week_date))
     saturday = monday + datetime.timedelta(days=5)

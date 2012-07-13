@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block title %}
+     {% trans "Monthly Sales" %}
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="reports">
+
+	{% include "distribution/tabnav.html" %}
+
+
+	<h2>{% trans "Monthly Sales from" %} {{ from_date }} to {{ to_date }}</h2>
+	<table class="ga-event-table" >
+		<tr>
+			<th>{% trans "Product" %}</th>
+			<th>{% trans "Customer" %}</th>
+			<th>{% trans "Quantity Sold" %}</th>
+			<th>{% trans "Sales $" %}</th>
+	        </tr>
+        	{% for item in sales %}
+		<tr>
+			<td>{{ item.product }}</td>
+			<td>{{ item.customer }}</td>
+			<td style="text-align: right; ">{{ item.quantity|intcomma }}</td>
+			<td style="text-align: right; ">${{ item.extended_price|intcomma }}</td>
+		</tr>
+		{% endfor %}
+		<tr>
+			<th style="text-align: right; " colspan="2">Totals:</th>
+			<td style="text-align: right; ">{{ total_qty|intcomma }}</td>
+			<td style="text-align: right; ">${{ total_prices|intcomma }}</td>
+		</tr>
+	</table>
+
+</div>
+
+{% endblock %} 
+

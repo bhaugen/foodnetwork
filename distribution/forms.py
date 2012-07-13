@@ -320,6 +320,22 @@ class DateSelectionForm(forms.Form):
     selected_date = forms.DateField(
         widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
 
+class DateRangeSelectionForm(forms.Form):
+    from_date = forms.DateField(
+        widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
+    to_date = forms.DateField(
+        widget=forms.TextInput(attrs={"dojoType": "dijit.form.DateTextBox", "constraints": "{datePattern:'yyyy-MM-dd'}"}))
+
+
+class MonthSelectionForm(forms.Form):
+    month = forms.ChoiceField()
+
+    def __init__(self, *args, **kwargs):
+        super(MonthSelectionForm, self).__init__(*args, **kwargs)
+        months = Order.objects.dates("delivery_date", "month")
+        months = months.reverse()
+        self.fields['month'].choices = [(month.strftime('%Y/%m/%d'), month.strftime("%B %Y")) for month in months]
+
 
 class InvoiceSelectionForm(forms.Form):
     delivery_date = forms.DateField(

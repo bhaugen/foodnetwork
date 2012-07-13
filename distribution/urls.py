@@ -120,6 +120,8 @@ urlpatterns = patterns('',
     url(r'^receiptsandsales/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$', receipts_and_sales, name="receipts_and_sales"),
     url(r'^orderedvsavailable/(?P<year>\d{4})/(?P<month>\d+)/(?P<day>\d+)/$',
         ordered_vs_available, name="ordered_vs_available"),
+    url(r'^monthlysales/(?P<from_date>\w{10})/(?P<to_date>\w{10})/$',
+        monthly_sales, name='monthly_sales'),
 
     # emails
     url(r'^emailselection/$', email_selection, name="email_selection"),

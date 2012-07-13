@@ -27,30 +27,70 @@
 
 	{% include "distribution/tabnav.html" %}
 
+
 	<div style="float: left; border: 2px solid grey; padding: 1em;">
 
-	<h4> {% trans "Ordered vs Available Report" %}</h4>
+	<h4> {% trans "Monthly Sales Report" %}</h4>
 
-    <form action="." method="POST" >{% csrf_token %}
-        <table>
-                <th style="text-align: right; " >{% trans "Delivery Date" %}:</th>
-                <td>{{ dsform.selected_date}}</td>
-				{% if dsform.selected_date.errors %}
-					<td style="color: red; " >
-						{{ dsform.selected_date.errors }}
-					</td>
-				{% endif %}
-            </tr>
-    </table>
-    <center>
-    <input name="submit-ordered_available" type="submit" value="{% trans 'Submit' %}" />
-    </center>
+	<form action="." method="POST" >{% csrf_token %}
+		<table>
+			<tr>
+				<th style="text-align: right; " >{% trans "Month" %}:</th>
+                		<td>{{ msform.month}}</td>
+			{% comment %}
+                	<th style="text-align: right; " >{% trans "From Date" %}:</th>
+                	<td>{{ msform.from_date}}</td>
+			{% if msform.from_date.errors %}
+				<td style="color: red; " >
+					{{ msform.from_date.errors }}
+				</td>
+			{% endif %}
+			</tr>
+			<tr>
+                	<th style="text-align: right; " >{% trans "To Date" %}:</th>
+                	<td>{{ msform.to_date}}</td>
+			{% if msform.to_date.errors %}
+				<td style="color: red; " >
+					{{ msform.to_date.errors }}
+				</td>
+			{% endif %}
+			{% endcomment %}
+        		</tr>
+    		</table>
+    		<center>
+    			<input name="submit-monthly-sales" type="submit" value="{% trans 'Submit' %}" />
+		</center>
+	</form>
 
 	</div>
 
 	<div style="float: left; border: 2px solid grey; padding: 1em;">
 
-	<h4> {% trans "Receipts and Sales Report" %}</h4>
+	<h4> {% trans "Ordered vs Available Report" %}</h4>
+
+	<form action="." method="POST" >{% csrf_token %}
+		<table>
+			<tr>
+                	<th style="text-align: right; " >{% trans "Delivery Date" %}:</th>
+                	<td>{{ dsform.selected_date}}</td>
+			{% if dsform.selected_date.errors %}
+				<td style="color: red; " >
+					{{ dsform.selected_date.errors }}
+				</td>
+			{% endif %}
+        		</tr>
+    		</table>
+    		<center>
+    			<input name="submit-ordered_available" type="submit" value="{% trans 'Submit' %}" />
+		</center>
+	</form>
+
+	</div>
+
+	<div style="float: left; border: 2px solid grey; padding: 1em;">
+
+		<h4> {% trans "Receipts and Sales Report" %}</h4>
+		<p>based on today's date</p>
 
     <form action="." method="POST" >{% csrf_token %}
         <center>

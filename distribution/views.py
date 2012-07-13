@@ -1667,7 +1667,31 @@ def order_table(request, year, month, day):
 def report_selection(request):
     init = {"selected_date": next_delivery_date(),}
     dsform = DateSelectionForm(data=request.POST or None, initial=init)
+    #td = datetime.date.today()
+    #sd = datetime.date(td.year, td.month, 1)
+    #ed = datetime.date(td.year, td.month + 1, 1)
+    #ed = ed - datetime.timedelta(days=1)
+    #init_range = {
+    #    "from_date": sd,
+    #    "to_date": ed,
+    #}
+    #msform = DateRangeSelectionForm(data=request.POST or None,
+    #                                initial=init_range)
+    msform = MonthSelectionForm(data=request.POST or None)
     if request.method == "POST":
+        if request.POST.get('submit-monthly-sales'):
+            if msform.is_valid():
+                msdata = msform.cleaned_data
+                #from_date = msdata['from_date'].strftime('%Y_%m_%d')
+                #to_date = msdata['to_date'].strftime('%Y_%m_%d')
+                from_date = datetime.datetime.strptime(msdata['month'],
+                                                       '%Y/%m/%d').date()
+                to_date = datetime.date(from_date.year, from_date.month + 1, 1)
+                to_date = to_date - datetime.timedelta(days=1)
+                from_date = from_date.strftime('%Y_%m_%d')
+                to_date = to_date.strftime('%Y_%m_%d')
+                return HttpResponseRedirect('/%s/%s/%s/'
+                    % ('distribution/monthlysales', from_date, to_date))
         if request.POST.get('submit-ordered_available'):
             if dsform.is_valid():
                 dsdata = dsform.cleaned_data
@@ -1675,14 +1699,32 @@ def report_selection(request):
                 return HttpResponseRedirect('/%s/%s/%s/%s/'
                     % ('distribution/orderedvsavailable', ord_date.year, ord_date.month, ord_date.day))
         if request.POST.get('submit-receipts-sales'):
-            td = datetime.date.today()        
             return HttpResponseRedirect('/%s/%s/%s/%s/'
                % ('distribution/receiptsandsales', td.year, td.month, td.day ))
     return render_to_response('distribution/report_selection.html', 
         {
             'dsform': dsform,
+            'msform': msform,
         }, context_instance=RequestContext(request))
 
+@login_required
+def monthly_sales(request, from_date, to_date):
+    try:
+        from_date = datetime.datetime(*time.strptime(from_date, '%Y_%m_%d')[0:5]).date()
+        to_date = datetime.datetime(*time.strptime(to_date, '%Y_%m_%d')[0:5]).date()
+    except ValueError:
+            raise Http404
+    sales = sales_table(from_date, to_date)
+    total_qty = sum(item.quantity for item in sales)
+    total_prices = sum(item.extended_price for item in sales)
+    return render_to_response('distribution/monthly_sales.html', 
+        {
+            'from_date': from_date,
+            'to_date': to_date,
+            'sales': sales,
+            'total_qty': total_qty,
+            'total_prices': total_prices,
+        }, context_instance=RequestContext(request))
 
 @login_required
 def receipts_and_sales(request, year, month, day):
