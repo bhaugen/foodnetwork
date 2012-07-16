@@ -21,6 +21,13 @@ def is_number(s):
     except ValueError:
         return False
 
+def unpaid_orders():
+    orders = Order.objects.exclude(state__contains="ubmitted")
+    unpaid = []
+    for order in orders:
+        if not order.is_fully_paid():
+            unpaid.append(order)
+    return unpaid
 
 class SalesRow(object):
     def __init__(self, product, customer, quantity, extended_price):

@@ -1457,7 +1457,9 @@ class Payment(EconomicEvent):
 
     def __unicode__(self):
         amount_string = '$' + str(self.amount)
+        id_string = "".join(["#", str(self.id)])
         return ' '.join([
+            id_string,
             self.transaction_date.strftime('%Y-%m-%d'),
             self.to_whom.short_name,
             amount_string])
@@ -1522,6 +1524,9 @@ ORDER_STATES = (
     ('Paid', _('Paid')),
     ('Paid-Filled', _('Paid and Filled')),
     ('Filled-Paid', _('Filled and Paid')),
+    ('Part-Payment', _('Partly Paid')),
+    ('Part-Payment-Filled', _('Partly Paid and Filled')),
+    ('Filled-Part-Payment', _('Filled and Partly Paid')),
 )
 
 
@@ -1570,6 +1575,16 @@ class Order(models.Model):
             return True
         return False
 
+    def is_fully_paid(self):
+        cps = self.customer_payments.all()
+        if not cps.count():
+            return self.is_paid()
+        paid = sum(cp.amount_paid for cp in cps)
+        if paid >= self.grand_total():
+            return True
+        else:
+            return False
+
     def is_changeable(self):
         answer = False
         if self.state == "Unsubmitted" or self.state == "Submitted":
@@ -1580,7 +1595,7 @@ class Order(models.Model):
     def delete_payments(self):
         for cp in self.customer_payments.all():
             cp.delete()
-        if self.state == "Paid-Filled" or self.state == "Filled-Paid":
+        if self.state.find("Filled") > -1:
             self.state = "Filled"
         else:
             self.state = "Submitted"
@@ -1588,15 +1603,16 @@ class Order(models.Model):
 
     def is_delivered(self):
         #todo: what about partials?
-        if self.state == "Filled" or self.state == "Paid-Filled" or self.state == "Filled-Paid":
-            return True
-        return False
+        #if self.state == "Filled" or self.state == "Paid-Filled" or self.state == "Filled-Paid":
+        #    return True
+        #return False
+        return self.state.find("Filled") > -1
 
     def register_delivery(self):
         if self.state.find("Filled") < 0:
             #print "registering delivery for order", self
-            if self.state == "Paid":
-                self.state = "Paid-Filled"
+            if self.state == "Paid" or self.state == "Part-Payment":
+                self.state = "-".join([self.state, "Filled"])
             else:
                 self.state = "Filled"
             self.save()
@@ -1607,14 +1623,24 @@ class Order(models.Model):
             and so does not include self.save().
         """
 
-        if self.state.find("Paid") < 0:
-            if self.state == "Filled":
-                self.state = "Filled-Paid"
+        if self.is_fully_paid():
+            if self.state.find("Paid") < 0:
+                if self.state == "Filled":
+                    self.state = "Filled-Paid"
+                else:
+                    self.state = "Paid"
+                return True
             else:
-                self.state = "Paid"
-            return True
+                return False
         else:
-            return False
+            if self.state.find("Part") < 0:
+                if self.state == "Filled":
+                    self.state = "Filled-Part-Payment"
+                else:
+                    self.state = "Part-Payment"
+                return True
+            else:
+                return False
 
     def register_customer_payment(self):
         if self.set_paid_state():
@@ -1651,7 +1677,13 @@ class Order(models.Model):
     
     def grand_total(self):
         return self.transportation_fee() + self.total_price() + self.coop_fee()
+
+    def amount_paid(self):
+        return sum(cp.amount_paid for cp in self.customer_payments.all()) or Decimal("0")
     
+    def amount_due(self):
+        return self.grand_total() - self.amount_paid()
+
     def payment_due_date(self):
         term_days = customer_terms()
         return self.delivery_date + datetime.timedelta(days=term_days)

@@ -44,13 +44,17 @@
         <tr>
              <th>{% trans "Order" %}</th>
              <th>{% trans "Delivery Date" %}</th>
-             <th>{% trans "Total Due" %}</th>
+	     <th>{% trans "Grand Total" %}</th>
+	     <th>{% trans "Total Paid" %}</th>
+	     <th>{% trans "Total Due" %}</th>
         </tr>
         {% for order in payment.orders_paid %}
             <tr>
                 <td>#{{ order.id }}</td>
                 <td>{{ order.delivery_date }}</td>
-                <td style="text-align: right; ">{{ order.grand_total }}</td>
+		<td style="text-align: right; ">{{ order.grand_total }}</td>
+		<td style="text-align: right; ">{{ order.amount_paid }}</td>
+		<td style="text-align: right; ">{{ order.amount_due }}</td>
             </tr>
         {% endfor %}
 

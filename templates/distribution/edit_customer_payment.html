@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Customer Payment Update" %}
+{% endblock %}
+
+{% block header %}
+
+{% include "dojo_include.html" %}
+
+    <script type="text/javascript" >
+
+		function cleanNumericInput(value)
+		{
+			var cleanNumber = value.replace( /[^\-.0-9]/g, '');
+			var firstPos = cleanNumber.indexOf(".");
+			var lastPos = cleanNumber.lastIndexOf(".");
+			while(firstPos!=lastPos)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				firstPos = cleanNumber.indexOf(".");
+				lastPos = cleanNumber.lastIndexOf(".");
+			}
+			var lastPos = cleanNumber.lastIndexOf("-");
+			while(lastPos>0)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				lastPos = cleanNumber.lastIndexOf("-");
+			}
+			return cleanNumber;
+		}
+
+		function validateNumber(evt, functionToCall)
+		{
+			var isValid = true;
+			var candidate = evt.target.value;
+			var strippedNumber = cleanNumericInput(candidate);
+			strippedNumber = strippedNumber || 0;
+			if(isNaN(candidate))
+			{
+				evt.target.style.color = "red";
+				evt.target.value = "Not number";
+				isValid = false;
+				var anim1 = dojo.animateProperty({
+						node: evt.target, delay: 1000,
+						properties:{
+							opacity: { end: 0 }
+						}
+					}); 
+				var anim2 = dojo.animateProperty
+				({
+						node: evt.target, delay: 1000,
+						properties:
+						{
+							opacity: { end: 1 }, color: { end: 'black'}
+						},
+						onEnd: function()
+						{
+							evt.target.value = strippedNumber;
+							if(functionToCall)
+							{
+								functionToCall(evt);
+							}
+    					}
+				}); 
+				anim1.play();
+				anim2.play();
+			}
+			else
+			{
+				evt.target.value = strippedNumber;
+				if(functionToCall)
+				{
+					functionToCall(evt);
+				}
+			}
+			return isValid;
+		}
+
+
+		function finishQuantityChange(evt)
+		{
+			var row = evt.target.id.split('-')[0];
+			extendPriceForRow(row);
+			changeTotalOrdered(row);
+		}
+
+
+		var orderedTotals = {};
+		var thisOrderQty = {};
+
+		function changeTotalOrdered(row)
+		{
+			var totOrd = parseFloat(orderedTotals[row + '-ordered']);
+			var qtyFieldName = row + '-quantity';
+			var qty = parseFloat(dojo.byId(qtyFieldName).value);
+			var prevQty = parseFloat(thisOrderQty[qtyFieldName]);
+			var qtyDelta = qty - prevQty;
+			var newTotal = totOrd + qtyDelta;
+			var totOrdField = dojo.byId(row + '-ordered').value = newTotal;
+			thisOrderQty[qtyFieldName] = qty;
+			orderedTotals[row + '-ordered'] = newTotal;
+		}
+
+		function quantityChanged(evt)
+		{
+			validateNumber(evt, finishQuantityChange);
+
+		}
+
+		function priceChanged(evt)
+		{
+			validateNumber(evt, extendPriceForEvt);
+		}
+
+		function feeChanged(evt)
+		{
+			validateNumber(evt);
+		}
+
+		function totalPayment()
+		{
+			var queryNodes = dojo.query(".paid");
+			var totalAmount = 0;
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i];
+				var row = node.id.split('-')[0];
+				var paid = parseFloat(dojo.byId(row + '-amount_paid').value);
+				totalAmount += paid;
+			}
+			dojo.byId('id_amount').value = totalAmount.toFixed(2);
+		}
+
+		function paymentChanged(evt)
+		{
+			var payment = parseFloat(evt.target.value);
+			var queryNodes = dojo.query(".paid");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i];
+				var row = node.id.split('-')[0];
+				var paidField = dojo.byId(row + '-amount_paid');
+				var dueField = dojo.byId(row + '-amount_due');
+				var paid = parseFloat(paidField.value);
+				var due = parseFloat(dueField.value);
+				due += paid;
+				paid = 0;
+				if (payment)
+				{
+					
+					if (due > payment)
+					{
+						paid = payment;
+						due -= paid;
+						payment = 0;
+					}
+					else
+					{
+						paid = due;
+						payment -= due;
+						due = 0;	
+					}
+				}
+				paidField.value = paid.toFixed(2);
+				dueField.value = due.toFixed(2);
+				amountsPaid[paidField.id] = paid;
+				amountsDue[dueField.id] = due;
+				if (paid)
+				{
+					node.checked = true;
+				}
+				else
+				{
+					node.checked = false;
+				}
+			}
+		}
+
+
+		function paidChanged(evt)
+		{
+			var pay = evt.target.checked;
+			var row = evt.target.id.split('-')[0];
+			var paidField = dojo.byId(row + '-amount_paid');
+			var dueField = dojo.byId(row + '-amount_due');
+			var paid = parseFloat(paidField.value);
+			var due = parseFloat(dueField.value);
+			if (pay)
+			{
+				paid += due;
+				due = 0;
+			}
+			else
+			{
+				due += paid;
+				paid = 0;
+			}
+			paidField.value = paid.toFixed(2);
+			dueField.value = due.toFixed(2);
+			amountsPaid[paidField.id] = paid;
+			amountsDue[dueField.id] = due;
+			totalPayment();
+		}
+
+		function amountPaidChanged(evt)
+		{
+			var prev = amountsPaid[evt.target.id];
+			var row = evt.target.id.split('-')[0];
+			var dueField = dojo.byId(row + '-amount_due');
+			var paid = parseFloat(evt.target.value);
+			var due = parseFloat(dueField.value);
+			var delta = prev - paid;
+			amountsPaid[evt.target.id] = paid;
+			due += delta;
+			amountsDue[dueField.id] = due;
+			dueField.value = due.toFixed(2);
+			var node = dojo.byId(row + '-paid');
+			if (paid)
+			{
+				node.checked = true;
+			}
+			else
+			{
+				node.checked = false;
+			}
+
+			totalPayment();
+		}
+
+		function amountDueChanged(evt)
+		{
+			var prev = amountsDue[evt.target.id];
+			var row = evt.target.id.split('-')[0];
+			var paidField = dojo.byId(row + '-amount_paid');
+			var due = parseFloat(evt.target.value);
+			var paid = parseFloat(paidField.value);
+			var delta = prev - due;
+			amountsDue[evt.target.id] = due;
+			paid += delta;
+			paidField.value = paid.toFixed(2);
+			var node = dojo.byId(row + '-paid');
+			if (paid)
+			{
+				node.checked = true;
+			}
+			else
+			{
+				node.checked = false;
+			}
+
+			totalPayment();
+		}
+
+		var amountsPaid = {};
+		var amountsDue = {};
+
+		dojo.addOnLoad(function()
+		{
+			totalPayment();
+			var node = dojo.byId("id_amount");
+			dojo.connect(node, "onblur", "paymentChanged");
+			var queryNodes = dojo.query(".paid");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i];
+				dojo.connect(node, "onchange", "paidChanged");
+			}
+			var queryNodes = dojo.query(".amount-paid");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i];
+				dojo.connect(node, "onblur", "amountPaidChanged");
+				amountsPaid[node.id] = node.value;
+			}
+			var queryNodes = dojo.query(".amount-due");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i];
+				dojo.connect(node, "onblur", "amountDueChanged");
+				amountsDue[node.id] = node.value;
+			}
+		});
+
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="payments">
+
+	{% include "distribution/tabnav.html" %}
+
+    <form action="." method="POST" >{% csrf_token %}
+        <table>
+            {% if payment %}
+		        <tr>
+		            <th style="text-align: right; " >{% trans "Payment Number" %}:</th>
+		            <td>{{ payment.id }}</td>
+		        </tr>
+            {% endif %}
+            <tr>
+                <th style="text-align: right; " >{% trans "Customer" %}:</th>
+                <td>{{ customer }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >{% trans "Date" %}:</th>
+                <td>{{ payment_form.transaction_date }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >{% trans "Amount" %}:</th>
+                <td>{{ payment_form.amount }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >{% trans "Reference" %}:</th>
+               <td>{{ payment_form.reference }}</td>
+            </tr>
+        </table>
+		<h4>
+			{% trans "Orders" %}: 
+		</h4>
+
+        <table class="ga-event-table" >
+			<tr>
+             	<th>{% trans "Order" %}</th>
+		<th>{% trans "Delivery Date" %}</th>
+		<th>{% trans "Amount Paid" %}</th>
+		<th>{% trans "Amount Due" %}</th>
+		<th>{% trans "Pay" %}</th>
+            </tr>
+            {% for item_form in item_forms %}
+                 <tr>
+                    <td class="read-only-td" > #{{ item_form.order.id }} </td>
+		    <td class="read-only-td" > {{ item_form.delivery_date }} </td>
+		    <td> {{ item_form.amount_paid }} </td>
+		    <td> {{ item_form.amount_due }} </td>
+		    <td> {{ item_form.paid }} </td>
+			{{ item_form.order_id}}
+                </tr>
+            {% endfor %}
+    </table>
+        <p>
+            <input type="submit" value="{% trans 'Save Changes' %}" />
+        </p>
+
+    </form>
+</div>
+{% endblock %}
+
+

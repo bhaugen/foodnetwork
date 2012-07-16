@@ -2458,10 +2458,14 @@ def payment_selection(request):
         if request.POST.get('submit-customer-payments'):
             if csform.is_valid():
                 csdata = csform.cleaned_data
-                customer = csdata['customer'] if csdata['customer'] else 0
-                payment = csdata['customer_payment'] if csdata['customer_payment'] else 0
-                return HttpResponseRedirect('/%s/%s/%s/'
-                   % ('distribution/customerpaymentupdate', customer, payment))
+                customer = csdata['customer'] or 0
+                payment = csdata['customer_payment'] or 0
+                if payment:
+                    return HttpResponseRedirect('/%s/%s/'
+                        % ('distribution/editcustomerpayment', payment))
+                else:
+                    return HttpResponseRedirect('/%s/%s/'
+                        % ('distribution/newcustomerpayment', customer))
     return render_to_response('distribution/payment_selection.html', {
         'header_form': ihform,
         'member_selection_form': msform,
@@ -3056,12 +3060,12 @@ def payment_update(request, producer_id, payment_id):
                 else:
                     tx = InventoryTransaction.objects.get(pk=tx_id)
                 if paid:
-                    # todo: assuming here that payments always pay the full tx.due_to_member
+                    # todo: emulate customer_payment_update
                     if not tx.is_paid():
                         tp = TransactionPayment(
                             paid_event = tx,
                             payment = the_payment,
-                            amount_paid = tx.due_to_member())
+                            amount_paid = the_payment.amount)
                         tp.save()
                 else:
                     tx.delete_payments()
@@ -3082,8 +3086,122 @@ def payment_update(request, producer_id, payment_id):
          'item_forms': itemforms}, context_instance=RequestContext(request))
 
 @login_required
-def customer_payment_update(request, customer_id, payment_id):
+def new_customer_payment(request, customer_id):
+    try:
+        food_net = food_network()
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
 
+    customer_id = int(customer_id)
+    customer = get_object_or_404(Party, pk=customer_id)
+
+    payment = ""
+    paymentform = CustomerPaymentForm(data=request.POST or None,
+        initial={"transaction_date": datetime.date.today()})
+
+    itemforms = create_customer_payment_transaction_forms(
+        customer=customer, data=request.POST or None)
+
+    if request.method == "POST":
+        if paymentform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
+            the_payment = paymentform.save(commit=False)
+            the_payment.from_whom = customer
+            the_payment.to_whom = food_net
+            the_payment.save()
+            remaining_amount = the_payment.amount
+            for itemform in itemforms:
+                data = itemform.cleaned_data
+                paid = data['paid']
+                order_id = data['order_id']
+                order = Order.objects.get(pk=order_id)
+                if paid:
+                    #todo: register_payment shd work like delete_payments
+                    if not order.is_paid():
+                        due = order.amount_due()
+                        applied_amount = remaining_amount
+                        if remaining_amount > due:
+                            applied_amount = due
+                            remaining_amount -= due
+                        cp = CustomerPayment(
+                            paid_order = order,
+                            payment = the_payment,
+                            amount_paid = applied_amount)
+                        cp.save()
+                        order.register_customer_payment()
+                else:
+                    order.delete_payments()
+            return HttpResponseRedirect('/%s/%s/'
+               % ('distribution/customerpayment', the_payment.id))
+        #else:
+            #import pdb; pdb.set_trace()
+        
+    return render_to_response('distribution/new_customer_payment.html', 
+        {'payment': payment,
+         'customer': customer,
+         'payment_form': paymentform, 
+         'item_forms': itemforms}, context_instance=RequestContext(request))
+
+@login_required
+def edit_customer_payment(request, payment_id):
+    try:
+        food_net = food_network()
+    except FoodNetwork.DoesNotExist:
+        return render_to_response('distribution/network_error.html')
+
+    customer = ''
+
+    payment_id = int(payment_id)
+    payment = get_object_or_404(Payment, pk=payment_id)
+    #import pdb; pdb.set_trace()
+    customer = payment.from_whom
+
+    paymentform = CustomerPaymentForm(data=request.POST or None, instance=payment)
+
+    itemforms = create_customer_payment_edit_forms(
+        payment=payment, data=request.POST or None)
+
+    if request.method == "POST":
+        if paymentform.is_valid() and all([itemform.is_valid() for itemform in itemforms]):
+            the_payment = paymentform.save(commit=False)
+            the_payment.from_whom = customer
+            the_payment.to_whom = food_net
+            the_payment.save()
+            remaining_amount = the_payment.amount
+            for itemform in itemforms:
+                data = itemform.cleaned_data
+                paid = data['paid']
+                order_id = data['order_id']
+                order = Order.objects.get(pk=order_id)
+                if paid:
+                    #todo: register_payment shd work like delete_payments
+                    if not order.is_paid():
+                        due = order.amount_due()
+                        applied_amount = remaining_amount
+                        if remaining_amount > due:
+                            applied_amount = due
+                            remaining_amount -= due
+                        cp = CustomerPayment(
+                            paid_order = order,
+                            payment = the_payment,
+                            amount_paid = applied_amount)
+                        cp.save()
+                        order.register_customer_payment()
+                else:
+                    order.delete_payments()
+            return HttpResponseRedirect('/%s/%s/'
+               % ('distribution/customerpayment', the_payment.id))
+        #else:
+            #import pdb; pdb.set_trace()
+        
+    return render_to_response('distribution/edit_customer_payment.html', 
+        {'payment': payment,
+         'customer': customer,
+         'payment_form': paymentform, 
+         'item_forms': itemforms}, context_instance=RequestContext(request))
+
+@login_required
+def customer_payment_update(request, customer_id, payment_id):
+    #todo: separate into new_payment and edit_payment
     try:
         food_net = food_network()
     except FoodNetwork.DoesNotExist:
@@ -3118,19 +3236,24 @@ def customer_payment_update(request, customer_id, payment_id):
             the_payment.from_whom = customer
             the_payment.to_whom = food_net
             the_payment.save()
+            remaining_amount = the_payment.amount
             for itemform in itemforms:
                 data = itemform.cleaned_data
                 paid = data['paid']
                 order_id = data['order_id']
                 order = Order.objects.get(pk=order_id)
                 if paid:
-                    # todo: assuming here that payments always pay the full tx.due_to_member
-                    # todo: register_payment shd work like delete_payments
+                    #todo: register_payment shd work like delete_payments
                     if not order.is_paid():
+                        due = order.amount_due()
+                        applied_amount = remaining_amount
+                        if remaining_amount > due:
+                            applied_amount = due
+                            remaining_amount -= due
                         cp = CustomerPayment(
                             paid_order = order,
                             payment = the_payment,
-                            amount_paid = order.grand_total())
+                            amount_paid = applied_amount)
                         cp.save()
                         order.register_customer_payment()
                 else:
@@ -3188,7 +3311,7 @@ def dojo_products(request):
 def invoice_selection(request):
     init = {"delivery_date": next_delivery_date(),}
     unpaid_invoices = Order.objects.filter(
-        state="Filled")
+        state__contains="Filled").exclude(state__contains="Paid")
     if request.method == "POST":
         dsform = InvoiceSelectionForm(request.POST)  
         if dsform.is_valid():

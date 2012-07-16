@@ -109,19 +109,22 @@ class CustomerPaymentSelectionForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(CustomerPaymentSelectionForm, self).__init__(*args, **kwargs)
         self.fields['customer'].choices = [('', '----------')] + [(cust.id, cust.short_name) for cust in Customer.objects.all()]
+        payments = [cp.payment for cp in CustomerPayment.objects.all()]
+        payments = list(set(payments))
+        payments.sort(lambda x, y: cmp(y.transaction_date, x.transaction_date))
         self.fields['customer_payment'].choices = [('', 'New')] + [
-            (payment.payment.id, payment) for payment in CustomerPayment.objects.all()]
+            (payment.id, payment) for payment in payments]
 
     def clean(self):
         cleaned_data = self.cleaned_data
         customer = cleaned_data.get("customer")
-        payment = cleaned_data.get("payment")
+        payment = cleaned_data.get("customer_payment")
 
         if not (customer or payment):
             msg = u"Must select Customer or existing Payment."
             self._errors["customer"] = self.error_class([msg])
             del cleaned_data["customer"]
-            del cleaned_data["payment"]
+            del cleaned_data["customer_payment"]
         return cleaned_data
 
 
@@ -154,6 +157,12 @@ class CustomerPaymentTransactionForm(forms.Form):
     amount_due=forms.DecimalField(widget=forms.TextInput(attrs={'readonly':'true', 'class': 'read-only-input', 'size': '8'}))
     paid=forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'paid',}))
 
+class CustomerPaymentEditForm(forms.Form):
+    order_id = forms.CharField(widget=forms.HiddenInput)
+    amount_paid=forms.DecimalField(widget=forms.TextInput(attrs={'class': 'amount-paid', 'size': '8'}))
+    amount_due=forms.DecimalField(widget=forms.TextInput(attrs={'class': 'amount-due', 'size': '8'}))
+    paid=forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'paid',}))
+
 
 def create_customer_payment_transaction_form(order, pay_all, data=None):
     if pay_all:
@@ -162,30 +171,51 @@ def create_customer_payment_transaction_form(order, pay_all, data=None):
         paid = not not order.is_paid()
     the_form = CustomerPaymentTransactionForm(data, prefix=order.id, initial={
         'order_id': order.id,
-        'amount_due': order.grand_total(),
+        'amount_due': order.amount_due(),
         'paid': paid,
         })
     the_form.order = order
     the_form.delivery_date = order.delivery_date
     return the_form
 
-def create_customer_payment_transaction_forms(customer=None, payment=None, data=None):
-    form_list = []
-    if not customer:
-        if payment:
-            customer = payment.from_whom
-        else:
-            return form_list
-    pay_all = True
-    if payment:
-        pay_all = False
+def create_customer_payment_edit_form(order, amount_paid, pay, data=None):
+    the_form = CustomerPaymentEditForm(data, prefix=order.id, initial={
+        'order_id': order.id,
+        'amount_paid': amount_paid,
+        'amount_due': order.amount_due(),
+        'paid': pay,
+        })
+    the_form.order = order
+    the_form.delivery_date = order.delivery_date
+    return the_form
 
-        for order in payment.orders_paid():
-            form_list.append(create_customer_payment_transaction_form(order, pay_all, data))
+def create_customer_payment_edit_forms(payment, data=None):
+    form_list = []
+    customer = payment.from_whom
+    orders = set()
+    for cp in payment.paid_orders.all():
+        order = cp.paid_order
+        orders.add(order)
+        form_list.append(create_customer_payment_edit_form(order,
+            cp.amount_paid, True, data))
 
     for order in Order.objects.filter(customer=customer):
+        if not order in orders:
+            if not order.is_paid():
+                orders.add(order)
+                form_list.append(create_customer_payment_edit_form(order,
+                    Decimal("0"),  False, data))
+
+    return form_list
+
+
+def create_customer_payment_transaction_forms(customer, data=None):
+    form_list = []
+    pay_all = True
+    for order in Order.objects.filter(customer=customer):
         if not order.is_paid():
-            form_list.append(create_customer_payment_transaction_form(order, pay_all, data))
+            form_list.append(create_customer_payment_transaction_form(order,
+                pay_all, data))
 
     return form_list
 
