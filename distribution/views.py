@@ -3172,22 +3172,29 @@ def edit_customer_payment(request, payment_id):
                 paid = data['paid']
                 order_id = data['order_id']
                 order = Order.objects.get(pk=order_id)
-                if paid:
-                    #todo: register_payment shd work like delete_payments
-                    if not order.is_paid():
-                        due = order.amount_due()
-                        applied_amount = remaining_amount
-                        if remaining_amount > due:
-                            applied_amount = due
-                            remaining_amount -= due
+                amount_paid = data['amount_paid']
+                try:
+                    cp = CustomerPayment.objects.get(
+                        payment=the_payment,
+                        paid_order=order)
+                except CustomerPayment.DoesNotExist:
+                    cp = None
+                if amount_paid:
+                    if cp:
+                        if cp.amount_paid != amount_paid:
+                            cp.amount_paid = amount_paid
+                            cp.save()
+                            order.register_customer_payment_change()
+                    else:
                         cp = CustomerPayment(
                             paid_order = order,
                             payment = the_payment,
-                            amount_paid = applied_amount)
+                            amount_paid = amount_paid)
                         cp.save()
                         order.register_customer_payment()
                 else:
-                    order.delete_payments()
+                    if cp:
+                        order.delete_payment(cp)
             return HttpResponseRedirect('/%s/%s/'
                % ('distribution/customerpayment', the_payment.id))
         #else:

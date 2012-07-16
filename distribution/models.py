@@ -1601,6 +1601,20 @@ class Order(models.Model):
             self.state = "Submitted"
         self.save()
 
+    def delete_payment(self, customer_payment):
+        customer_payment.delete()
+        if self.customer_payments.all().count():
+            if self.state.find("Filled") > -1:
+                self.state = "Filled-Part-Payment"
+            else:
+                self.state = "Part-Payment"
+        else:
+            if self.state.find("Filled") > -1:
+                self.state = "Filled"
+            else:
+                self.state = "Submitted"
+        self.save()
+
     def is_delivered(self):
         #todo: what about partials?
         #if self.state == "Filled" or self.state == "Paid-Filled" or self.state == "Filled-Paid":
@@ -1645,6 +1659,19 @@ class Order(models.Model):
     def register_customer_payment(self):
         if self.set_paid_state():
             self.save()
+
+    def register_customer_payment_change(self):
+        if self.is_fully_paid():
+            if self.state.find("Filled") > -1:
+                self.state = "Filled-Paid"
+            else:
+                self.state = "Paid"
+        else:
+            if self.state.find("Filled") > -1:
+                self.state = "Filled-Part-Payment"
+            else:
+                self.state = "Part-Payment"
+        self.save()
 
     def transportation_fee(self):
         try:
