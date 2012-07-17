@@ -100,7 +100,10 @@
 				<a href="{% url invoices order_state='1' cust_id=order.customer.id year=order.delivery_date.year month=order.delivery_date.month day=order.delivery_date.day %}">
 					#{{ order.id }} {{ order.customer }} 
 					Ordered: {{ order.order_date }} Delivered: {{ order.delivery_date }} 
-					${{ order.grand_total }}	
+					Grand Total: ${{ order.grand_total }} 
+					{% if order.amount_paid %}
+					Amount Paid: ${{ order.amount_paid }} Amount Due: ${{ order.amount_due }}
+					{% endif %}
 				</a>
 			</li>
 
