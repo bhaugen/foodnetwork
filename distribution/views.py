@@ -1667,7 +1667,7 @@ def order_table(request, year, month, day):
 def report_selection(request):
     init = {"selected_date": next_delivery_date(),}
     dsform = DateSelectionForm(data=request.POST or None, initial=init)
-    #td = datetime.date.today()
+    td = datetime.date.today()
     #sd = datetime.date(td.year, td.month, 1)
     #ed = datetime.date(td.year, td.month + 1, 1)
     #ed = ed - datetime.timedelta(days=1)

@@ -58,9 +58,10 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('short_name', 'long_name', 'growing_method', 'parent', 'price',
         'expiration_days', 'pay_producer', 'sellable', 'plannable', 'stockable', 
         'producer_totals')
-    list_editable = ['expiration_days',]
+    list_editable = ['expiration_days', 'parent']
     list_filter = [ 'sellable', 'plannable', 'stockable', 'parent']
-    search_fields = ['short_name', 'long_name', 'growing_method']
+    search_fields = ['short_name', 'long_name', 'growing_method',
+                     'parent__long_name']
     inlines = [ ProducerProductInline, ]
     
 admin.site.register(Product, ProductAdmin)
@@ -80,6 +81,7 @@ class ProducerProductAdmin(admin.ModelAdmin):
                     'default_avail_qty',
                     'inventoried', 'planned', 'distributor')
     list_filter = ['inventoried', 'producer', 'product']
+    list_editable = ['inventoried', 'default_avail_qty']
     ordering = ('product',)
     
 admin.site.register(ProducerProduct, ProducerProductAdmin)
