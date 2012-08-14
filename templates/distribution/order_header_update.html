@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+     {% trans "Order Header Update" %}
+{% endblock %}
+
+{% block header %}
+
+{% include "dojo_include.html" %}
+
+    <script type="text/javascript" >
+
+		function cleanNumericInput(value)
+		{
+			var cleanNumber = value.replace( /[^\-.0-9]/g, '');
+			var firstPos = cleanNumber.indexOf(".");
+			var lastPos = cleanNumber.lastIndexOf(".");
+			while(firstPos!=lastPos)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				firstPos = cleanNumber.indexOf(".");
+				lastPos = cleanNumber.lastIndexOf(".");
+			}
+			var lastPos = cleanNumber.lastIndexOf("-");
+			while(lastPos>0)
+			{
+				cleanNumber=cleanNumber.substring(0,lastPos) + cleanNumber.substring(lastPos + 1);
+				lastPos = cleanNumber.lastIndexOf("-");
+			}
+			return cleanNumber;
+		}
+
+		function validateNumber(evt, functionToCall)
+		{
+			var isValid = true;
+			var candidate = evt.target.value;
+			var strippedNumber = cleanNumericInput(candidate);
+			strippedNumber = strippedNumber || 0;
+			if(isNaN(candidate))
+			{
+				evt.target.style.color = "red";
+				evt.target.value = "Not number";
+				isValid = false;
+				var anim1 = dojo.animateProperty({
+						node: evt.target, delay: 1000,
+						properties:{
+							opacity: { end: 0 }
+						}
+					}); 
+				var anim2 = dojo.animateProperty
+				({
+						node: evt.target, delay: 1000,
+						properties:
+						{
+							opacity: { end: 1 }, color: { end: 'black'}
+						},
+						onEnd: function()
+						{
+							evt.target.value = strippedNumber;
+							if(functionToCall)
+							{
+								functionToCall(evt);
+							}
+    					}
+				}); 
+				anim1.play();
+				anim2.play();
+			}
+			else
+			{
+				evt.target.value = strippedNumber;
+				if(functionToCall)
+				{
+					functionToCall(evt);
+				}
+			}
+			return isValid;
+		}
+
+
+		function customerChanged(evt)
+		{
+			dojo.byId("contact").innerHTML = '---';
+			dojo.byId("phone").innerHTML = '---';
+			var jsonUrl = "/jsoncustomer/" + evt.target.value + "/";
+			dojo.xhrGet( 
+			{
+					url: jsonUrl,
+					handleAs: "json",
+					load: function(responseObject, ioArgs) 
+					{
+						var customer = responseObject[0];
+						dojo.byId("contact").innerHTML = customer.fields.contact;
+						dojo.byId("phone").innerHTML = customer.fields.phone;
+					}
+			});
+		}
+
+		function extendPriceForEvt(evt)
+		{
+			var row = evt.target.id.split('-')[0];
+			extendPriceForRow(row);
+		}
+
+		function extendPriceForRow(row)
+		{
+			var up = parseFloat(dojo.byId(row + '-unit_price').value);
+			var qty = parseFloat(dojo.byId(row + '-quantity').value);
+			dojo.byId(row + '-ext_price').innerHTML = (up * qty).toFixed(2);
+		}
+
+		function finishQuantityChange(evt)
+		{
+			var row = evt.target.id.split('-')[0];
+			changeTotalOrdered(row);
+			extendPriceForRow(row);
+		}
+
+
+		var orderedTotals = {};
+		var thisOrderQty = {};
+
+		function checkTotalOrdered(row)
+		{
+			// *** This function does not work! ***
+			// avail must be rethought!
+			var totOrd = parseFloat(orderedTotals[row + '-ordered']);
+			var qtyFieldName = row + '-quantity';
+			var qtyField = dojo.byId(qtyFieldName);
+			qtyField.style.color = "black";
+			var qty = parseFloat(qtyField.value);
+			var avail = parseFloat(dojo.byId(row + '-avail').value);
+			var prevQty = parseFloat(thisOrderQty[qtyFieldName]);
+			if (qty > prevQty)
+			{
+				if (totOrd == avail)
+				{
+					qtyField.value = prevQty;
+					qtyField.style.color = "red";
+					return;
+				}
+			}
+		
+			var qtyDelta = qty - prevQty;
+			var newTotal = totOrd + qtyDelta;
+			if (newTotal > avail)
+			{
+				qty = avail - totOrd + prevQty;
+				qtyField.value = qty;
+				qtyField.style.color = "red";
+			}
+			var qtyDelta = qty - prevQty;
+			var newTotal = totOrd + qtyDelta;
+			var totOrdField = dojo.byId(row + '-ordered').value = newTotal;
+			thisOrderQty[qtyFieldName] = qty;
+			orderedTotals[row + '-ordered'] = newTotal;
+		}
+
+		function changeTotalOrdered(row)
+		{
+			var totOrd = parseFloat(orderedTotals[row + '-ordered']);
+			var qtyFieldName = row + '-quantity';
+			var qty = parseFloat(dojo.byId(qtyFieldName).value);
+			var prevQty = parseFloat(thisOrderQty[qtyFieldName]);
+			var qtyDelta = qty - prevQty;
+			var newTotal = totOrd + qtyDelta;
+			var totOrdField = dojo.byId(row + '-ordered').value = newTotal;
+			thisOrderQty[qtyFieldName] = qty;
+			orderedTotals[row + '-ordered'] = newTotal;
+		}
+
+		function quantityChanged(evt)
+		{
+			//alert(evt.target.id + " changed: " + evt.target.value);
+			validateNumber(evt, finishQuantityChange);
+
+		}
+
+		function priceChanged(evt)
+		{
+			validateNumber(evt, extendPriceForEvt);
+		}
+
+		function feeChanged(evt)
+		{
+			validateNumber(evt);
+		}
+
+		function checkForDistributor(evt)
+		{
+			var fee = evt.target.value;
+			var distributorField = dojo.byId("id_distributor");
+			var x = 0;
+		}
+
+		function transportationFeeChanged(evt)
+		{
+			validateNumber(evt, checkForDistributor);
+		}
+
+		function distributorChanged(evt)
+		{
+			var jsonUrl = "/distribution/jsondistributor/" + evt.target.value + "/";
+			dojo.xhrGet( 
+			{
+					url: jsonUrl,
+					handleAs: "json",
+					load: function(responseObject, ioArgs) 
+					{
+						var distributor = responseObject[0];
+						dojo.byId("id_transportation_fee").value = distributor.fields.transportation_fee;
+					}
+			});
+		}
+
+
+		dojo.addOnLoad(function()
+		{
+			var queryNodes = dojo.query(".quantity-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var node = queryNodes[i]
+				dojo.connect(node, "onblur", "quantityChanged");
+				var row = node.id.split('-')[0];
+				extendPriceForRow(row);
+				thisOrderQty[node.id] = node.value;
+			}
+			var queryNodes = dojo.query(".unit-price-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				dojo.connect(queryNodes[i], "onblur", "priceChanged");
+			}
+			var queryNodes = dojo.query(".fee-field");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				dojo.connect(queryNodes[i], "onblur", "feeChanged");
+			}
+			var queryNodes = dojo.query(".total-ordered");
+			for(var i=0;i<queryNodes.length;i++)
+			{
+				var thisNode = queryNodes[i];
+				orderedTotals[thisNode.id] = thisNode.value;
+			}
+			node = dojo.byId("id_transportation_fee");
+			dojo.connect(node, "onblur", "transportationFeeChanged");
+
+			dojo.connect(dojo.byId("id_distributor"), "onchange", "distributorChanged");
+
+		});
+
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="order-update">
+
+	{% include "distribution/tabnav.html" %}
+
+    <form action="." method="POST" >{% csrf_token %}
+        <table >
+            {% if order %}
+		        <tr>
+		            <th style="text-align: right; " >{% trans "Order Number" %}:</th>
+		            <td>{{ order.id }}</td>
+		        </tr>
+            {% endif %}
+            <tr>
+                <th style="text-align: right; " >{% trans "Customer" %}:</th>
+                <td>{{ customer }}</td>
+            </tr>
+            <tr>
+		    <th style="text-align: right; " >{% trans "Purchase Order" %}:</th>
+                <td>{{ order_form.purchase_order }}</td>
+            </tr>
+             <tr>
+		     <th style="text-align: right; " >{% trans "Order Date" %}:</th>
+                <td>{{ order_form.order_date }}</td>
+             </tr>
+	     <tr>
+		     <th style="text-align: right; " >{% trans "Delivery Date" %}:</th>
+                <td>{{ order_form.delivery_date }}</td>
+            </tr>
+	    <tr>
+                <th style="text-align: right; " >{% trans "Distributor" %}:</th>
+                <td>{{ order_form.distributor }}</td>
+            </tr>
+			<tr>
+                <th style="text-align: right; " >{% trans "Transportation Fee" %}:</th>
+                <td>{{ order_form.transportation_fee }}</td>
+            </tr>
+	    <tr>
+                <th style="text-align: right; " >{% trans "Contact" %}:</th>
+               <td  id="contact" >{{ customer.contact }}</td>
+            </tr>
+            <tr>
+                <th style="text-align: right; " >{% trans "Phone" %}:</th>
+                <td id="phone" >{{ customer.phone }}</td>
+            </tr>
+        </table>
+        <p>
+            <input type="submit" value="{% trans 'Save Order Header changes' %}" />
+        </p>
+    </form>
+</div>
+{% endblock %}
+

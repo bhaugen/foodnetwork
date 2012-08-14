@@ -1096,7 +1096,6 @@ def new_order(request, cust_id, year, month, day):
          'order_form': ordform, 
          'item_forms': itemforms}, context_instance=RequestContext(request))
 
-
 @login_required
 def edit_order(request, order_id):
     order = get_object_or_404(Order, id=int(order_id))
@@ -1152,6 +1151,57 @@ def edit_order(request, order_id):
          'order_form': ordform, 
          'item_forms': itemforms}, context_instance=RequestContext(request))
 
+
+@login_required
+def edit_order_header(request, order_id):
+    order = get_object_or_404(Order, id=int(order_id))
+    orderdate = order.order_date
+    availdate = order.delivery_date
+
+    customer = order.customer
+
+    if request.method == "POST":
+        ordform = OrderForm(order, instance=order, data=request.POST)
+        #import pdb; pdb.set_trace()   
+        if ordform.is_valid():
+            order = ordform.save(commit=False)
+            data = ordform.cleaned_data
+            transportation_fee = data['transportation_fee']
+            distributor = data['distributor']
+            order.changed_by = request.user
+            order.distributor = distributor
+            order.save()
+            if transportation_fee:
+                transportation_tx = None
+                try:
+                    transportation_tx = TransportationTransaction.objects.get(order=order)
+                    if transportation_fee != transportation_tx.amount:
+                        transportation_tx.amount = transportation_fee
+                        transportation_tx.save()
+                    if distributor != transportation_tx.from_whom:
+                        transportation_tx.from_whom = distributor
+                        transportation_tx.save()
+                except TransportationTransaction.DoesNotExist:
+                    pass
+                if not transportation_tx:
+                    transportation_tx = TransportationTransaction(
+                        from_whom=distributor,
+                        to_whom=customer,
+                        order=order, 
+                        amount=transportation_fee,
+                        transaction_date=order.delivery_date)
+                    transportation_tx.save()
+            is_change = True
+            return HttpResponseRedirect('/%s/%s/'
+               % ('distribution/order', order.id))
+    else:
+        ordform = OrderForm(order, instance=order)
+    return render_to_response('distribution/order_header_update.html', 
+        {'customer': customer, 
+         'order': order, 
+         'order_date': orderdate, 
+         'avail_date': availdate, 
+         'order_form': ordform}, context_instance=RequestContext(request))
 
 @login_required
 def delete_order_confirmation(request, order_id):

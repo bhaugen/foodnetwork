@@ -107,7 +107,7 @@
 					${{ order.grand_total }}
 					- {{ order.get_state_display }}
 				</a>&nbsp;&nbsp; 
-				<a href="{% url staff_edit_order order_id=order.id %}">Change</a>
+				<a href="{% url staff_edit_order order_id=order.id %}">Change Order</a>
 				{% comment %}
 				<a href="{% url delete_order_confirmation order_id=order.id %}">Delete</a>
 				{% endcomment %}
@@ -130,10 +130,9 @@
 						#{{ order.id }} {{ order.customer }} 
 						Ordered: {{ order.order_date }} Delivery: {{ order.delivery_date }} 
 						${{ order.grand_total }}
+						- {{ order.get_state_display }}
 					</a>&nbsp;&nbsp; 
-					{% comment %}
-					<a href="{% url change_order order_id=order.id %}">Change</a>
-					{% endcomment %}
+					<a href="{% url edit_order_header order_id=order.id %}">Change Order Header</a>
 				</li>
 	
 			{% endfor %}
