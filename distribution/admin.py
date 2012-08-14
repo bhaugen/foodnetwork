@@ -58,7 +58,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('short_name', 'long_name', 'growing_method', 'parent', 'price',
         'expiration_days', 'pay_producer', 'sellable', 'plannable', 'stockable', 
         'producer_totals')
-    list_editable = ['expiration_days', 'parent']
+    list_editable = ['expiration_days', 'parent', 'sellable']
     list_filter = [ 'sellable', 'plannable', 'stockable', 'parent']
     search_fields = ['short_name', 'long_name', 'growing_method',
                      'parent__long_name']
