@@ -1736,7 +1736,12 @@ def report_selection(request):
                 #to_date = msdata['to_date'].strftime('%Y_%m_%d')
                 from_date = datetime.datetime.strptime(msdata['month'],
                                                        '%Y/%m/%d').date()
-                to_date = datetime.date(from_date.year, from_date.month + 1, 1)
+                month = from_date.month
+                year = from_date.year
+                if month == 12:
+                    month = 1
+                    year += 1
+                to_date = datetime.date(year, month, 1)
                 to_date = to_date - datetime.timedelta(days=1)
                 from_date = from_date.strftime('%Y_%m_%d')
                 to_date = to_date.strftime('%Y_%m_%d')
