@@ -96,7 +96,7 @@ INSTALLED_APPS = (
     'pay',
 )
 
-PAYPAL_RECEIVER_EMAIL = "bobha_1286809456_biz@gmail.com"
+PAYPAL_RECEIVER_EMAIL = ""
 PAYPAL_IMAGE = "https://www.paypalobjects.com/WEBSCR-640-20101108-1/en_US/i/bnr/horizontal_solution_PP.gif"
 PAYPAL_SANDBOX_IMAGE = "https://www.paypalobjects.com/WEBSCR-640-20101108-1/en_US/i/bnr/horizontal_solution_PP.gif"
 
